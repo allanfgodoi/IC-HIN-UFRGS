@@ -43,6 +43,9 @@ std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204
 ///some global variables -- after can think in add it in a ".h" file
 bool doSymmetrisation_=true; //symmetrise the correlation function in each quadrant
 
+///File to store histograms - after we can use a variable to set centrality bins - for now I am just using one single bin
+TFile *output = new TFile(Form("corr_cent_%d_%d.root",0,5), "recreate");
+
 ROOT::Math::PtEtaPhiMVector fourvec_px_py_pz_e;
 TVector3 particle;
 TVector3 trigger;
@@ -234,6 +237,18 @@ for (int j = 0; j < ptTbins_; j++) {
     canvas[j][i]->cd(0);
     signal[j][i]->Draw("COLZ");
     canvas[j][i]->SaveAs(Form("Figures/deta_dphi_signal_trig_%d_%d_ass_%d_%d.pdf",int(ptTrigMin_[j]*10), int(ptTrigMax_[j]*10), int(ptAssMin_[i]*10), int(ptAssMax_[i]*10)));
+   }
+}
+
+
+///Write the historgrams to the "output" file 
+h_pt->Write();
+h_eta->Write();
+h_phi->Write();
+h_mass->Write();
+for (int j = 0; j < ptTbins_; j++) {
+   for (int i = 0; i < ptNbins_; i++) {
+      signal[j][i]->Write();
    }
 }
 
