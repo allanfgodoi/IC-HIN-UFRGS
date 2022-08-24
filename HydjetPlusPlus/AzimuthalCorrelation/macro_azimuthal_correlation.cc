@@ -38,7 +38,8 @@ std::cout<<"Starting..."<<std::endl;
 const int particle_type = 0; // 0 for all (pions, kaons, protons); 1 for pions; 2 for kaons; 3 for protons
 
 ///access Hydjet++ generated events in ROOT  TTree format
-std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
+//std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
+std::unique_ptr<TFile> f( TFile::Open("/home/pedrolunardi/IC/Hydjet/RunOutput.root") );
 
 ///some global variables -- after can think in add it in a ".h" file
 bool doSymmetrisation_=true; //symmetrise the correlation function in each quadrant
