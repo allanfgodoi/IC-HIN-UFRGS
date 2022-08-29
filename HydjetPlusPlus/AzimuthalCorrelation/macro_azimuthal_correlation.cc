@@ -39,9 +39,11 @@ const int particle_type = 0; // 0 for all (pions, kaons, protons); 1 for pions; 
 
 ///access Hydjet++ generated events in ROOT  TTree format
 std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
+const int NEventsArraySize = 100; //IMPORTANT: total number of events generated
 
 ///some global variables -- after can think in add it in a ".h" file
 bool doSymmetrisation_=true; //symmetrise the correlation function in each quadrant
+bool doBackground_=true; //if "true" will do event mixing correlation for background - IMPORTANT: it will take a lot of time to finish
 
 ///File to store histograms - after we can use a variable to set centrality bins - for now I am just using one single bin
 TFile *output = new TFile(Form("corr_cent_%d_%d.root",0,5), "recreate");
@@ -52,15 +54,15 @@ TVector3 trigger;
 TVector3 associated;
 
 const int ptTbins_=1, ptNbins_=1; //number of pT ranges for Trigger & Associated particles 
-std::vector<TVector3> event[ptTbins_+ptNbins_];
+std::vector<TVector3> allevents[NEventsArraySize][ptTbins_+ptNbins_];
 //Max and Min boundaries for Trigger & Associated particles range
 double ptTrigMax_[ptTbins_];
 double ptTrigMin_[ptTbins_];
 double ptAssMax_[ptNbins_];
 double ptAssMin_[ptNbins_];
-ptTrigMax_[0]=3.0; //in GeV/c
-ptTrigMin_[0]=1.0;
-ptAssMax_[0]=3.0;
+ptTrigMax_[0]=3.5; //in GeV/c
+ptTrigMin_[0]=3.0;
+ptAssMax_[0]=1.5;
 ptAssMin_[0]=1.0;
 
 
@@ -120,9 +122,11 @@ auto h_mass = new TH1D("h_mass",hist_title_label,100,0,1.5);
 auto h_pt_trigger_all = new TH1D("h_pt_trigger_all","All Trigger Particles",200,0,20);
 
 TH2D* signal[ptTbins_][ptNbins_];
+TH2D* background[ptTbins_][ptNbins_];
 for (int j = 0; j < ptTbins_; j++) {
    for (int i = 0; i < ptNbins_; i++) {
     signal[j][i] = new TH2D(Form("signal_trig_%d_%d_ass_%d_%d",int(ptTrigMin_[j]*10), int(ptTrigMax_[j]*10), int(ptAssMin_[i]*10), int(ptAssMax_[i]*10) ) , ";#Delta#eta;#Delta#phi" , 33, -4.8 - 4.8/32.0, 4.8 + 4.8/32.0,  31, -0.5*TMath::Pi()+TMath::Pi()/32, 1.5*TMath::Pi()-TMath::Pi()/32);
+    background[j][i] = new TH2D(Form("background_trig_%d_%d_ass_%d_%d",int(ptTrigMin_[j]*10), int(ptTrigMax_[j]*10), int(ptAssMin_[i]*10), int(ptAssMax_[i]*10) ) , ";#Delta#eta;#Delta#phi" , 33, -4.8 - 4.8/32.0, 4.8 + 4.8/32.0,  31, -0.5*TMath::Pi()+TMath::Pi()/32, 1.5*TMath::Pi()-TMath::Pi()/32);
    }
 }
 
@@ -153,48 +157,88 @@ for (int i = 0; input_tree->LoadTree(i) >= 0; ++i) {
       particle.SetPtEtaPhi(pt,eta,phi);
       //store Associated particles information
       for (int ii = 0; ii < ptNbins_; ii++)
-        if ( pt > ptAssMin_[ii] && pt < ptAssMax_[ii] ) (event[ptTbins_ + ii]).push_back(particle);	 
+        if ( pt > ptAssMin_[ii] && pt < ptAssMax_[ii] ) (allevents[i][ptTbins_ + ii]).push_back(particle);
+
 
       //store Trigger particles information  
       for (int jj = 0; jj < ptTbins_; jj++)
-         if ( pt > ptTrigMin_[jj] && pt < ptTrigMax_[jj] ) (event[jj]).push_back(particle);
+         if ( pt > ptTrigMin_[jj] && pt < ptTrigMax_[jj] ) (allevents[i][jj]).push_back(particle);
 
    }//end particle loop
 
    int Ntrig=0, Nass=0; //number of trigger & associated particles in each event
    double dEta=0.0, dPhi=0.0; //to build the correlation
    for (int i_trigbin = 0; i_trigbin < ptTbins_; i_trigbin++) {
-      Ntrig = event[i_trigbin].size();
-      //std::cout<<"Ntrig : "<<Ntrig<<std::endl;
-      for (int j = 0; j < Ntrig; j++) {
-         trigger = event[i_trigbin][j];
+      Ntrig = (allevents[i][i_trigbin]).size(); 
+      for (int w = 0; w < Ntrig; w++) {
+	 trigger = (allevents[i][i_trigbin])[w]; 
          h_pt_trigger_all->Fill(trigger.Pt());
 	 for (int i_assbin = 0; i_assbin < ptNbins_; i_assbin++) {
-            Nass = event[ptTbins_+i_assbin].size();
-	    //std::cout<<"Nass : "<<Nass<<std::endl;
-	    for (int i = 0; i < Nass; i++) {
-               associated = event[ptTbins_+i_assbin][i];
+	    Nass = (allevents[i][ptTbins_+i_assbin]).size();
+	    for (int z = 0; z < Nass; z++) {
+	       associated = (allevents[i][ptTbins_+i_assbin])[z];
 	       dEta=deltaEta(trigger,associated); 
 	       dPhi=deltaPhi(trigger,associated);
 	       //std::cout<<"dEta : "<<dEta<<";  dPhi : "<<dPhi<<std::endl;
-	       if (dEta != 0 && dPhi != 0) signal[i_trigbin][i_assbin]->Fill(dEta,dPhi);
+	       if (dEta != 0 && dPhi != 0) signal[i_trigbin][i_assbin]->Fill(dEta,dPhi,1./Ntrig); //See Eq. 2 of https://arxiv.org/pdf/1201.3158.pdf
 	       if (dEta != 0  && dPhi != 0 && doSymmetrisation_){
                   dEta=deltaEta(trigger,associated); dPhi=deltaPhi(associated,trigger);
-                  signal[i_trigbin][i_assbin]->Fill(dEta,dPhi);
+                  signal[i_trigbin][i_assbin]->Fill(dEta,dPhi,1./Ntrig); //See Eq. 2 of https://arxiv.org/pdf/1201.3158.pdf
                   dEta=deltaEta(associated,trigger); dPhi=deltaPhi(associated,trigger);
-                  signal[i_trigbin][i_assbin]->Fill(dEta,dPhi);
+                  signal[i_trigbin][i_assbin]->Fill(dEta,dPhi,1./Ntrig); //See Eq. 2 of https://arxiv.org/pdf/1201.3158.pdf
                   dEta=deltaEta(associated,trigger); dPhi=deltaPhi(trigger,associated);
-                  signal[i_trigbin][i_assbin]->Fill(dEta,dPhi);
+                  signal[i_trigbin][i_assbin]->Fill(dEta,dPhi,1./Ntrig); //See Eq. 2 of https://arxiv.org/pdf/1201.3158.pdf
 	       }
             }		    
 	 }	 
       }	      
    }
-
-
-   //IMPORTANT: clear vectors for next event
-   for (int kk=0; kk < (ptNbins_+ptTbins_); kk++) (event[kk]).clear();
 }
+
+
+///Background part
+if(doBackground_){
+
+   int Ntrig_bg, Nass_bg;
+   int NevtMix;
+   double dEta_bg, dPhi_bg;
+
+   NevtMix=10;
+   if ( NEventsArraySize<11 ) NevtMix = NEventsArraySize-1;   
+
+   for (int i_ev=0; i_ev<NEventsArraySize; i_ev++) {
+      int i_mix =0;	   
+      for (int j_ev=i_ev+1; j_ev<NEventsArraySize; j_ev++){
+        if(i_mix>=NevtMix)break;
+
+        for (int i_trigbin=0; i_trigbin<ptTbins_; i_trigbin++) {
+           Ntrig_bg = (allevents[i_ev][i_trigbin]).size();
+	   for (int i_assbin=0; i_assbin<ptNbins_; i_assbin++) {
+              Nass_bg = (allevents[j_ev][ptTbins_+i_assbin]).size();
+	      for (int j=0; j<Ntrig_bg; j++) {
+		 trigger = (allevents[i_ev][i_trigbin])[j];
+		 for (int i=0; i<Nass_bg; i++) {
+		    associated = (allevents[j_ev][ptTbins_+i_assbin])[i];
+		    dEta_bg=deltaEta(trigger,associated); dPhi_bg=deltaPhi(trigger,associated);
+		    if (dEta_bg != 0  && dPhi_bg != 0) background[i_trigbin][i_assbin]->Fill(dEta_bg,dPhi_bg,1./Ntrig_bg); //See Eq. 3 of https://arxiv.org/pdf/1201.3158.pdf
+		    if (dEta_bg != 0  && dPhi_bg != 0 && doSymmetrisation_){
+                       dEta_bg=deltaEta(trigger,associated); dPhi_bg=deltaPhi(associated,trigger);
+		       background[i_trigbin][i_assbin]->Fill(dEta_bg,dPhi_bg,1./Ntrig_bg); //See Eq. 3 of https://arxiv.org/pdf/1201.3158.pdf
+                       dEta_bg=deltaEta(associated,trigger); dPhi_bg=deltaPhi(associated,trigger);
+		       background[i_trigbin][i_assbin]->Fill(dEta_bg,dPhi_bg,1./Ntrig_bg); //See Eq. 3 of https://arxiv.org/pdf/1201.3158.pdf
+                       dEta_bg=deltaEta(associated,trigger); dPhi_bg=deltaPhi(trigger,associated);
+		       background[i_trigbin][i_assbin]->Fill(dEta_bg,dPhi_bg,1./Ntrig_bg); //See Eq. 3 of https://arxiv.org/pdf/1201.3158.pdf
+                    }
+		 }	 
+	      }
+           }		   
+	}	
+      	i_mix++;      
+      }	      
+   }	   
+}
+
+
 
 ///Plot histograms
 
@@ -240,6 +284,16 @@ for (int j = 0; j < ptTbins_; j++) {
    }
 }
 
+TCanvas *canvas_bg[ptTbins_][ptNbins_];
+for (int j = 0; j < ptTbins_; j++) {
+   for (int i = 0; i < ptNbins_; i++) {
+    canvas_bg[j][i] = new TCanvas(Form("c_background_trig_%d_%d_ass_%d_%d",int(ptTrigMin_[j]*10), int(ptTrigMax_[j]*10), int(ptAssMin_[i]*10), int(ptAssMax_[i]*10) ), "eta vs phi correlation", 500, 500);
+    canvas_bg[j][i]->cd(0);
+    background[j][i]->Draw("COLZ");
+    canvas_bg[j][i]->SaveAs(Form("Figures/deta_dphi_background_trig_%d_%d_ass_%d_%d.pdf",int(ptTrigMin_[j]*10), int(ptTrigMax_[j]*10), int(ptAssMin_[i]*10), int(ptAssMax_[i]*10)));
+   }
+}
+
 
 ///Write the historgrams to the "output" file 
 h_pt->Write();
@@ -249,6 +303,7 @@ h_mass->Write();
 for (int j = 0; j < ptTbins_; j++) {
    for (int i = 0; i < ptNbins_; i++) {
       signal[j][i]->Write();
+      background[j][i]->Write();
    }
 }
 
