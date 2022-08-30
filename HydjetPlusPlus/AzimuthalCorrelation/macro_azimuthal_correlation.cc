@@ -39,6 +39,7 @@ const int particle_type = 0; // 0 for all (pions, kaons, protons); 1 for pions; 
 
 ///access Hydjet++ generated events in ROOT  TTree format
 std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
+//std::unique_ptr<TFile> f( TFile::Open("/home/pedrolunardi/IC/Hydjet/RunOutput.root") );
 const int NEventsArraySize = 100; //IMPORTANT: total number of events generated
 
 ///some global variables -- after can think in add it in a ".h" file
