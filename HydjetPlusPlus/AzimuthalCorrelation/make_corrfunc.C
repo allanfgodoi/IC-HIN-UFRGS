@@ -10,7 +10,8 @@ float apttrigmin[]={3.0};
 float apttrigmax[]={3.5};
 
 Double_t c=0.;
-//Double_t c1,c2=1.;
+Double_t c1,c2=1.;
+Double_t c3=200; //IMPORTANT (temporary): should be equal to the total number of events generated  
 
 TFile* hfile = new TFile("corr_cent_0_5.root");
 
@@ -49,14 +50,14 @@ for (int i =0; i < nbins; i++) {
  
      	
    c=background[i]->GetBinContent(background[i]->FindBin(0,0));
-   //c1=background[i]->GetYaxis()->GetBinWidth(1);
-   //c2=background[i]->GetXaxis()->GetBinWidth(1);
+   c1=background[i]->GetYaxis()->GetBinWidth(1);
+   c2=background[i]->GetXaxis()->GetBinWidth(1);
 
-   //std::cout<<"c : " << c <<"; c1 : "<< c1 <<"; c2 : "<<c2<<std::endl;
-   std::cout<<"c : " << c<<std::endl;
+   std::cout<<"c : " << c <<"; c1 : "<< c1 <<"; c2 : "<<c2<<std::endl;
+   //std::cout<<"c : " << c<<std::endl;
 
    //dphi_signal[i]->Scale(c/(4.*c1*c2));
-   dphi_signal[i]->Scale(c/4.);
+   dphi_signal[i]->Scale(c/(4.*c1*c2*c3));
 
    dphi_signal[i]->Write();		
    dphi_bg[i]->Write();			
@@ -64,7 +65,7 @@ for (int i =0; i < nbins; i++) {
 
    signal[i]->Divide(background[i]);
    //signal[i]->Scale(c/(4.*c1*c2));
-   signal[i]->Scale(c/4.);
+   signal[i]->Scale(c/(4.*c1*c2*c3));
    signal[i]->Write();
 
 
