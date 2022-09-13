@@ -38,10 +38,10 @@ std::cout<<"Starting..."<<std::endl;
 const int particle_type = 0; // 0 for all (pions, kaons, protons); 1 for pions; 2 for kaons; 3 for protons
 
 ///access Hydjet++ generated events in ROOT  TTree format
-std::unique_ptr<TFile> f1( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
-std::unique_ptr<TFile> f2( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
-//std::unique_ptr<TFile> f( TFile::Open("/home/pedrolunardi/IC/Hydjet/RunOutput.root") );
-const int NEventsArraySize = 200; //IMPORTANT: total number of events generated
+//std::unique_ptr<TFile> f1( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
+//std::unique_ptr<TFile> f2( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
+std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
+const int NEventsArraySize = 100; //IMPORTANT: total number of events generated
 
 ///some global variables -- after can think in add it in a ".h" file
 bool doSymmetrisation_=true; //symmetrise the correlation function in each quadrant
@@ -69,14 +69,15 @@ ptAssMin_[0]=1.0;
 
 
 //Get trees
-auto input_tree1 = f1->Get<TTree>("td");
-auto input_tree2 = f2->Get<TTree>("td");
+///auto input_tree1 = f1->Get<TTree>("td");
+///auto input_tree2 = f2->Get<TTree>("td");
+auto input_tree = f->Get<TTree>("td");
 
-TList *list = new TList;
-list->Add(input_tree1);
-list->Add(input_tree2);
-
-TTree *input_tree = TTree::MergeTrees(list);
+///TList *list = new TList;
+///list->Add(input_tree1);
+///list->Add(input_tree2);
+///
+///TTree *input_tree = TTree::MergeTrees(list);
 
 // Disable everything...
 input_tree->SetBranchStatus("*", false);

@@ -11,7 +11,7 @@ float apttrigmax[]={3.5};
 
 Double_t c=0.;
 Double_t c1,c2=1.;
-Double_t c3=200; //IMPORTANT (temporary): should be equal to the total number of events generated  
+Double_t c3=100; //IMPORTANT (temporary): should be equal to the total number of events generated  
 
 TFile* hfile = new TFile("corr_cent_0_5.root");
 
