@@ -1,0 +1,6 @@
+*.log
+*.d
+*.o
+*.pyc
+*.class
+*.tmp
