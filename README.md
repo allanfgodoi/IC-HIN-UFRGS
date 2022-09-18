@@ -5,6 +5,7 @@ To contribute to this repository (also known as repo), please, follow the steps:
 1) To be done just once (forking, i.e. creates a replica of the repo):
 
    To do this, 
+
        1.1 Go to your web browser, navigate to GitHub and log in
 
        1.2 Navigate to the repo: https://github.com/CesarBernardes/IC-HIN-UFRGS
