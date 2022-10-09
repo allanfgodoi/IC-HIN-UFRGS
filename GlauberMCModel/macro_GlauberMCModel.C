@@ -39,11 +39,12 @@ func_WS->SetTitle("");
 //Plot function
 TCanvas tc("tc","tc",1000,500); //ROOT TCanvas to plot the distributions
 tc.Divide(2,1,0.02,0.02); //divide it in two
-tc.cd(1); //enter in one part
+tc.cd(1); //enter in the left Pad of the Canvas
 func_WS->Draw("l");
 TLegend *leg = new TLegend(0.6,0.68,0.85,0.9); //Create a legend for the plots
 legendStyle(leg, func_WS, "#frac{#rho_{0}}{1+exp#left(#frac{r-r_{0}}{a}#right)}"); //call function to customize style of legend
 leg->Draw();
+tc.cd(2); //enter in the right Pad of the Canvas
 tc.Print("fig_nucleus_distributions.pdf"); //save pdf file with plots
 
 }
