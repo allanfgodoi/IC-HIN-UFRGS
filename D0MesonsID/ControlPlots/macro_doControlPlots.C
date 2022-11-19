@@ -158,17 +158,17 @@ std::string variable_name_fake[N_variables]={"DPt_fake","DRapidity_fake","DPhi_f
 TString hist_name_all[N_variables]={"DPt_all","DRapidity_all","DPhi_all","DMass_all","D3DDecayLength_all","DVtxProb_all","D2DPointingAngle_all","DTtrk1Pt_all","DTrk1PtErr_all","DTrk1Eta_all","DTrk1Chi2n_all","DzDCASignificanceDaugther1_all","DxyDCASignificanceDaugther1_all"}; //histograms' name
 TString hist_name_true[N_variables]={"DPt_true","DRapidity_true","DPhi_true","DMass_true","D3DDecayLength_true","DVtxProb_true","D2DPointingAngle_true","DTtrk1Pt_true","DTrk1PtErr_true","DTrk1Eta_true","DTrk1Chi2n_true","DzDCASignificanceDaugther1_true","DxyDCASignificanceDaugther1_true"};
 TString hist_name_fake[N_variables]={"DPt_fake","DRapidity_fake","DPhi_fake","DMass_fake","D3DDecayLength_fake","DVtxProb_fake","D2DPointingAngle_fake","DTtrk1Pt_fake","DTrk1PtErr_fake","DTrk1Eta_fake","DTrk1Chi2n_fake","DzDCASignificanceDaugther1_fake","DxyDCASignificanceDaugther1_fake"};
-TString hist_title_all[N_variables]={"p_{T} of D^{0} Mesons Candidates","Rapidity (y) of D^{0} Mesons","Azimuthal Angle (#phi) of D^{0} Mesons","Invariant Mass (M_{inv}) of D^{0} Mesons","Distance from Primary Vertex to Secondary Vertex of D^{0} Mesons","Chi2 Probability of the Secondary Vertex of D^{0} Mesons","Angle Between p of D^{0} Mesons and the Segment PVSV","1st Daughters of D^{0} Mesons Transverse Momentum","1st Daughters of D^{0} Mesons Transverse Momentum Uncertainty","1st Daughters of D^{0} Mesons Pseudo-rapidity","1st Daughters of D^{0} Mesons Normalized Chi2 of the Trajectory Fit","1st Daughters of D^{0} Mesons Significance of the Impact Parameter in Z Axis","1st Daughters of D^{0} Mesons Significance of the Impact Parameter in XY Plane"}; //histograms' title
-TString hist_title_true[N_variables]={"p_{T} of true D^{0} Mesons","Rapidity (y) of true D^{0} Mesons","Azimuthal Angle (#phi) of true D^{0} Mesons","Invariant Mass (M_{inv}) of true D^{0} Mesons","Distance from Primary Vertex to Secondary Vertex of true D^{0} Mesons","Chi2 Probability of the Secondary Vertex of true D^{0} Mesons","Angle Between p of the true D^{0} Mesons and the Segment PVSV","1st Daughters of true D^{0} Mesons Transverse Momentum","1st Daughters of true D^{0} Mesons Transverse Momentum Uncertainty","1st Daughters of true D^{0} Mesons Pseudo-rapidity","1st Daughters of true D^{0} Mesons Normalized Chi2 of the Trajectory Fit","1st Daughters of true D^{0} Mesons Significance of the Impact Parameter in Z Axis","1st Daughters of true D^{0} Mesons Significance of the Impact Parameter in XY Plane"};
-TString hist_title_fake[N_variables]={"p_{T} of fake D^{0} Mesons (background)","Rapidity (y) of fake D^{0} Mesons (background)","Azimuthal Angle (#phi) of fake D^{0} Mesons","Invariant Mass (M_{inv}) of fake D^{0} Mesons (background)","Distance from Primary Vertex to Secondary Vertex of fake D^{0} Mesons (background)","Chi2 Probability of the Secondary Vertex of fake D^{0} Mesons (background)","Angle Between p of the fake D^{0} Mesons (background) and the Segment PVSV","1st Daughters of fake D^{0} Mesons (background) Transverse Momentum","1st Daughters of fake D^{0} Mesons (background) Transverse Momentum Uncertainty","1st Daughters of fake D^{0} Mesons (background) Pseudo-rapidity","1st Daughters of fake D^{0} Mesons (background) Normalized Chi2 of the Trajectory Fit","1st Daughters of fake D^{0} Mesons (background) Significance of the Impact Parameter in Z Axis","1st Daughters of fake D^{0} Mesons (background) Significance of the Impact Parameter in XY Plane"};
+TString hist_title_all[N_variables]={"p_{T} of D^{0} Mesons Candidates","Rapidity (y) of D^{0} Mesons","Azimuthal Angle (#phi) of D^{0} Mesons","Invariant Mass (M_{inv}) of D^{0} Mesons","Distance from Primary Vertex to Secondary Vertex of D^{0} Mesons","Chi2 Probability of the Secondary Vertex of D^{0} Mesons","Superficial Angle Between p of D^{0} Mesons and the Segment PVSV","1st Daughters of D^{0} Mesons Transverse Momentum","1st Daughters of D^{0} Mesons Transverse Momentum Uncertainty","1st Daughters of D^{0} Mesons Pseudo-rapidity","1st Daughters of D^{0} Mesons Normalized Chi2 of the Trajectory Fit","1st Daughters of D^{0} Mesons Significance of the Impact Parameter in Z Axis","1st Daughters of D^{0} Mesons Significance of the Impact Parameter in XY Plane"}; //histograms' title
+TString hist_title_true[N_variables]={"p_{T} of true D^{0} Mesons","Rapidity (y) of true D^{0} Mesons","Azimuthal Angle (#phi) of true D^{0} Mesons","Invariant Mass (M_{inv}) of true D^{0} Mesons","Distance from Primary Vertex to Secondary Vertex of true D^{0} Mesons","Chi2 Probability of the Secondary Vertex of true D^{0} Mesons","Superficial Angle Between p of the true D^{0} Mesons and the Segment PVSV","1st Daughters of true D^{0} Mesons Transverse Momentum","1st Daughters of true D^{0} Mesons Transverse Momentum Uncertainty","1st Daughters of true D^{0} Mesons Pseudo-rapidity","1st Daughters of true D^{0} Mesons Normalized Chi2 of the Trajectory Fit","1st Daughters of true D^{0} Mesons Significance of the Impact Parameter in Z Axis","1st Daughters of true D^{0} Mesons Significance of the Impact Parameter in XY Plane"};
+TString hist_title_fake[N_variables]={"p_{T} of fake D^{0} Mesons (background)","Rapidity (y) of fake D^{0} Mesons (background)","Azimuthal Angle (#phi) of fake D^{0} Mesons","Invariant Mass (M_{inv}) of fake D^{0} Mesons (background)","Distance from Primary Vertex to Secondary Vertex of fake D^{0} Mesons (background)","Chi2 Probability of the Secondary Vertex of fake D^{0} Mesons (background)"," Superficial Angle Between p of the fake D^{0} Mesons (background) and the Segment PVSV","1st Daughters of fake D^{0} Mesons (background) Transverse Momentum","1st Daughters of fake D^{0} Mesons (background) Transverse Momentum Uncertainty","1st Daughters of fake D^{0} Mesons (background) Pseudo-rapidity","1st Daughters of fake D^{0} Mesons (background) Normalized Chi2 of the Trajectory Fit","1st Daughters of fake D^{0} Mesons (background) Significance of the Impact Parameter in Z Axis","1st Daughters of fake D^{0} Mesons (background) Significance of the Impact Parameter in XY Plane"};
 const float hist_Nbins[N_variables]= {20, 50, 25, 50, 100, 20, 20, 40, 100, 100, 100, 70, 100}; //Number of bins for All, True, and Fake D0 candidates histograms
 const float hist_Xrange_min[N_variables]= {3, -2.5, -4.6, 1.60, 0, 0, 0, 0.5, 0, -1.8, 0, -540, -100}; //Minimum value of the x-axis range for All, True, and Fake D0 candidates histograms
 const float hist_Xrange_max[N_variables]= {5, 2.5, 4.6, 2.10, 20, 1, 1, 4, 0.2, 1.8, 10, 125, 100}; //Maximum value of the x-axis range for All, True, and Fake D0 candidates histograms
-TString hist_XaxisTitle[N_variables]={"p_{T} (GeV/c)","Rapidity","#phi","M_{inv} (GeV/c^{2})","Length (#mi m)","Probability","#alpha (rad)","p_{T} (GeV/c)","p_{T} Uncertainty (GeV/c)","Pseudo-rapidity","Probability","Significance","Significance"}; //Title of x-axis for All, True, and Fake D0 candidates histograms
+TString hist_XaxisTitle[N_variables]={"p_{T} (GeV/c)","Rapidity","#phi","M_{inv} (GeV/c^{2})","Decay Length (#mum)","Probability","#alpha (rad)","p_{T} (GeV/c)","p_{T} Uncertainty (GeV/c)","Pseudo-rapidity","Probability","Significance","Significance"}; //Title of x-axis for All, True, and Fake D0 candidates histograms
 const float hist_Yrange_min[N_variables]={0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9}; //Minimum of the y-axis range for All, True, and Fake D0 candidates histograms
 const float hist_Yrange_max[N_variables]={10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000}; //Maximum of the y-axis range for All, True, and Fake D0 candidates histograms
-const float histNorm_Yrange_min[N_variables]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; //Minimum of the y-axis range for All, True, and Fake D0 candidates Normalized histograms
-const float histNorm_Yrange_max[N_variables]={0.4,0.1,0.1,0.25,0.4,0.3,0.6,0.1,0.2,0.2,0.8,0.4,0.4}; //Maximum of the y-axis range for All, True, and Fake D0 candidates Normalized histograms
+const float histNorm_Yrange_min[N_variables]={0.0,0.0,0.0,0.0,0.00001,0.0,0.0,0.0,0.00001,0.0,0.00001,0.00001,0.00001}; //Minimum of the y-axis range for All, True, and Fake D0 candidates Normalized histograms
+const float histNorm_Yrange_max[N_variables]={0.4,0.1,0.1,0.25,0.4,0.3,0.6,0.1,0.2,0.2,0.06,0.4,0.4}; //Maximum of the y-axis range for All, True, and Fake D0 candidates Normalized histograms
 TString fig_name[N_variables]={"hist_DPt.pdf","hist_DRapidity.pdf","hist_DPhi.pdf","hist_DMass.pdf","hist_D3DDecayLength.pdf","hist_DVtxProb.pdf","hist_D2DPointingAngle.pdf","hist_DTtrk1Pt.pdf","hist_DTrk1PtErr.pdf","hist_DTrk1Eta.pdf","hist_DTrk1Chi2n.pdf","hist_DzDCASignificanceDaugther1.pdf","hist_DxyDCASignificanceDaugther1.pdf"}; //Name of the figure file with the histograms saved
 auto yaxis_label2 = "Total Number of Particles / Bin"; //common y-axis label
 auto yaxis_label3 = "Normalized Distributions";
@@ -209,6 +209,11 @@ for (unsigned int i=0; i<N_variables; i++){
    
    //First, case "1)"...
    tc.cd(1);
+   if (i == 4 || i == 10) {
+      gPad->SetLogx(); //use log scale in x-axis for wanted varibles
+   } else {
+      gPad->SetLogx(0);
+   }
    gPad->SetLogy(); //use log scale in y-axis
    gPad->SetTickx(1); 
    gPad->SetTicky(1);
@@ -238,23 +243,37 @@ for (unsigned int i=0; i<N_variables; i++){
    leg->Draw();
    //...and then, case "2)"
    tc.cd(2);
+   if (i == 4 || i == 10) {
+      gPad->SetLogx(); //use log scale in x-axis for wanted varibles
+   } else {
+      gPad->SetLogx(0);
+   }
+   if (i == 4 || i == 8 || i == 10 || i == 11 || i == 12) {
+      gPad->SetLogy(); //use log scale in y-axis for wanted varibles
+   } else {
+      gPad->SetLogy(0);
+   }
    gPad->SetTickx(1);
    gPad->SetTicky(1);
+   gPad->Update();
    TH1D *h_clone_all = (TH1D *)h_all->Clone("h_clone_all"); //clone the histogram "h_all" in order to not messup the original one
    h_clone_all->GetYaxis()->SetTitle(yaxis_label3);
    h_clone_all->SetStats(0);
    h_clone_all->GetYaxis()->SetTitleOffset(1.5);
    h_clone_all->Scale(1./(h_clone_all->Integral())); //Normalize it by multiplying the distribution by 1./integral
    h_clone_all->Draw("h");
+   gPad->Update();
    h_clone_all->GetYaxis()->SetRangeUser(histNorm_Yrange_min[i], histNorm_Yrange_max[i]);
    TH1D *h_clone_fake = (TH1D *)h_fake->Clone("h_clone_fake"); //clone the histogram "h_fake" in order to not messup the original one
    h_clone_fake->Scale(1./(h_clone_fake->Integral())); //Normalize it by multiplying the distribution by 1./integral
    h_clone_fake->SetStats(0);
    h_clone_fake->Draw("hsame");
+   gPad->Update();
    TH1D *h_clone_true = (TH1D *)h_true->Clone("h_clone_true"); //clone the histogram "h_true" in order to not messup the original one
    h_clone_true->Scale(1./(h_clone_true->Integral()));
    h_clone_true->SetStats(0);
    h_clone_true->Draw("hsame");
+   gPad->Update();
    TLegend *leg_norm = new TLegend(0.7,0.68,0.95,0.9); //Create a legend for the plots
    legendStyle(leg_norm, h_clone_all, h_clone_fake, h_clone_true);  //call function to customize style of TCanvas
    leg_norm->Draw();
