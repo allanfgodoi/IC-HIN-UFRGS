@@ -243,6 +243,26 @@ for (unsigned int i=0; i<N_variables; i++){
    leg->Draw();
    //...and then, case "2)"
    tc.cd(2);
+   gPad->SetTickx(1);
+   gPad->SetTicky(1);
+   TH1D *h_clone_all = (TH1D *)h_all->Clone("h_clone_all"); //clone the histogram "h_all" in order to not messup the original one
+   h_clone_all->GetYaxis()->SetTitle(yaxis_label3);
+   h_clone_all->SetStats(0);
+   h_clone_all->GetYaxis()->SetTitleOffset(1.5);
+   h_clone_all->Scale(1./(h_clone_all->Integral())); //Normalize it by multiplying the distribution by 1./integral
+   h_clone_all->Draw("h");
+   h_clone_all->GetYaxis()->SetRangeUser(histNorm_Yrange_min[i], histNorm_Yrange_max[i]);
+   TH1D *h_clone_fake = (TH1D *)h_fake->Clone("h_clone_fake"); //clone the histogram "h_fake" in order to not messup the original one
+   h_clone_fake->Scale(1./(h_clone_fake->Integral())); //Normalize it by multiplying the distribution by 1./integral
+   h_clone_fake->SetStats(0);
+   h_clone_fake->Draw("hsame");
+   TH1D *h_clone_true = (TH1D *)h_true->Clone("h_clone_true"); //clone the histogram "h_true" in order to not messup the original one
+   h_clone_true->Scale(1./(h_clone_true->Integral()));
+   h_clone_true->SetStats(0);
+   h_clone_true->Draw("hsame");
+   TLegend *leg_norm = new TLegend(0.7,0.68,0.95,0.9); //Create a legend for the plots
+   legendStyle(leg_norm, h_clone_all, h_clone_fake, h_clone_true);  //call function to customize style of TCanvas
+   leg_norm->Draw();
    if (i == 4 || i == 10) {
       gPad->SetLogx(); //use log scale in x-axis for wanted varibles
    } else {
@@ -253,30 +273,6 @@ for (unsigned int i=0; i<N_variables; i++){
    } else {
       gPad->SetLogy(0);
    }
-   gPad->SetTickx(1);
-   gPad->SetTicky(1);
-   gPad->Update();
-   TH1D *h_clone_all = (TH1D *)h_all->Clone("h_clone_all"); //clone the histogram "h_all" in order to not messup the original one
-   h_clone_all->GetYaxis()->SetTitle(yaxis_label3);
-   h_clone_all->SetStats(0);
-   h_clone_all->GetYaxis()->SetTitleOffset(1.5);
-   h_clone_all->Scale(1./(h_clone_all->Integral())); //Normalize it by multiplying the distribution by 1./integral
-   h_clone_all->Draw("h");
-   gPad->Update();
-   h_clone_all->GetYaxis()->SetRangeUser(histNorm_Yrange_min[i], histNorm_Yrange_max[i]);
-   TH1D *h_clone_fake = (TH1D *)h_fake->Clone("h_clone_fake"); //clone the histogram "h_fake" in order to not messup the original one
-   h_clone_fake->Scale(1./(h_clone_fake->Integral())); //Normalize it by multiplying the distribution by 1./integral
-   h_clone_fake->SetStats(0);
-   h_clone_fake->Draw("hsame");
-   gPad->Update();
-   TH1D *h_clone_true = (TH1D *)h_true->Clone("h_clone_true"); //clone the histogram "h_true" in order to not messup the original one
-   h_clone_true->Scale(1./(h_clone_true->Integral()));
-   h_clone_true->SetStats(0);
-   h_clone_true->Draw("hsame");
-   gPad->Update();
-   TLegend *leg_norm = new TLegend(0.7,0.68,0.95,0.9); //Create a legend for the plots
-   legendStyle(leg_norm, h_clone_all, h_clone_fake, h_clone_true);  //call function to customize style of TCanvas
-   leg_norm->Draw();
    tc.Print(fig_name[i]); //save Canvas in a PDF file...we can change format if needed PNG, JPG, ..etc...
 }
 
