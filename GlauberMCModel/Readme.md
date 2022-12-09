@@ -32,8 +32,6 @@ of the collision itself. You are advised run command with:
 * __Simulations:__ Specify the numbers of simulations that you wish to
   run, the default value is 1*10^6.
 
-***
-
 ## Generated data
 
 The data passed to the defined file is going to be human-readable and saved in
@@ -43,8 +41,6 @@ a columnar style. Each line will have 3 values separated by a space character
   one collision;
 * __Colision number:__ The number of collisions between two necleons;
 * __Nuclei distance:__  The distance in fm between the two nuclei.
-
-***
 
 # CollisionsDraw
 
@@ -63,9 +59,6 @@ The file will generate a visual representation of the collisions, it can be run 
 * __Simulations:__ Specify the numbers of simulations that you wish to
   graph, the default value is 20.
 
-***
-
-
 # Process
 
 This file will generate graphs to visualize the generated data by
@@ -83,6 +76,5 @@ This file will generate graphs to visualize the generated data by
 
 ***
 
-
 *  __OBS:__ If you want to run the macros directly, you
-WILL need to put backslashes when sending sstrings.
+WILL need to put backslashes when sending strings.
