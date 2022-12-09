@@ -75,7 +75,7 @@ This file will generate a visual representation of the collisions, it can be run
 This file will generate graphs to visualize the generated data by
 [the colide program](#Collide):
 
-    root -l -b -q 'collisionsDraw.cpp(\"location\", int nucleons, int simulations)'
+    root -l -b -q 'process.cpp(\"location\")'
 
 ## Arguments received
 
