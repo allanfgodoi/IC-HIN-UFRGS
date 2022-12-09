@@ -19,15 +19,15 @@ void drawTH2 (TH2 *th2, TCanvas *canvas, const string& xTitle, const string& yTi
     canvas->Clear();
 
 }
-void drawTH1 (TH1 *th1, TCanvas *canvas, const string& xTitle, const string& yTitle, const string& saveAs){
-    th1->GetXaxis()->SetTitle(xTitle.c_str());
-    th1->GetYaxis()->SetTitle(yTitle.c_str());
-    th1->DrawClone("");
+void drawTH1 (TH1 *h, TCanvas *canvas, const string& xTitle, const string& yTitle, const string& saveAs){
+    h->GetXaxis()->SetTitle(xTitle.c_str());
+    h->GetYaxis()->SetTitle(yTitle.c_str());
+    h->DrawClone("");
     canvas->SaveAs(saveAs.c_str());
     canvas->Clear();
 }
 
-void process (){
+void process (string location = "./graphs"){
 
     // Config the canvas
     auto *c = new TCanvas("canvas", "canvas", 1'200, 1'000);
@@ -38,37 +38,37 @@ void process (){
     gStyle->SetOptStat(0);
 
     auto data = new TTree("data", "data");
-    data->ReadFile("data.txt.bak", "part:col:dist");
+    data->ReadFile("data.txt", "part:col:dist");
     TTreeReader reader(data);
     TTreeReaderValue<float> part(reader, "part");
     TTreeReaderValue<float> col(reader, "col");
     TTreeReaderValue<float> dist(reader, "dist");
 
-    auto partXEvent = new TH1F("ppe", "nPart vs eventos", 375, 0, ceil(data->GetMaximum("part")));
-    auto colXEvent = new TH1F("cpe", "nCol vs eventos", 500, 0, ceil(data->GetMaximum("col")));
-    auto distXEvent = new TH1F("dpe", "d vs eventos", 54, 0, ceil(data->GetMaximum("dist")));
-    auto distXPart= new TH2F("dpp", "d vs nPart", 200,0,18,200,0,data->GetMaximum("part"));
-    auto distXCol= new TH2F("dpc", "d vs nCol", 400,0,18,200,0,data->GetMaximum("col"));
-    auto colXPart= new TH2F("cpp", "nCol vs nPart", 208,0,data->GetMaximum("part"),200,0,data->GetMaximum("col"));
+    auto partXEvent = new TH1I("ppe", "nPart vs eventos", 375, 0, ceil(data->GetMaximum("part")));
+    auto colXEvent  = new TH1I("cpe", "nCol vs eventos", 500, 0, ceil(data->GetMaximum("col")));
+    auto distXEvent = new TH1I("dpe", "d vs eventos", 54, 0, ceil(data->GetMaximum("dist")));
+    auto distXPart  = new TH2I("dpp", "d vs nPart", 200,0,18,200,0,data->GetMaximum("part"));
+    auto distXCol   = new TH2I("dpc", "d vs nCol", 400,0,18,200,0,data->GetMaximum("col"));
+    auto colXPart   = new TH2I("cpp", "nCol vs nPart", 208,0,data->GetMaximum("part"),200,0,data->GetMaximum("col"));
 
     while (reader.Next()){
-        partXEvent->Fill(*part);
-        colXEvent->Fill(*col);
-        distXEvent->Fill(*dist);
-        distXPart->Fill(*dist, *part);
-        distXCol->Fill(*dist, *col);
-        colXPart->Fill(*part, *col);
+        partXEvent -> Fill(*part);
+        colXEvent  -> Fill(*col);
+        distXEvent -> Fill(*dist);
+        distXPart  -> Fill(*dist, *part);
+        distXCol   -> Fill(*dist, *col);
+        colXPart   -> Fill(*part, *col);
     }
 
     // Draw TH2 functions
     c->SetLogz();
-    drawTH2(distXPart, c, "Distancia", "Participantes", "./graphs/distpart.png");
-    drawTH2(distXCol, c, "Distancia", "Colisoes", "./graphs/distcol.png");
-    drawTH2(colXPart, c, "Colisoes", "Participantes", "./graphs/colpart.png");
+    drawTH2(distXPart, c, "Distancia", "Participantes", location + "/distpart.png");
+    drawTH2(distXCol, c, "Distancia", "Colisoes", location + "/distcol.png");
+    drawTH2(colXPart, c, "Colisoes", "Participantes", location + "/colpart.png");
 
     // Draw TH1 Functions
-    drawTH1(distXEvent, c, "Distancia", "Eventos", "./graphs/dist.png");
+    drawTH1(distXEvent, c, "Distancia", "Eventos", location + "/dist.png");
     c->SetLogy();
-    drawTH1(partXEvent, c, "Participantes", "Eventos", "./graphs/part.png");
-    drawTH1(colXEvent, c, "Colisoes", "Eventos", "./graphs/col.png");
+    drawTH1(partXEvent, c, "Participantes", "Eventos", location + "/part.png");
+    drawTH1(colXEvent, c, "Colisoes", "Eventos", location + "/col.png");
 }

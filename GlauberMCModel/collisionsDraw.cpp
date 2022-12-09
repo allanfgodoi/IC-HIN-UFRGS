@@ -4,6 +4,7 @@
 #include <TGraph.h>
 #include <TRandom.h>
 #include <TLegend.h>
+#include <TRandom3.h>
 
 using namespace std;
 
@@ -25,10 +26,10 @@ void config(TGraph graph, Color_t color, const char* name){
     graph.DrawClone("P");
 }
 
-void collisionsDraw (){
+void collisionsDraw (string location = "simulations", int nucleons = 208, int sim = 20){
 
     // Config RNG
-    auto *random = new TRandom();
+    auto *random = new TRandom3();
     random->SetSeed();
 
     // Simulation variables
@@ -37,17 +38,16 @@ void collisionsDraw (){
                 a       = 0.542,
                 secIn   = 65;
 
-    const int    n      = 208;
     const double radius = sqrt((secIn / 10) / TMath::Pi());
-    double  xFirst[n] , yFirst[n],  // convert to 2d matrix
-            xSecond[n], ySecond[n];
+    double  xFirst[nucleons] , yFirst[nucleons],  // convert to 2d matrix
+            xSecond[nucleons], ySecond[nucleons];
     int nCol = 0;
 
     // Config the canvas
     TCanvas canvas("B(Z)", "B(Z) linear", 1280, 1000);
     canvas.SetTicks();
 
-    for (int p = 0; p < 20; p++) {
+    for (int p = 0; p < sim; p++) {
 
         vector<double> xFirstPartTemp, yFirstPartTemp;
         vector<double> xSecondPartTemp, ySecondPartTemp;
@@ -65,21 +65,25 @@ void collisionsDraw (){
 
         // Generate collision data
         double nucleiDistance = dist->GetRandom();
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < nucleons; i++) {
+
+            // Generate random values for the first nuclei
             double position = pos->GetRandom();
             double var = random->Rndm() * TMath::Pi() * 2;
-            xFirst[i] = position * sin(var);
-            yFirst[i] = position * cos(var);
-            position = pos->GetRandom();
-            var = random->Rndm() * TMath::TwoPi();
+            xFirst[i]  = position * sin(var);
+            yFirst[i]  = position * cos(var);
+
+            // Generate random values for the second nuclei
+            position   = pos->GetRandom();
+            var        = random->Rndm() * TMath::TwoPi();
             xSecond[i] = position * sin(var) + nucleiDistance;
             ySecond[i] = position * cos(var);
         }
 
-        // Verify collision part and number
-        for (int i = 0; i < n; i++) {
-            bool passTrough = false;
-            for (int j = 0; j < n; j++) {
+        // COLLISION VERIFICATION
+        for (int i = 0; i < nucleons; i++) {  // Loop throught every first nucleus' nucleon
+            bool passTrough = false;   // variable responsible to verify if there has been any collision between the nucleons
+            for (int j = 0; j < nucleons; j++) { // Loop throught every second nucleus' nucleon
                 if ((sqrt(pow((xFirst[i] - xSecond[j]), 2) +
                    pow((yFirst[i] - ySecond[j]), 2))) < radius) {
                     nCol++;
@@ -87,11 +91,10 @@ void collisionsDraw (){
                     bool done = true;
                     for (double k : xSecondPartTemp) {
                         if (k==xSecond[j])
-                            if (ySecondPartTemp[position] == ySecond[j]){
+                            if (ySecondPartTemp[++position] == ySecond[j]){
                                 done = false;
                                 break;
                             }
-                        position++;
                     }
                     if (done) {
                         xSecondPartTemp.push_back(xSecond[j]);
@@ -118,8 +121,8 @@ void collisionsDraw (){
         copy(ySecondPartTemp.begin(), ySecondPartTemp.end(), ysp);
 
         // Drawn the nuclei in canvas
-        TGraph first(n, xFirst, yFirst);
-        TGraph second(n, xSecond, ySecond);
+        TGraph first(nucleons, xFirst, yFirst);
+        TGraph second(nucleons, xSecond, ySecond);
         TGraph firstPart(fSize, xfp, yfp);
         TGraph secondPart(sSize, xsp, ysp);
         config(first, kAzure + 1, "nas");
@@ -137,7 +140,7 @@ void collisionsDraw (){
         leg->DrawClone("Same");
 
         // Export as image the canvas
-        string tName = "./sim/Sim" + to_string(p) + ".png";
+        string tName = "./" + location + "/Sim" + to_string(p) + ".png";
         const char *name = tName.c_str();
         canvas.SaveAs(name);
     }

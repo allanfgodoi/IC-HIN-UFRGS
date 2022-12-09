@@ -7,3 +7,6 @@
 CMakeLists.txt
 cmake-build-debug*
 .idea*
+GlauberMCModel/data.txt.txt
+GlauberMCModel/graphs
+GlauberMCModel/sim
