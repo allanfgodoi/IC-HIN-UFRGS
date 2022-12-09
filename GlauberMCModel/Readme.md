@@ -17,29 +17,27 @@ As for the program itself, the files are:
 # Collide
 
 This is the main file, responsible for generating the data
-of the collision itself. It's advised to run command with:
+of the collision itself. You are advised run command with:
 
-root -l -q -t 'collide.cpp(\"filename\", int nucleons, int simulations)'
+    root -l -q -t 'collide.cpp(\"filename\", int nucleons, int simulations)'
 
 ## Arguments received
 
 * __Filename:__ Receive the folder and file that you want to save the
   collision data, the default value is "./data.txt";
-*  __OBS:__ If you want to run it directly, you SHOULD put a backslash
-   before the quotation marks, or else it will not run.
 
 * __Nucleons:__ Specify the numbers of nucleons in the nuclei that you
   want to simulate, the default value is 208, as in a lead nucleus;
 
 * __Simulations:__ Specify the numbers of simulations that you wish to
-  run, the default value is 1.000.000.
+  run, the default value is 1*10^6.
 
 ***
 
 ## Generated data
 
 The data passed to the defined file is going to be human-readable and saved in
-a columnar style. each line will have 3 values separated by a space character
+a columnar style. Each line will have 3 values separated by a space character
 (" "). The values are:
 * __Participants:__ The number of single nucleons that participated of at least
   one collision;
@@ -50,7 +48,7 @@ a columnar style. each line will have 3 values separated by a space character
 
 # CollisionsDraw
 
-This file will generate a visual representation of the collisions, it can be run with:
+The file will generate a visual representation of the collisions, it can be run with:
 
     root -l -b -q 'collisionsDraw.cpp(\"location\", int nucleons, int simulations)'
 
@@ -58,8 +56,6 @@ This file will generate a visual representation of the collisions, it can be run
 
 * __Location:__ Receive the folder that you want to save the
   collision data, the default value is "./simulations";
-*  __OBS:__ If you want to run it directly, you SHOULD put a backslash
-   before the quotation marks, or else it will not run.
 
 * __Nucleons:__ Specify the numbers of nucleons in the nuclei that you
   want to simulate, the default value is 208, as in a lead nucleus;
@@ -75,19 +71,18 @@ This file will generate a visual representation of the collisions, it can be run
 This file will generate graphs to visualize the generated data by
 [the colide program](#Collide):
 
-    root -l -b -q 'process.cpp(\"location\")'
+    root -l -b -q 'process.cpp(\"datafile\", \"location\")'
 
 ## Arguments received
 
+* __Datafile:__ Receive the folder that the data file is
+, the default value is "./data.txt";
+
 * __Location:__ Receive the folder that you want to save the
   collision data, the default value is "./graphs";
-*  __OBS:__ If you want to run it directly, you SHOULD put a backslash
-   before the quotation marks, or else it will not run.
-
-* __Nucleons:__ Specify the numbers of nucleons in the nuclei that you
-  want to simulate, the default value is 208, as in a lead nucleus;
-
-* __Simulations:__ Specify the numbers of simulations that you wish to
-  graph, the default value is 20.
 
 ***
+
+
+*  __OBS:__ If you want to run the macros directly, you
+WILL need to put backslashes when sending sstrings.

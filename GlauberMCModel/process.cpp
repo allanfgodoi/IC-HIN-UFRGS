@@ -27,7 +27,7 @@ void drawTH1 (TH1 *h, TCanvas *canvas, const string& xTitle, const string& yTitl
     canvas->Clear();
 }
 
-void process (string location = "./graphs"){
+void process (const string& dataFile = "./data.txt", const string& location = "./graphs"){
 
     // Config the canvas
     auto *c = new TCanvas("canvas", "canvas", 1'200, 1'000);
@@ -38,7 +38,7 @@ void process (string location = "./graphs"){
     gStyle->SetOptStat(0);
 
     auto data = new TTree("data", "data");
-    data->ReadFile("data.txt", "part:col:dist");
+    data->ReadFile(dataFile.c_str(), "part:col:dist");
     TTreeReader reader(data);
     TTreeReaderValue<float> part(reader, "part");
     TTreeReaderValue<float> col(reader, "col");
