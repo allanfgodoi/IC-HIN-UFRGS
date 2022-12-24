@@ -1,11 +1,8 @@
 #include "TF1.h"
-#include "TH1F.h"
-#include "TGraph.h"
 #include "TRandom.h"
 #include <random>
 #include <fstream>
 #include <iostream>
-#include <algorithm>
 #include <TROOT.h>
 
 using namespace std;
@@ -25,7 +22,7 @@ double calcD(double *x, double *par){
     return x[0]*2*pi;
 }
 
-void collide (const string& filename = "data.txt", int nucleons = 208, int simulations = 1'000'000){
+void collide (const string& filename = "./a/data.txt", int nucleons = 208, int simulations = 1'000'000){
 
     ROOT::EnableImplicitMT();
 

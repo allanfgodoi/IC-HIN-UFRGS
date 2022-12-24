@@ -1,12 +1,11 @@
-#include "TF1.h"
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH1.h"
+#include "TH2.h"
 #include "TCanvas.h"
 #include "TTree.h"
 #include "TTreeReader.h"
 #include "TStyle.h"
 #include <random>
-#include <iostream>
+#include <TSystem.h>
 
 using namespace std;
 
@@ -27,7 +26,7 @@ void drawTH1 (TH1 *h, TCanvas *canvas, const string& xTitle, const string& yTitl
     canvas->Clear();
 }
 
-void process (const string& dataFile = "./data.txt", const string& location = "./graphs"){
+void process (const string& dataFile = "./data.txt", const string& location = "./"){
 
     // Config the canvas
     auto *c = new TCanvas("canvas", "canvas", 1'200, 1'000);

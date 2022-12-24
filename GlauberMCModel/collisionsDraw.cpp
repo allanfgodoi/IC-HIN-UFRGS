@@ -26,7 +26,7 @@ void config(TGraph graph, Color_t color, const char* name){
     graph.DrawClone("P");
 }
 
-void collisionsDraw (string location = "simulations", int nucleons = 208, int sim = 20){
+void collisionsDraw (int nucleons = 208, int sim = 20){
 
     // Config RNG
     auto *random = new TRandom3();
@@ -140,8 +140,7 @@ void collisionsDraw (string location = "simulations", int nucleons = 208, int si
         leg->DrawClone("Same");
 
         // Export as image the canvas
-        string tName = "./" + location + "/Sim" + to_string(p) + ".png";
-        const char *name = tName.c_str();
-        canvas.SaveAs(name);
+        string tName = "./Sim" + to_string(p) + ".pdf";
+        canvas.SaveAs(tName.c_str());
     }
 }
