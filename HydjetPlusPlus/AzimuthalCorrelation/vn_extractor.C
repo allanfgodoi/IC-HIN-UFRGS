@@ -16,9 +16,8 @@
 //#include "TF1.h"
 //#include "TH1D.h"
 
-
-void FourierFit(const char* filename)
-{
+//void vn_extractor(const char* filename)
+void vn_extractor(const char* signal_dphi_projection){
 
   TFile file(filename, "signal_dphi_projection.root");
 
@@ -63,7 +62,7 @@ void FourierFit(const char* filename)
 int main(int argc, char *argv[])
 {
 
-  FourierFit("signal_dphi_projection.root");
+  vn_extractor("signal_dphi_projection.root");
 
   return 0;
 
