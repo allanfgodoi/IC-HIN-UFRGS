@@ -5,6 +5,8 @@
 #include <TRandom.h>
 #include <TLegend.h>
 #include <TRandom3.h>
+#include <TFile.h>
+#include <TTree.h>
 
 using namespace std;
 
@@ -26,19 +28,21 @@ void config(TGraph graph, Color_t color, const char* name){
     graph.DrawClone("P");
 }
 
+const double
+    pi              = TMath::Pi(),
+    p0              = 3,
+    r0              = 6.62,
+    a               = 0.542,
+    secIn           = 65,
+    radiusSquared   = (secIn / 10) / pi;
+
 void collisionsDraw (int nucleons = 208, int sim = 20){
 
     // Config RNG
-    auto *random = new TRandom3();
+    auto *random = new TRandom();
     random->SetSeed();
 
     // Simulation variables
-    const float p0      = 3,
-                r0      = 6.62,
-                a       = 0.542,
-                secIn   = 65;
-
-    const double radius = sqrt((secIn / 10) / TMath::Pi());
     double  xFirst[nucleons] , yFirst[nucleons],  // convert to 2d matrix
             xSecond[nucleons], ySecond[nucleons];
     int nCol = 0;
@@ -46,11 +50,15 @@ void collisionsDraw (int nucleons = 208, int sim = 20){
     // Config the canvas
     TCanvas canvas("B(Z)", "B(Z) linear", 1280, 1000);
     canvas.SetTicks();
+    unordered_set<int> nucleonPartTemp;
+    vector<double> xFirstPartTemp, yFirstPartTemp;
+    vector<double> xSecondPartTemp, ySecondPartTemp;
 
     for (int p = 0; p < sim; p++) {
 
-        vector<double> xFirstPartTemp, yFirstPartTemp;
-        vector<double> xSecondPartTemp, ySecondPartTemp;
+        nucleonPartTemp.clear();
+        xFirstPartTemp.clear(), yFirstPartTemp.clear();
+        xSecondPartTemp.clear(), ySecondPartTemp.clear();
 
         // Config the graph
         canvas.Clear();
@@ -64,51 +72,37 @@ void collisionsDraw (int nucleons = 208, int sim = 20){
         pos->SetParameters(p0, r0, a);
 
         // Generate collision data
-        double nucleiDistance = dist->GetRandom();
+        double d = dist->GetRandom();
         for (int i = 0; i < nucleons; i++) {
-
-            // Generate random values for the first nuclei
             double position = pos->GetRandom();
-            double var = random->Rndm() * TMath::Pi() * 2;
-            xFirst[i]  = position * sin(var);
-            yFirst[i]  = position * cos(var);
-
-            // Generate random values for the second nuclei
-            position   = pos->GetRandom();
-            var        = random->Rndm() * TMath::TwoPi();
-            xSecond[i] = position * sin(var) + nucleiDistance;
+            double var = random->Rndm() * pi * 2;
+            xFirst[i] = position * sin(var);
+            yFirst[i] = position * cos(var);
+            position = pos->GetRandom();
+            var = random->Rndm() * pi * 2;
+            xSecond[i] = position * sin(var) + d;
             ySecond[i] = position * cos(var);
         }
 
-        // COLLISION VERIFICATION
-        for (int i = 0; i < nucleons; i++) {  // Loop throught every first nucleus' nucleon
-            bool passTrough = false;   // variable responsible to verify if there has been any collision between the nucleons
-            for (int j = 0; j < nucleons; j++) { // Loop throught every second nucleus' nucleon
-                if ((sqrt(pow((xFirst[i] - xSecond[j]), 2) +
-                   pow((yFirst[i] - ySecond[j]), 2))) < radius) {
+        // Verify collision partTemp and number
+        for (int i = 0; i < nucleons; i++) {
+            bool passTrough = false;
+            for (int j = 0; j < nucleons; j++) {
+                if (pow(xFirst[i] - xSecond[j], 2) +
+                    pow(yFirst[i] - ySecond[j], 2) < (radiusSquared)) {
                     nCol++;
-                    int position = 0;
-                    bool done = true;
-                    for (double k : xSecondPartTemp) {
-                        if (k==xSecond[j])
-                            if (ySecondPartTemp[++position] == ySecond[j]){
-                                done = false;
-                                break;
-                            }
-                    }
-                    if (done) {
-                        xSecondPartTemp.push_back(xSecond[j]);
-                        ySecondPartTemp.push_back(ySecond[j]);
+                    if (nucleonPartTemp.insert(j).second) {
+                        xSecondPartTemp.emplace_back(xSecond[j]);
+                        ySecondPartTemp.emplace_back(ySecond[j]);
                     }
                     passTrough = true;
                 }
             }
-            if (passTrough) {
-                xFirstPartTemp.push_back(xFirst[i]);
-                yFirstPartTemp.push_back(yFirst[i]);
-            }
+            if (passTrough){
+                xFirstPartTemp.emplace_back(xFirst[i]);
+                yFirstPartTemp.emplace_back(yFirst[i]);
+            };
         }
-
 
         // Convert from list to array for usage in the TGraph module
         int fSize = static_cast<int>(xFirstPartTemp.size()),

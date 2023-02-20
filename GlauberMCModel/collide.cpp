@@ -1,103 +1,114 @@
 #include "TF1.h"
 #include "TRandom.h"
 #include <random>
-#include <fstream>
-#include <iostream>
 #include <TROOT.h>
+#include <TTree.h>
+#include <TFile.h>
+#include <thread>
 
 using namespace std;
 
-const double pi = TMath::Pi();
+// Simulation variables
+const double
+        pi              = TMath::Pi(),
+        rho0            = 3,
+        r0              = 6.62,
+        a               = 0.542,
+        secIn           = 65,
+        radiusSquared   = (secIn / 10) / pi;
 
-double wsFunction(double *x, double *par){
-    return (x[0] * par[0] / (1 + exp((x[0] - par[1])/par[2])));
-}
+const ::int64_t nThreads = std::thread::hardware_concurrency();
+mutex mtx;
 
-double calcProb (double *x, double *par) {
-    auto f = new TF1 ("temp", wsFunction, 0, 14, 3);
-    return wsFunction(x, par) / f->Integral(0, 14);
-}
+// Structures used to generate and save data.
+struct Nucleon {double x, y;};
+struct Data {int nCol, nPart; double dist;};
 
-double calcD(double *x, double *par){
-    return x[0]*2*pi;
-}
+void collide (const string& filename = "./data.root", int nucleons = 208, int simulations = 1'000'000){
 
-void collide (const string& filename = "./a/data.txt", int nucleons = 208, int simulations = 1'000'000){
-
+    // Configure multithreading
     ROOT::EnableImplicitMT();
+    ROOT::EnableThreadSafety();
+
+    // Configure the program to export in a Root file
+    Data data{};
+    auto *file = new TFile(filename.c_str(),"recreate");
+    auto *save = new TTree("save", "Simulation");
+    save->Branch("Collisions", &data, "col/I:part/I:dist/D");
+
+    vector<thread> threads;
+
+    // Set up the functions to be used in the generators
+    auto *distF = new TF1("distF", "x*2*pi", 0, 18);
+    auto *posF = new TF1("posF", "(x*[0]/(1+exp((x-[1])/[2])))/309.310706654", 0, 14);
+    posF->SetParameters(rho0, r0, a);
 
     // Config RNG
-    ofstream data(filename);
-    auto *random = new TRandom();
-    random->SetSeed();
+    mt19937 rng(random_device{}());
+    uniform_real_distribution<> dis(0.0, 1.0);
+    TRandom random;
+    random.SetSeed();
 
-    // Simulation variables
-    const double rho0     = 3,
-                 r0     = 6.62,
-                 a      = 0.542,
-                 secIn   = 65;
+    for (int k = 0; k < nThreads; k++) {
+        threads.emplace_back([&, k] {
 
-    const double radius = sqrt((secIn / 10) / pi);
-          double xFirst[nucleons], yFirst[nucleons],
-                 xSecond[nucleons], ySecond[nucleons];
+            // Run the simulations
+            for (int p = k; p < simulations;) {
+                unordered_set<int> nucleonPartTemp;
 
-    for (int p = 0; p < 1'000'000; ) {
-        int nCol = 0,
-            secPart = 0,
-            firstPart = 0;
+                // Create the array of Nucleon to represent the Nuclei.
+                Nucleon first[nucleons];
+                Nucleon second[nucleons];
+                int colT = 0;
+                int partT = 0;
+                double distT;
 
-        vector<double> xSecondPartTemp, ySecondPartTemp;
+                // Generate collision data
+                distT = distF->GetRandom();
+                for (int i = 0; i < nucleons; i++) {
+                    double position = posF->GetRandom();
+                    double var = dis(rng) * pi * 2;
+                    first[i].x = position * sin(var);
+                    first[i].y = position * cos(var);
+                    position = posF->GetRandom();
+                    var = dis(rng) * pi * 2;
+                    second[i].x = position * sin(var) + distT;
+                    second[i].y = position * cos(var);
+                }
 
-        // Set up the functions to be used in the generators
-        auto *dist = new TF1("dist", calcD, 0, 20, 0);
-        auto *pos = new TF1("pos", "(x*[0]/(1+exp((x-[1])/[2])))/309.310706654", 0, 14);
-        pos->SetParameters(rho0, r0, a);
 
-        // Generate collision data
-        double nucleiDistance = dist->GetRandom();
-        for (int i = 0; i < nucleons; i++) {
-            double position = pos->GetRandom();
-            double var = random->Rndm() * pi * 2;
-            xFirst[i] = position * sin(var);
-            yFirst[i] = position * cos(var);
-            position = pos->GetRandom();
-            var = random->Rndm() * pi * 2;
-            xSecond[i] = position * sin(var) + nucleiDistance;
-            ySecond[i] = position * cos(var);
-        }
-
-        // Verify collision part and number
-        for (int i = 0; i < nucleons; i++) {
-            bool passTrough = false;
-            for (int j = 0; j < nucleons; j++) {
-                if ((sqrt(pow((xFirst[i] - xSecond[j]), 2) + pow((yFirst[i] - ySecond[j]), 2))) < radius){
-                    nCol++;
-                    int position = 0;
-                    bool done = true;
-                    for (double k : xSecondPartTemp) {
-                        if (k==xSecond[j])
-                            if (ySecondPartTemp[position] == ySecond[j]){
-                                done = false;
-                                break;
+                // Verify collision partTemp and number
+                for (int i = 0; i < nucleons; i++) {
+                    bool passTrough = false;
+                    for (int j = 0; j < nucleons; j++) {
+                        if ((pow((first[i].x - second[j].x), 2) +
+                             pow((first[i].y - second[j].y), 2)) < radiusSquared) {
+                            colT++;
+                            passTrough = true;
+                            if (nucleonPartTemp.insert(j).second) {
+                                partT++;
                             }
-                        position++;
+                        }
                     }
-                    if (done) {
-                        xSecondPartTemp.push_back(xSecond[j]);
-                        ySecondPartTemp.push_back(ySecond[j]);
-                        secPart++;
-                    }
-                    passTrough = true;
+                    if (passTrough) { partT++; }
+                }
+                if (partT > 0) {
+                    mtx.lock();
+                    data.nCol = colT;
+                    data.nPart = partT;
+                    data.dist = distT;
+                    save->Fill();
+                    mtx.unlock();
+                    p+= (int) nThreads;
                 }
             }
-            if (passTrough) {
-                firstPart++;
-            }
-        }
-        if (firstPart + secPart > 0) {
-            data << (firstPart + secPart) << " " << nCol << " " << nucleiDistance << endl;
-            p++;
-        }
+        });
     }
-    data.close();
+    for (auto &t : threads) t.join();
+    save->Write();
+    file->Close();
+}
+
+int main () {
+    collide();
 }

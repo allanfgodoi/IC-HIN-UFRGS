@@ -1,13 +1,16 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TCanvas.h"
-#include "TTree.h"
+#include "TFile.h"
 #include "TTreeReader.h"
 #include "TStyle.h"
 #include <random>
 #include <TSystem.h>
+#include <TTreeReaderArray.h>
 
 using namespace std;
+
+struct Data{int nCol, nPart; double dist;};
 
 void drawTH2 (TH2 *th2, TCanvas *canvas, const string& xTitle, const string& yTitle, const string& saveAs){
     th2->GetXaxis()->SetTitle(xTitle.c_str());
@@ -26,7 +29,9 @@ void drawTH1 (TH1 *h, TCanvas *canvas, const string& xTitle, const string& yTitl
     canvas->Clear();
 }
 
-void process (const string& dataFile = "./data.txt", const string& location = "./"){
+void process (const char* dataFile = "./data.root", const string& location = "./graphs"){
+
+    gSystem->mkdir(location.c_str());
 
     // Config the canvas
     auto *c = new TCanvas("canvas", "canvas", 1'200, 1'000);
@@ -36,27 +41,31 @@ void process (const string& dataFile = "./data.txt", const string& location = ".
     gStyle->SetPalette(kRainBow);
     gStyle->SetOptStat(0);
 
-    auto data = new TTree("data", "data");
-    data->ReadFile(dataFile.c_str(), "part:col:dist");
-    TTreeReader reader(data);
-    TTreeReaderValue<float> part(reader, "part");
-    TTreeReaderValue<float> col(reader, "col");
-    TTreeReaderValue<float> dist(reader, "dist");
+    // Open the ROOT file and get the "save" tree
+    auto *file = new TFile("data.root");
+    auto *tree = (TTree*) file->Get("save");
 
-    auto partXEvent = new TH1I("ppe", "nPart vs eventos", 375, 0, ceil(data->GetMaximum("part")));
-    auto colXEvent  = new TH1I("cpe", "nCol vs eventos", 500, 0, ceil(data->GetMaximum("col")));
-    auto distXEvent = new TH1I("dpe", "d vs eventos", 54, 0, ceil(data->GetMaximum("dist")));
-    auto distXPart  = new TH2I("dpp", "d vs nPart", 200,0,18,200,0,data->GetMaximum("part"));
-    auto distXCol   = new TH2I("dpc", "d vs nCol", 400,0,18,200,0,data->GetMaximum("col"));
-    auto colXPart   = new TH2I("cpp", "nCol vs nPart", 208,0,data->GetMaximum("part"),200,0,data->GetMaximum("col"));
+    // Create variables to hold the data
+    Data data{};
 
-    while (reader.Next()){
-        partXEvent -> Fill(*part);
-        colXEvent  -> Fill(*col);
-        distXEvent -> Fill(*dist);
-        distXPart  -> Fill(*dist, *part);
-        distXCol   -> Fill(*dist, *col);
-        colXPart   -> Fill(*part, *col);
+    // Set up branches to read the data into the variables
+    tree->SetBranchAddress("Collisions", &data);
+
+    auto partXEvent = new TH1I("ppe", "nPart vs eventos", 375, 0, 416);
+    auto colXEvent  = new TH1I("cpe", "nCol vs eventos", 500, 0, 2000);
+    auto distXEvent = new TH1I("dpe", "d vs eventos", 54, 0, 18);
+    auto distXPart  = new TH2I("dpp", "d vs nPart", 200,0,18,200,0, 416);
+    auto distXCol   = new TH2I("dpc", "d vs nCol", 400,0,18,200,0,2000);
+    auto colXPart   = new TH2I("cpp", "nCol vs nPart", 208,0,416,200,0,2000);
+
+    for (Long64_t i = 0; i < tree->GetEntries(); i++) {
+        tree->GetEntry(i);
+        partXEvent -> Fill(data.nPart);
+        colXEvent  -> Fill(data.nCol);
+        distXEvent -> Fill(data.dist);
+        distXPart  -> Fill(data.dist, data.nPart);
+        distXCol   -> Fill(data.dist, data.nCol);
+        colXPart   -> Fill(data.nPart, data.nCol);
     }
 
     // Draw TH2 functions
