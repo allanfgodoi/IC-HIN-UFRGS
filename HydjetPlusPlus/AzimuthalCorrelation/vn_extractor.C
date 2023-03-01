@@ -1,42 +1,14 @@
-//#include<cstdio>
-//#include<cstdlib>
-//#include<iostream>
+void vn_extractor(){
 
-//#include "TROOT.h"
-//#include "TTree.h"
-//#include "TFile.h"
-//#include "TFile.h"
-//#include "TTree.h"
-//#include "TVector3.h"
-//#include "TH1.h"
-//#include "TH2.h"
-//#include "TCanvas.h"
+  TFile * f = TFile::Open("corrfunc1D_cent_0_5.root");
 
-//#include <cmath>
-//#include "TF1.h"
-//#include "TH1D.h"
-
-//void vn_extractor(const char* filename)
-void vn_extractor(const char* signal_dphi_projection){
-
-  TFile file(filename, "signal_dphi_projection.root");
-
-  TH1D *signal_dphi_projection = (TH1D*) file.Get("signal_dphi_projection.root");
-
+  TH1D* h = (TH1D*) f->Get("signal_dphi_projection_0");
 
   // Cria a função de fit
 
-  TF1 *fit = new TF1("fit", "[0]*cos(x*[1]+[2])+[3]*cos(2*x*[4]+[5])+[6]", 0, 5);
+  TF1 *fit = new TF1("fit", "[0]*(1 + 2*[1]*cos(x)+2*[2]*cos(2*x) + 2*[3]*cos(3*x))", -1.4, 4.6);
 
-  //fit->SetParNames("V_{1}", "f_{1}", "phi_{1}", "V_{2}", "f_{2}", "phi_{2}", "bkg");
-
-  fit->SetParameters(1, 1, 1, 0.5, 2, 0.5, 0);
-
-
-  // Faz o fit no histograma do dphi_signal
-
-  signal_dphi_projection->Fit(fit, "R");
-
+  fit->SetParameters(60, 0.1, 0.1, 0.1);
 
   // Cria um canvas para desenhar o histograma e o fit
 
@@ -44,27 +16,20 @@ void vn_extractor(const char* signal_dphi_projection){
 
   c->cd();
 
+  // Desenha o histograma no canvas
 
-  // Desenha o histograma e o fit no canvas
+  h->Draw("p*Error");
 
-  signal_dphi_projection->Draw("hist");
+  // Faz o fit no histograma do dphi_signal
+
+  h->Fit(fit, "R");
+
+  // Desenha o fit no canvas
 
   fit->Draw("same");
 
+  // Salva o canvas como um pdf
 
-  // Salva o canvas como um arquivo de imagem
-
-  c->SaveAs("FourierFit.png");
-
-}
-
-
-int main(int argc, char *argv[])
-{
-
-  vn_extractor("signal_dphi_projection.root");
-
-  return 0;
+  c->SaveAs("FourierFit.pdf");
 
 }
-
