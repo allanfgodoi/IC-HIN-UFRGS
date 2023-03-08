@@ -10,6 +10,12 @@ void vn_extractor(){
 
   fit->SetParameters(60, 0.1, 0.1, 0.1);
 
+  fit->SetParLimits(1, 0.000001, 10);
+
+  fit->SetParLimits(2, 0.000001, 10);
+
+  fit->SetParLimits(3, 0.000001, 10);
+
   // Cria um canvas para desenhar o histograma e o fit
 
   TCanvas *c = new TCanvas("c", "c", 800, 600);
