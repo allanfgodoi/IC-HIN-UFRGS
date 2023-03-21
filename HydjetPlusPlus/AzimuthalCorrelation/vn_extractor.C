@@ -1,6 +1,6 @@
 void vn_extractor(){
 
-  TFile * f = TFile::Open("corrfunc1D_cent_0_5.root");
+  TFile * f = TFile::Open("/home/pedrolunardi/IC/collaboration/HydjetPlusPlus/AzimuthalCorrelation/root_files/corrfunc1D_cent_10_30.root");
 
   TH1D* h = (TH1D*) f->Get("signal_dphi_projection_0");
 
@@ -28,7 +28,13 @@ void vn_extractor(){
 
   // Faz o fit no histograma do dphi_signal
 
-  h->Fit(fit, "R");
+  ROOT::Math::MinimizerOptions::SetDefaultMinimizer("Minuit2");
+
+  h->Fit(fit, "R Q");
+
+  h->Fit(fit, "R Q");
+
+  h->Fit(fit, "R M");
 
   // Desenha o fit no canvas
 
@@ -36,6 +42,8 @@ void vn_extractor(){
 
   // Salva o canvas como um pdf
 
-  c->SaveAs("FourierFit.pdf");
+  c->Draw("SURF1");
+  c->SetTitle("10 - 30 %");
+  c->SaveAs("FourierFit_10_30.pdf");
 
 }
