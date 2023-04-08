@@ -125,11 +125,11 @@ tc_PVpos.Print("hist_3D_PVposition.pdf");
 
 auto d_select = d.Define("DPt_true","func_select_signal(DPt,DGen)") //pT
                  .Define("DPt_fake","func_select_fake(DPt,DGen)")  //pT
-		 .Define("DRapidity_true","func_select_signal(DRapidity,DGen)") //Rapidity
-		 .Define("DRapidity_fake","func_select_fake(DRapidity,DGen)") //Rapidity
-		 .Define("DPhi_true","func_select_signal(DPhi,DGen)") //Phi
-	         .Define("DPhi_fake","func_select_fake(DPhi,DGen)") //Phi		 
-		 .Define("DMass_true","func_select_signal(DMass,DGen)") //Mass
+		         .Define("DRapidity_true","func_select_signal(DRapidity,DGen)") //Rapidity
+		         .Define("DRapidity_fake","func_select_fake(DRapidity,DGen)") //Rapidity
+		         .Define("DPhi_true","func_select_signal(DPhi,DGen)") //Phi
+	             .Define("DPhi_fake","func_select_fake(DPhi,DGen)") //Phi		 
+		         .Define("DMass_true","func_select_signal(DMass,DGen)") //Mass
                  .Define("DMass_fake","func_select_fake(DMass,DGen)") //Mass
                  .Define("D3DDecayLength_true","func_select_signal(D3DDecayLength,DGen)") //Decay Length
                  .Define("D3DDecayLength_fake","func_select_fake(D3DDecayLength,DGen)") //Decay Length
@@ -148,28 +148,49 @@ auto d_select = d.Define("DPt_true","func_select_signal(DPt,DGen)") //pT
                  .Define("DzDCASignificanceDaugther1_true","func_select_signal(DzDCASignificanceDaugther1,DGen)") // 1st Daughter Significance of the Impact Parameter in Z Axis
                  .Define("DzDCASignificanceDaugther1_fake","func_select_fake(DzDCASignificanceDaugther1,DGen)") // 1st Daughter Significance of the Impact Parameter in Z Axis
                  .Define("DxyDCASignificanceDaugther1_true","func_select_signal(DxyDCASignificanceDaugther1,DGen)") // 1st Daughter Significance of the Impact Parameter in XY Plane
-                 .Define("DxyDCASignificanceDaugther1_fake","func_select_fake(DxyDCASignificanceDaugther1,DGen)"); // 1st Daughter Significance of the Impact Parameter in XY Plane
+                 .Define("DxyDCASignificanceDaugther1_fake","func_select_fake(DxyDCASignificanceDaugther1,DGen)") // 1st Daughter Significance of the Impact Parameter in XY Plane
+                 .Define("D2DDecayLength_true","func_select_signal(D2DDecayLength,DGen)")
+                 .Define("D2DDecayLength_fake","func_select_fake(D2DDecayLength,DGen)") 
+                 .Define("DDca_true", "func_select_signal(DDca,DGen)") // 
+                 .Define("DDca_fake", "func_select_fake(DDca,DGen)") //  
+                 .Define("D3DPointingAngle_true", "func_select_signal(D3DPointingAngle,DGen)") // 3D Projection of Pointing Angle
+                 .Define("D3DPointingAngle_fake", "func_select_fake(D3DPointingAngle,DGen)") // 3D Projection of Pointing Angle
+                 .Define("DTtrk2Pt_true", "func_select_signal(DTtrk1Pt,DGen)") // 2nd Daughter Transverse Momentum
+                 .Define("DTtrk2Pt_fake", "func_select_fake(DTtrk1Pt,DGen)") // 2nd Daughter Transverse Momentum 
+                 .Define("DTrk2Pt_true", "func_select_signal(DTrk2Pt,DGen)") // 2nd Daughter Transverse Momentum Uncertainty
+                 .Define("DTrk2Pt_fake", "func_select_fake(DTrk2Pt,DGen)") // 2nd Daughter Transverse Momentum Uncertainty
+                 .Define("DTrk2PtErr_true", "func_select_signal(DTrk2PtErr,DGen)") // 2nd Daughter Pseudo-rapidity
+                 .Define("DTrk2PtErr_fake", "func_select_fake(DTrk2PtErr,DGen)") // 1st Daughter Pseudo-rapidity
+                 .Define("DTrk2Eta_true", "func_select_signal(DTrk2Eta,DGen)") // 1st Daughter Transverse Momentum Uncertainty
+                 .Define("DTrk2Eta_fake", "func_select_fake(DTrk2Eta,DGen)") // 1st Daughter Transverse Momentum Uncertainty
+                 .Define("DTrk2Chi2n_true", "func_select_signal(DTrk2Chi2n,DGen)") // 2nd Daughter Normalized Chi2 of the Trajectory Fit
+                 .Define("DTrk2Chi2n_fake", "func_select_fake(DTrk2Chi2n,DGen)") // 2nd Daughter Normalized Chi2 of the Trajectory Fit
+                 .Define("DzDCASignificanceDaugther2_true", "func_select_signal(DzDCASignificanceDaugther2,DGen)") // 2nd Daughter Significance of the Impact Parameter in Z Axis
+                 .Define("DzDCASignificanceDaugther2_fake", "func_select_fake(DzDCASignificanceDaugther2,DGen)") // 2nd Daughter Significance of the Impact Parameter in Z Axis
+                 .Define("DxyDCASignificanceDaugther2_true", "func_select_signal(DxyDCASignificanceDaugther2,DGen)") // 2nd Daughter Significance of the Impact Parameter in XY Plane
+                 .Define("DxyDCASignificanceDaugther2_fake", "func_select_fake(DxyDCASignificanceDaugther2,DGen)"); // 2nd Daughter Significance of the Impact Parameter in XY Plane
 
-const unsigned int N_variables = 13; //Sequence: DPt, DRapidity, DPhi, DMass, D3DDecayLength, DVtxProb, D2DPointingAngle, DTtrk1Pt, DTrk1PtErr, DTrk1Eta, DTrk1Chi2n, DzDCASignificanceDaugther1, DxyDCASignificanceDaugther1, ...
 
-std::string variable_name_all[N_variables]={"DPt","DRapidity","DPhi","DMass","D3DDecayLength","DVtxProb","D2DPointingAngle","DTtrk1Pt","DTrk1PtErr","DTrk1Eta","DTrk1Chi2n","DzDCASignificanceDaugther1","DxyDCASignificanceDaugther1"}; //variables' name
-std::string variable_name_true[N_variables]={"DPt_true","DRapidity_true","DPhi_true","DMass_true","D3DDecayLength_true","DVtxProb_true","D2DPointingAngle_true","DTtrk1Pt_true","DTrk1PtErr_true","DTrk1Eta_true","DTrk1Chi2n_true","DzDCASignificanceDaugther1_true","DxyDCASignificanceDaugther1_true"};
-std::string variable_name_fake[N_variables]={"DPt_fake","DRapidity_fake","DPhi_fake","DMass_fake","D3DDecayLength_fake","DVtxProb_fake","D2DPointingAngle_fake","DTtrk1Pt_fake","DTrk1PtErr_fake","DTrk1Eta_fake","DTrk1Chi2n_fake","DzDCASignificanceDaugther1_fake","DxyDCASignificanceDaugther1_fake"};
-TString hist_name_all[N_variables]={"DPt_all","DRapidity_all","DPhi_all","DMass_all","D3DDecayLength_all","DVtxProb_all","D2DPointingAngle_all","DTtrk1Pt_all","DTrk1PtErr_all","DTrk1Eta_all","DTrk1Chi2n_all","DzDCASignificanceDaugther1_all","DxyDCASignificanceDaugther1_all"}; //histograms' name
-TString hist_name_true[N_variables]={"DPt_true","DRapidity_true","DPhi_true","DMass_true","D3DDecayLength_true","DVtxProb_true","D2DPointingAngle_true","DTtrk1Pt_true","DTrk1PtErr_true","DTrk1Eta_true","DTrk1Chi2n_true","DzDCASignificanceDaugther1_true","DxyDCASignificanceDaugther1_true"};
-TString hist_name_fake[N_variables]={"DPt_fake","DRapidity_fake","DPhi_fake","DMass_fake","D3DDecayLength_fake","DVtxProb_fake","D2DPointingAngle_fake","DTtrk1Pt_fake","DTrk1PtErr_fake","DTrk1Eta_fake","DTrk1Chi2n_fake","DzDCASignificanceDaugther1_fake","DxyDCASignificanceDaugther1_fake"};
-TString hist_title_all[N_variables]={"p_{T} of D^{0} Mesons Candidates","Rapidity (y) of D^{0} Mesons","Azimuthal Angle (#phi) of D^{0} Mesons","Invariant Mass (M_{inv}) of D^{0} Mesons","Distance from Primary Vertex to Secondary Vertex of D^{0} Mesons","Chi2 Probability of the Secondary Vertex of D^{0} Mesons","Superficial Angle Between p of D^{0} Mesons and the Segment PVSV","1st Daughters of D^{0} Mesons Transverse Momentum","1st Daughters of D^{0} Mesons Transverse Momentum Uncertainty","1st Daughters of D^{0} Mesons Pseudo-rapidity","1st Daughters of D^{0} Mesons Normalized Chi2 of the Trajectory Fit","1st Daughters of D^{0} Mesons Significance of the Impact Parameter in Z Axis","1st Daughters of D^{0} Mesons Significance of the Impact Parameter in XY Plane"}; //histograms' title
-TString hist_title_true[N_variables]={"p_{T} of true D^{0} Mesons","Rapidity (y) of true D^{0} Mesons","Azimuthal Angle (#phi) of true D^{0} Mesons","Invariant Mass (M_{inv}) of true D^{0} Mesons","Distance from Primary Vertex to Secondary Vertex of true D^{0} Mesons","Chi2 Probability of the Secondary Vertex of true D^{0} Mesons","Superficial Angle Between p of the true D^{0} Mesons and the Segment PVSV","1st Daughters of true D^{0} Mesons Transverse Momentum","1st Daughters of true D^{0} Mesons Transverse Momentum Uncertainty","1st Daughters of true D^{0} Mesons Pseudo-rapidity","1st Daughters of true D^{0} Mesons Normalized Chi2 of the Trajectory Fit","1st Daughters of true D^{0} Mesons Significance of the Impact Parameter in Z Axis","1st Daughters of true D^{0} Mesons Significance of the Impact Parameter in XY Plane"};
-TString hist_title_fake[N_variables]={"p_{T} of fake D^{0} Mesons (background)","Rapidity (y) of fake D^{0} Mesons (background)","Azimuthal Angle (#phi) of fake D^{0} Mesons","Invariant Mass (M_{inv}) of fake D^{0} Mesons (background)","Distance from Primary Vertex to Secondary Vertex of fake D^{0} Mesons (background)","Chi2 Probability of the Secondary Vertex of fake D^{0} Mesons (background)"," Superficial Angle Between p of the fake D^{0} Mesons (background) and the Segment PVSV","1st Daughters of fake D^{0} Mesons (background) Transverse Momentum","1st Daughters of fake D^{0} Mesons (background) Transverse Momentum Uncertainty","1st Daughters of fake D^{0} Mesons (background) Pseudo-rapidity","1st Daughters of fake D^{0} Mesons (background) Normalized Chi2 of the Trajectory Fit","1st Daughters of fake D^{0} Mesons (background) Significance of the Impact Parameter in Z Axis","1st Daughters of fake D^{0} Mesons (background) Significance of the Impact Parameter in XY Plane"};
-const float hist_Nbins[N_variables]= {20, 50, 25, 50, 100, 20, 20, 40, 100, 100, 100, 70, 100}; //Number of bins for All, True, and Fake D0 candidates histograms
-const float hist_Xrange_min[N_variables]= {3, -2.5, -4.6, 1.60, 0, 0, 0, 0.5, 0, -1.8, 0, -540, -100}; //Minimum value of the x-axis range for All, True, and Fake D0 candidates histograms
-const float hist_Xrange_max[N_variables]= {5, 2.5, 4.6, 2.10, 20, 1, 1, 4, 0.2, 1.8, 10, 125, 100}; //Maximum value of the x-axis range for All, True, and Fake D0 candidates histograms
-TString hist_XaxisTitle[N_variables]={"p_{T} (GeV/c)","Rapidity","#phi","M_{inv} (GeV/c^{2})","Decay Length (#mum)","Probability","#alpha (rad)","p_{T} (GeV/c)","p_{T} Uncertainty (GeV/c)","Pseudo-rapidity","Probability","Significance","Significance"}; //Title of x-axis for All, True, and Fake D0 candidates histograms
-const float hist_Yrange_min[N_variables]={0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9}; //Minimum of the y-axis range for All, True, and Fake D0 candidates histograms
-const float hist_Yrange_max[N_variables]={10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000}; //Maximum of the y-axis range for All, True, and Fake D0 candidates histograms
-const float histNorm_Yrange_min[N_variables]={0.0,0.0,0.0,0.0,0.00001,0.0,0.0,0.0,0.00001,0.0,0.00001,0.00001,0.00001}; //Minimum of the y-axis range for All, True, and Fake D0 candidates Normalized histograms
-const float histNorm_Yrange_max[N_variables]={0.4,0.1,0.1,0.25,0.4,0.3,0.6,0.1,0.2,0.2,0.06,0.4,0.4}; //Maximum of the y-axis range for All, True, and Fake D0 candidates Normalized histograms
-TString fig_name[N_variables]={"hist_DPt.pdf","hist_DRapidity.pdf","hist_DPhi.pdf","hist_DMass.pdf","hist_D3DDecayLength.pdf","hist_DVtxProb.pdf","hist_D2DPointingAngle.pdf","hist_DTtrk1Pt.pdf","hist_DTrk1PtErr.pdf","hist_DTrk1Eta.pdf","hist_DTrk1Chi2n.pdf","hist_DzDCASignificanceDaugther1.pdf","hist_DxyDCASignificanceDaugther1.pdf"}; //Name of the figure file with the histograms saved
+const unsigned int N_variables = 22; //Sequence: DPt, DRapidity, DPhi, DMass, D3DDecayLength, DVtxProb, D2DPointingAngle, DTtrk1Pt, DTrk1PtErr, DTrk1Eta, DTrk1Chi2n, DzDCASignificanceDaugther1, DxyDCASignificanceDaugther1,D2DDecayLength, DDca, D3DPointingAngle, DTrk2Pt, DTrk2PtErr, DTrk2Eta, DTrk2Chi2n, DzDCASignificanceDaugther2, DxyDCASignificanceDaugther2 ...
+
+std::string variable_name_all[N_variables]={"DPt","DRapidity","DPhi","DMass","D3DDecayLength","DVtxProb","D2DPointingAngle","DTtrk1Pt","DTrk1PtErr","DTrk1Eta","DTrk1Chi2n","DzDCASignificanceDaugther1","DxyDCASignificanceDaugther1","D2DDecayLength", "DDca", "D3DPointingAngle", "DTrk2Pt", "DTrk2PtErr", "DTrk2Eta", "DTrk2Chi2n", "DzDCASignificanceDaugther2", "DxyDCASignificanceDaugther2"}; //variables' name
+std::string variable_name_true[N_variables]={"DPt_true","DRapidity_true","DPhi_true","DMass_true","D3DDecayLength_true","DVtxProb_true","D2DPointingAngle_true","DTtrk1Pt_true","DTrk1PtErr_true","DTrk1Eta_true","DTrk1Chi2n_true","DzDCASignificanceDaugther1_true","DxyDCASignificanceDaugther1_true", "D2DDecayLength_true", "DDca_true", "D3DPointingAngle_true", "DTrk2Pt_true", "DTrk2PtErr_true", "DTrk2Eta_true", "DTrk2Chi2n_true", "DzDCASignificanceDaugther2_true", "DxyDCASignificanceDaugther2_true" };
+std::string variable_name_fake[N_variables]={"DPt_fake","DRapidity_fake","DPhi_fake","DMass_fake","D3DDecayLength_fake","DVtxProb_fake","D2DPointingAngle_fake","DTtrk1Pt_fake","DTrk1PtErr_fake","DTrk1Eta_fake","DTrk1Chi2n_fake","DzDCASignificanceDaugther1_fake","DxyDCASignificanceDaugther1_fake", "D2DDecayLength_fake", "DDca_fake", "D3DPointingAngle_fake", "DTrk2Pt_fake", "DTrk2PtErr_fake", "DTrk2Eta_fake", "DTrk2Chi2n_fake", "DzDCASignificanceDaugther2_fake", "DxyDCASignificanceDaugther2_fake" };
+TString hist_name_all[N_variables]={"DPt_all","DRapidity_all","DPhi_all","DMass_all","D3DDecayLength_all","DVtxProb_all","D2DPointingAngle_all","DTtrk1Pt_all","DTrk1PtErr_all","DTrk1Eta_all","DTrk1Chi2n_all","DzDCASignificanceDaugther1_all","DxyDCASignificanceDaugther1_all", "D2DDecayLength_all", "DDca_all", "D3DPointingAngle_all", "DTrk2Pt", "DTrk2PtErr", "DTrk2Eta", "DTrk2Chi2n", "DzDCASignificanceDaugther2", "DxyDCASignificanceDaugther2" }; //histograms' name
+TString hist_name_true[N_variables]={"DPt_true","DRapidity_true","DPhi_true","DMass_true","D3DDecayLength_true","DVtxProb_true","D2DPointingAngle_true","DTtrk1Pt_true","DTrk1PtErr_true","DTrk1Eta_true","DTrk1Chi2n_true","DzDCASignificanceDaugther1_true","DxyDCASignificanceDaugther1_true","D2DDecayLength_true", "DDca_true", "D3DPointingAngle_true", "DTrk2Pt_true", "DTrk2PtErr_true", "DTrk2Eta_true", "DTrk2Chi2n_true", "DzDCASignificanceDaugther2_true", "DxyDCASignificanceDaugther2_true"  };
+TString hist_name_fake[N_variables]={"DPt_fake","DRapidity_fake","DPhi_fake","DMass_fake","D3DDecayLength_fake","DVtxProb_fake","D2DPointingAngle_fake","DTtrk1Pt_fake","DTrk1PtErr_fake","DTrk1Eta_fake","DTrk1Chi2n_fake","DzDCASignificanceDaugther1_fake","DxyDCASignificanceDaugther1_fake","D2DDecayLength_fake", "DDca_fake", "D3DPointingAngle_fake", "DTrk2Pt_fake", "DTrk2PtErr_fake", "DTrk2Eta_fake", "DTrk2Chi2n_fake", "DzDCASignificanceDaugther2_fake", "DxyDCASignificanceDaugther2_fake" };
+TString hist_title_all[N_variables]={"p_{T} of D^{0} Mesons Candidates","Rapidity (y) of D^{0} Mesons","Azimuthal Angle (#phi) of D^{0} Mesons","Invariant Mass (M_{inv}) of D^{0} Mesons","Distance from Primary Vertex to Secondary Vertex of D^{0} Mesons","Chi2 Probability of the Secondary Vertex of D^{0} Mesons","Superficial Angle Between p of D^{0} Mesons and the Segment PVSV","1st Daughters of D^{0} Mesons Transverse Momentum","1st Daughters of D^{0} Mesons Transverse Momentum Uncertainty","1st Daughters of D^{0} Mesons Pseudo-rapidity","1st Daughters of D^{0} Mesons Normalized Chi2 of the Trajectory Fit","1st Daughters of D^{0} Mesons Significance of the Impact Parameter in Z Axis","1st Daughters of D^{0} Mesons Significance of the Impact Parameter in XY Plane","2D projection in xy-plane of the distance between PV and SV", "Distance of closest approach", " Angle between the D0 momentum and the line connecting the PV and SV", "2nd Daughters of D^{0} Mesons Transverse Momentum", "2nd Daughters of D^{0} Mesons Transverse Momentum Uncertainty", "2nd Daughters of D^{0} Mesons Pseudo-rapidity", "2nd Daughter of D^{0} Mesons Normalized Chi2 of the Trajectory Fit", "2nd Daughter of D^{0} Mesons Significance of the Impact Parameter in Z Axis", "2nd Daughter of D^{0} Mesons Significance of the Impact Parameter in XY Plane" }; //histograms' title
+TString hist_title_true[N_variables]={"p_{T} of true D^{0} Mesons","Rapidity (y) of true D^{0} Mesons","Azimuthal Angle (#phi) of true D^{0} Mesons","Invariant Mass (M_{inv}) of true D^{0} Mesons","Distance from Primary Vertex to Secondary Vertex of true D^{0} Mesons","Chi2 Probability of the Secondary Vertex of true D^{0} Mesons","Superficial Angle Between p of the true D^{0} Mesons and the Segment PVSV","1st Daughters of true D^{0} Mesons Transverse Momentum","1st Daughters of true D^{0} Mesons Transverse Momentum Uncertainty","1st Daughters of true D^{0} Mesons Pseudo-rapidity","1st Daughters of true D^{0} Mesons Normalized Chi2 of the Trajectory Fit","1st Daughters of true D^{0} Mesons Significance of the Impact Parameter in Z Axis","1st Daughters of true D^{0} Mesons Significance of the Impact Parameter in XY Plane","2D projection in xy-plane of the true distance between PV and SV", "True Distance of closest approach", "angle from Primary Vertex to Secondary Vertex of true D^{0} Mesons", "2nd Daughters of true D^{0} Mesons Transverse Momentum", "2nd Daughters of true D^{0} Mesons Transverse Momentum Uncertainty", "2nd Daughters of true D^{0} Mesons Pseudo-rapidity", "2nd Daughter of true D^{0} Mesons Normalized Chi2 of the Trajectory Fit", "2nd Daughter of true D^{0} Mesons Significance of the Impact Parameter in Z Axis", "2nd Daughters of true D^{0} Mesons Significance of the Impact Parameter in XY Plane" };
+TString hist_title_fake[N_variables]={"p_{T} of fake D^{0} Mesons (background)","Rapidity (y) of fake D^{0} Mesons (background)","Azimuthal Angle (#phi) of fake D^{0} Mesons","Invariant Mass (M_{inv}) of fake D^{0} Mesons (background)","Distance from Primary Vertex to Secondary Vertex of fake D^{0} Mesons (background)","Chi2 Probability of the Secondary Vertex of fake D^{0} Mesons (background)"," Superficial Angle Between p of the fake D^{0} Mesons (background) and the Segment PVSV","1st Daughters of fake D^{0} Mesons (background) Transverse Momentum","1st Daughter of fake D^{0} Mesons (background) Transverse Momentum Uncertainty","1st Daughter of fake D^{0} Mesons (background) Pseudo-rapidity","1st Daughters of fake D^{0} Mesons (background) Normalized Chi2 of the Trajectory Fit","1st Daughter of fake D^{0} Mesons (background) Significance of the Impact Parameter in Z Axis","1st Daughters of fake D^{0} Mesons (background) Significance of the Impact Parameter in XY Plane","Distance Between p of the fake D^{0} Mesons (background) and the Segment PVSV", "DDca_graf", "3D angle from Primary Vertex to Secondary Vertex of fake D^{0} Mesons (background)", "2nd Daughters of fake D^{0} Mesons (background) Transverse Momentum", "2nd Daughters of fake D^{0} Mesons (background) Transverse Momentum Uncertainty", "2nd Daughter of fake D^{0} Mesons (background) Pseudo-rapidity", "2nd Daughter of fake D^{0} Mesons (background) Normalized Chi2 of the Trajectory Fit", "2nd Daughter of fake D^{0} Mesons (background) Significance of the Impact Parameter in Z Axis", "2nd Daughters of fake D^{0} Mesons (background) Significance of the Impact Parameter in XY Plane" };
+const float hist_Nbins[N_variables]= {20, 50, 25, 50, 100, 20, 20, 40, 100, 100, 100, 70, 100, 50, 25, 25, 50, 100, 100, 100, 100, 100 }; //Number of bins for All, True, and Fake D0 candidates histograms
+const float hist_Xrange_min[N_variables]= {3, -2.5, -4.6, 1.60, 0, 0, 0, 0.5, 0, -1.8, 0, -540, -100, 0, 0 , 0, 0, 0, -2, 0, -100, -100}; //Minimum value of the x-axis range for All, True, and Fake D0 candidates histograms
+const float hist_Xrange_max[N_variables]= {5, 2.5, 4.6, 2.10, 20, 1, 1, 4, 0.2, 1.8, 10, 125, 100, 0.3, 0.06, 1, 3.5, 0.04, 2, 1 , 100, 100 }; //Maximum value of the x-axis range for All, True, and Fake D0 candidates histograms
+TString hist_XaxisTitle[N_variables]={"p_{T} (GeV/c)","Rapidity","#phi","M_{inv} (GeV/c^{2})","Decay Distance (#mum)","Probability","#alpha (rad)","p_{T} (GeV/c)","p_{T} Uncertainty (GeV/c)","Pseudo-rapidity","distance","Significance","Significance"," Length" "Distance","Distance","#alpha (rad)","p_{T} (GeV/c)","p_{T} Uncertainty (GeV/c)","Pseudo-rapidity","Probability","Significance","Significance"}; //Title of x-axis for All, True, and Fake D0 candidates histograms
+const float hist_Yrange_min[N_variables]={0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9 }; //Minimum of the y-axis range for All, True, and Fake D0 candidates histograms
+const float hist_Yrange_max[N_variables]={10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000, 10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000,10000000}; //Maximum of the y-axis range for All, True, and Fake D0 candidates histograms
+const float histNorm_Yrange_min[N_variables]={0.0,0.0,0.0,0.0,0.00001,0.0,0.0,0.0,0.00001,0.0,0.00001,0.00001,0.00001,0.001,0.001,0.0001,0.00001,0.0,0.0001,0.01,0.01 }; //Minimum of the y-axis range for All, True, and Fake D0 candidates Normalized histograms
+const float histNorm_Yrange_max[N_variables]={0.4,0.1,0.1,0.25,0.4,0.3,0.6,0.1,0.2,0.2,0.06,0.4,0.4,1,0.5,0.15,0.1,0.2,0.15,0.3,0.3 }; //Maximum of the y-axis range for All, True, and Fake D0 candidates Normalized histograms
+TString fig_name[N_variables]={"hist_DPt.pdf","hist_DRapidity.pdf","hist_DPhi.pdf","hist_DMass.pdf","hist_D3DDecayLength.pdf","hist_DVtxProb.pdf","hist_D2DPointingAngle.pdf","hist_DTtrk1Pt.pdf","hist_DTrk1PtErr.pdf","hist_DTrk1Eta.pdf","hist_DTrk1Chi2n.pdf","hist_DzDCASignificanceDaugther1.pdf","hist_DxyDCASignificanceDaugther1.pdf", "D2DDecayLength.pdf", "DDca.pdf", "D3DPointingAngle.pdf", "DTrk2Pt.pdf", "DTrk2PtErr.pdf", "DTrk2Eta.pdf", "DTrk2Chi2n.pdf", "DzDCASignificanceDaugther2.pdf", "DxyDCASignificanceDaugther2.pdf" }; //Name of the figure file with the histograms saved
 auto yaxis_label2 = "Total Number of Particles / Bin"; //common y-axis label
 auto yaxis_label3 = "Normalized Distributions";
 
@@ -208,7 +229,7 @@ for (unsigned int i=0; i<N_variables; i++){
    // 2) Normalized in y-axis by its integral (better to visualize the shape of the distributions)
    
    //First, case "1)"...
-   tc.cd(1);
+    tc.cd(1);
    if (i == 4 || i == 10) {
       gPad->SetLogx(); //use log scale in x-axis for wanted varibles
    } else {
@@ -268,14 +289,13 @@ for (unsigned int i=0; i<N_variables; i++){
    } else {
       gPad->SetLogx(0);
    }
-   if (i == 4 || i == 8 || i == 10 || i == 11 || i == 12) {
-      gPad->SetLogy(); //use log scale in y-axis for wanted varibles
+   if (i == 4 || i == 8 || i == 10 || i == 11 || i == 12 || i == 13 || i == 14 || i == 19 || i == 20 || i == 21 || i == 22 ) {
+      gPad->SetLogy(); //use log scale in y-axis for wanted variables
    } else {
       gPad->SetLogy(0);
    }
    tc.Print(fig_name[i]); //save Canvas in a PDF file...we can change format if needed PNG, JPG, ..etc...
 }
-
 
 //Just to check the branches in the input trees
 //Open the root file and list the columns of the tree
@@ -292,4 +312,6 @@ f1.Close();
 
 
 }
+
+
 
