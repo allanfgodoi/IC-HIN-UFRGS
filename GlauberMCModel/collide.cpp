@@ -5,10 +5,11 @@
 #include <TTree.h>
 #include <TFile.h>
 #include <thread>
+#include <mutex>
 
 using namespace std;
 
-// Simulation variables
+// Const values used in the simulations
 const double
         pi              = TMath::Pi(),
         rho0            = 3,
@@ -17,18 +18,16 @@ const double
         secIn           = 65,
         radiusSquared   = (secIn / 10) / pi;
 
-const ::int64_t nThreads = std::thread::hardware_concurrency();
 mutex mtx;
 
 // Structures used to generate and save data.
 struct Nucleon {double x, y;};
 struct Data {int nCol, nPart; double dist;};
 
-void collide (const string& filename = "./data.root", int nucleons = 208, int simulations = 1'000'000){
+// Main code
+void collide (const string& filename = "./data.root", int nucleons = 208,
+int simulations = 1'000'000, const ::int64_t nThreads =std::thread::hardware_concurrency()){
 
-    // Configure multithreading
-    ROOT::EnableImplicitMT();
-    ROOT::EnableThreadSafety();
 
     // Configure the program to export in a Root file
     Data data{};
@@ -36,11 +35,9 @@ void collide (const string& filename = "./data.root", int nucleons = 208, int si
     auto *save = new TTree("save", "Simulation");
     save->Branch("Collisions", &data, "col/I:part/I:dist/D");
 
-    vector<thread> threads;
-
     // Set up the functions to be used in the generators
     auto *distF = new TF1("distF", "x*2*pi", 0, 18);
-    auto *posF = new TF1("posF", "(x*[0]/(1+exp((x-[1])/[2])))/309.310706654", 0, 14);
+    auto *posF = new TF1("posF", "(x*[0]/(1+exp((x-[1])/[2])))/309.310706654",0, 14);
     posF->SetParameters(rho0, r0, a);
 
     // Config RNG
@@ -49,6 +46,10 @@ void collide (const string& filename = "./data.root", int nucleons = 208, int si
     TRandom random;
     random.SetSeed();
 
+    // Configure multithreading
+    ROOT::EnableImplicitMT();
+    ROOT::EnableThreadSafety();
+    vector<thread> threads;
     for (int k = 0; k < nThreads; k++) {
         threads.emplace_back([&, k] {
 
@@ -90,8 +91,10 @@ void collide (const string& filename = "./data.root", int nucleons = 208, int si
                             }
                         }
                     }
-                    if (passTrough) { partT++; }
+                    if (passTrough) { partT++;}
                 }
+
+                // Write the data to the root file
                 if (partT > 0) {
                     mtx.lock();
                     data.nCol = colT;
@@ -107,8 +110,4 @@ void collide (const string& filename = "./data.root", int nucleons = 208, int si
     for (auto &t : threads) t.join();
     save->Write();
     file->Close();
-}
-
-int main () {
-    collide();
 }

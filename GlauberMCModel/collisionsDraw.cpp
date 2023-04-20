@@ -4,7 +4,7 @@
 #include <TGraph.h>
 #include <TRandom.h>
 #include <TLegend.h>
-#include <TRandom3.h>
+#include <TSystem.h>
 #include <TFile.h>
 #include <TTree.h>
 
@@ -14,7 +14,6 @@ using namespace std;
 double calcProb(double *x, double *par){
     return (x[0] * par[0] / (1 + exp((x[0] - par[1])/par[2])))/309.3107066;
 }
-
 double calcD(double *x, double *par){
     return x[0]*2*TMath::Pi();
 }
@@ -28,6 +27,7 @@ void config(TGraph graph, Color_t color, const char* name){
     graph.DrawClone("P");
 }
 
+// Const values used in the simulations
 const double
     pi              = TMath::Pi(),
     p0              = 3,
@@ -36,7 +36,9 @@ const double
     secIn           = 65,
     radiusSquared   = (secIn / 10) / pi;
 
-void collisionsDraw (int nucleons = 208, int sim = 20){
+// Main code
+void collisionsDraw (int nucleons = 208, int sim = 20, const string& location = "./sim"){
+    gSystem->mkdir(location.c_str());
 
     // Config RNG
     auto *random = new TRandom();
@@ -72,13 +74,13 @@ void collisionsDraw (int nucleons = 208, int sim = 20){
         pos->SetParameters(p0, r0, a);
 
         // Generate collision data
-        double d = dist->GetRandom();
+        double d = dist->GetRandom(random);
         for (int i = 0; i < nucleons; i++) {
-            double position = pos->GetRandom();
+            double position = pos->GetRandom(random);
             double var = random->Rndm() * pi * 2;
             xFirst[i] = position * sin(var);
             yFirst[i] = position * cos(var);
-            position = pos->GetRandom();
+            position = pos->GetRandom(random);
             var = random->Rndm() * pi * 2;
             xSecond[i] = position * sin(var) + d;
             ySecond[i] = position * cos(var);
@@ -91,17 +93,17 @@ void collisionsDraw (int nucleons = 208, int sim = 20){
                 if (pow(xFirst[i] - xSecond[j], 2) +
                     pow(yFirst[i] - ySecond[j], 2) < (radiusSquared)) {
                     nCol++;
+                    passTrough = true;
                     if (nucleonPartTemp.insert(j).second) {
                         xSecondPartTemp.emplace_back(xSecond[j]);
                         ySecondPartTemp.emplace_back(ySecond[j]);
                     }
-                    passTrough = true;
                 }
             }
             if (passTrough){
                 xFirstPartTemp.emplace_back(xFirst[i]);
                 yFirstPartTemp.emplace_back(yFirst[i]);
-            };
+            }
         }
 
         // Convert from list to array for usage in the TGraph module
@@ -122,7 +124,7 @@ void collisionsDraw (int nucleons = 208, int sim = 20){
         config(first, kAzure + 1, "nas");
         config(second, kOrange + 7, "nbs");
         config(firstPart, kAzure + 2, "nap");
-        config(secondPart, kRed + 2, "nbp");
+        config(secondPart, kRed, "nbp");
 
         // Create legend
         auto leg = new TLegend(.1, .9, .4, .7);
@@ -134,7 +136,7 @@ void collisionsDraw (int nucleons = 208, int sim = 20){
         leg->DrawClone("Same");
 
         // Export as image the canvas
-        string tName = "./Sim" + to_string(p) + ".pdf";
+        string tName = location + "/Sim" + to_string(p) + ".png";
         canvas.SaveAs(tName.c_str());
     }
 }
