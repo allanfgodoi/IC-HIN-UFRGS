@@ -10,3 +10,4 @@ cmake-build-debug*
 GlauberMCModel/data.txt*
 GlauberMCModel/graphs
 GlauberMCModel/sim
+.vscode/settings.json
