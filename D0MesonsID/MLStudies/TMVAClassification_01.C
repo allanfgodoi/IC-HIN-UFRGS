@@ -179,6 +179,9 @@ int TMVAClassification_01( TString myMethodList = "" )
    // Create a ROOT output file where TMVA will store ntuples, histograms, etc.
    TString outfileName( "TMVA_01.root" );
    TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
+
+   // Set the variables plots binning to 300
+   (TMVA::gConfig().GetVariablePlotting()).fNbinsMVAoutput = 300;
  
    // Create the factory object. Later you can choose the methods
    // whose performance you'd like to investigate. The factory is
@@ -503,7 +506,7 @@ int TMVAClassification_01( TString myMethodList = "" )
  
    if (Use["BDT"])  // Adaptive Boost
       factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDT",
-                           "!H:!V:NTrees=1000:MinNodeSize=2.5%:MaxDepth=4:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20" );
+                           "!H:!V:NTrees=850:MinNodeSize=2.5%:MaxDepth=4:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20" );
  
    if (Use["BDTB"]) // Bagging
       factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTB",
