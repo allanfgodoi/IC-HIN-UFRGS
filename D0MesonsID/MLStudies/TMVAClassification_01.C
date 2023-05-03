@@ -181,7 +181,7 @@ int TMVAClassification_01( TString myMethodList = "" )
    TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
 
    // Set the variables plots binning to 300
-   (TMVA::gConfig().GetVariablePlotting()).fNbinsMVAoutput = 300;
+   (TMVA::gConfig().GetVariablePlotting()).fNbinsMVAoutput = 20;
  
    // Create the factory object. Later you can choose the methods
    // whose performance you'd like to investigate. The factory is
