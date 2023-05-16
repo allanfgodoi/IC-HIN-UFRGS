@@ -158,7 +158,7 @@ int TMVAClassification_01( TString myMethodList = "" )
    // Read training and test data
    // (it is also possible to use ASCII format as input -> see TMVA Users Guide)
    TFile *input(0);
-   TString fname = "/home/allanfgodoi/Desktop/tree_skim_MC_prompt.root";
+   TString fname = "/home/allanfgodoi/Desktop/tree_skim_MC_promptTrain.root";
    if (!gSystem->AccessPathName( fname )) {
       input = TFile::Open( fname ); // check if file in local directory exists
    }
@@ -179,6 +179,9 @@ int TMVAClassification_01( TString myMethodList = "" )
    // Create a ROOT output file where TMVA will store ntuples, histograms, etc.
    TString outfileName( "TMVA_01.root" );
    TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
+
+   // Set the variables plots binning to 300
+   (TMVA::gConfig().GetVariablePlotting()).fNbinsMVAoutput = 10;
  
    // Create the factory object. Later you can choose the methods
    // whose performance you'd like to investigate. The factory is
