@@ -136,8 +136,8 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     reader->AddVariable("DzDCASignificanceDaugther2", &DzDCASignificanceDaugther2);
 
     // Book the MVA methods
-    ///TString dir    = "/home/allanfgodoi/Desktop/";
-    TString dir    = "/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC_TCC/ReposGit/IC-HIN-UFRGS/D0MesonsID/MLStudies/";
+    TString dir    = "/home/allanfgodoi/Desktop/";
+    //TString dir    = "/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC_TCC/ReposGit/IC-HIN-UFRGS/D0MesonsID/MLStudies/";
     TString prefix = "TMVAClassification";
 
     // Book method(s)
@@ -151,16 +151,22 @@ void TMVAClassificationApplication( TString myMethodList = "" )
 
     // Book output histograms
     UInt_t nbin = 100;
-    TH1F *histBdt(0);
-    if (Use["BDT"])           histBdt     = new TH1F( "MVA_BDT",           "MVA_BDT",           nbin, -0.8, 0.8 );
+    TH1F *histBdt_all(0);
+    TH1F *histBdt_signal(0);
+    TH1F *histBdt_background(0);
+    if (Use["BDT"]) {
+        histBdt_all = new TH1F("MVA_BDT_all", "MVA_BDT_all", nbin, -0.8, 0.8 );
+        histBdt_signal = new TH1F("MVA_BDT_signal", "MVA_BDT_signal", nbin, -0.8, 0.8 );
+        histBdt_background = new TH1F("MVA_BDT_background", "MVA_BDT_background", nbin, -0.8, 0.8 );
+    }
 
     // Prepare input tree (this must be replaced by your data source)
     // in this example, there is a toy tree with signal and one with background events
     // we'll later on use only the "signal" events for the test in this example.
     //
     TFile *input(0);
-    //TString fname = "/home/allanfgodoi/Desktop/tree_skim_MC_promptTest.root";
-    TString fname = "/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC_TCC/TopicosDeEstudo/D0_Selection/D0_MC_SkimmedTrees/tree_skim_MC_prompt.root";
+    TString fname = "/home/allanfgodoi/Desktop/tree_skim_MC_promptTest.root";
+    //TString fname = "/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC_TCC/TopicosDeEstudo/D0_Selection/D0_MC_SkimmedTrees/tree_skim_MC_prompt.root";
     if (!gSystem->AccessPathName( fname ))
         input = TFile::Open( fname ); // check if file in local directory exists
     else
@@ -196,7 +202,9 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     std::vector<float> * vec_DxyDCASignificanceDaugther2 = 0;
     std::vector<float> * vec_DzDCASignificanceDaugther1 = 0;
     std::vector<float> * vec_DzDCASignificanceDaugther2 = 0;
-    //std::vector<float> * vec_DMass = 0;
+    std::vector<float> * vec_DMass = 0;
+    std::vector<float> * vec_DGen = 0;
+    
     theTree->SetBranchAddress("D3DDecayLength", &vec_D3DDecayLength);
     theTree->SetBranchAddress("D3DDecayLengthSignificance", &vec_D3DDecayLengthSignificance);
     theTree->SetBranchAddress("DTrk1Chi2n", &vec_DTrk1Chi2n);
@@ -214,13 +222,16 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     theTree->SetBranchAddress("DxyDCASignificanceDaugther2", &vec_DxyDCASignificanceDaugther2);
     theTree->SetBranchAddress("DzDCASignificanceDaugther1", &vec_DzDCASignificanceDaugther1);
     theTree->SetBranchAddress("DzDCASignificanceDaugther2", &vec_DzDCASignificanceDaugther2);
-    //theTree->SetBranchAddress("DMass", &vec_DMass);
+    theTree->SetBranchAddress("DMass", &vec_DMass);
+    theTree->SetBranchAddress("DGen", &vec_DGen);
 
     std::cout << "--- Processing: " << theTree->GetEntries() << " events" << std::endl;
     TStopwatch sw;
     sw.Start();
     //this is a loop in the events (each collision)
     std::vector<float> aux_vec_all_trainingVariables;
+    std::vector<float> aux_vec_signal_trainingVariables;
+    std::vector<float> aux_vec_background_trainingVariables;
     for (Long64_t ievt=0; ievt<theTree->GetEntries();ievt++) {
 
         if (ievt%100000 == 0) std::cout << "--- ... Processing event: " << ievt << std::endl;
@@ -230,39 +241,104 @@ void TMVAClassificationApplication( TString myMethodList = "" )
 	//this is a loop in the D0 meson candidates in a given event
 	//NB.: here it can include signal and background 
         for(int iD0=0; iD0<vec_D3DDecayLength->size(); iD0++){
-           //use same sequence of variables as in the weight file        
-           aux_vec_all_trainingVariables.push_back((*vec_D3DDecayLength)[iD0]); 
-	   aux_vec_all_trainingVariables.push_back((*vec_D3DDecayLengthSignificance)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DTrk1Chi2n)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DTrk1PtErr)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DTrk2Chi2n)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DVtxProb)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_D3DPointingAngle)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DDca)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DTtrk1Pt)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DTrk2Pt)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DTrk2PtErr)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DTrk1Eta)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DTrk2Eta)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther1)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther2)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DzDCASignificanceDaugther1)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DzDCASignificanceDaugther2)[iD0]);
+            //use same sequence of variables as in the weight file        
+            aux_vec_all_trainingVariables.push_back((*vec_D3DDecayLength)[iD0]); 
+	        aux_vec_all_trainingVariables.push_back((*vec_D3DDecayLengthSignificance)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DTrk1Chi2n)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DTrk1PtErr)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DTrk2Chi2n)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DVtxProb)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_D3DPointingAngle)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DDca)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DTtrk1Pt)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DTrk2Pt)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DTrk2PtErr)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DTrk1Eta)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DTrk2Eta)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther1)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther2)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DzDCASignificanceDaugther1)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DzDCASignificanceDaugther2)[iD0]);
+
+            if ((*vec_DGen)[iD0]==23333 || (*vec_DGen)[iD0]==23344) {
+                aux_vec_signal_trainingVariables.push_back((*vec_D3DDecayLength)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_D3DDecayLengthSignificance)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DTrk1Chi2n)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DTrk1PtErr)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DTrk2Chi2n)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DVtxProb)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_D3DPointingAngle)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DDca)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DTtrk1Pt)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DTrk2Pt)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DTrk2PtErr)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DTrk1Eta)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DTrk2Eta)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther1)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther2)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DzDCASignificanceDaugther1)[iD0]);
+                aux_vec_signal_trainingVariables.push_back((*vec_DzDCASignificanceDaugther2)[iD0]);
+            }
+
+            if ((*vec_DGen)[iD0]!=23333 && (*vec_DGen)[iD0]!=23344) {
+                aux_vec_background_trainingVariables.push_back((*vec_D3DDecayLength)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_D3DDecayLengthSignificance)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DTrk1Chi2n)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DTrk1PtErr)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DTrk2Chi2n)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DVtxProb)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_D3DPointingAngle)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DDca)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DTtrk1Pt)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DTrk2Pt)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DTrk2PtErr)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DTrk1Eta)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DTrk2Eta)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther1)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther2)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DzDCASignificanceDaugther1)[iD0]);
+                aux_vec_background_trainingVariables.push_back((*vec_DzDCASignificanceDaugther2)[iD0]);
+            }
+
            // Return the MVA outputs and fill into histograms
 	   // See method here: https://root.cern.ch/root/html608/Reader_8cxx_source.html#l00486
-           if (Use["BDT"]) histBdt->Fill(reader->EvaluateMVA(aux_vec_all_trainingVariables,"BDT method"));
-           aux_vec_all_trainingVariables.clear(); //clean up the vector to fill next D0 meson information					  
+            if (Use["BDT"]) {
+                histBdt_all->Fill(reader->EvaluateMVA(aux_vec_all_trainingVariables,"BDT method"));
+                if (aux_vec_signal_trainingVariables.size() > 0) histBdt_signal->Fill(reader->EvaluateMVA(aux_vec_signal_trainingVariables,"BDT method"));
+                if (aux_vec_background_trainingVariables.size() > 0) histBdt_background->Fill(reader->EvaluateMVA(aux_vec_background_trainingVariables,"BDT method"));
+            }
+            //clean up the vectors to fill next D0 meson information
+            aux_vec_all_trainingVariables.clear();
+            aux_vec_signal_trainingVariables.clear();
+            aux_vec_background_trainingVariables.clear();				  
 	} 
     }
 
     // Get elapsed time
     sw.Stop();
     std::cout << "--- End of event loop: "; sw.Print();
+
+    // Create TCanvas and write histograms
     
-    // Write histograms
+    TCanvas canvas("canvas","canvas", 1000, 1000);
+    canvas.Divide(2, 2, 0.01, 0.01);
+    canvas.cd(1);
+    histBdt_all->Draw();
+    canvas.cd(2);
+    histBdt_signal->Draw();
+    canvas.cd(3);
+    histBdt_background->Draw();
+    canvas.Print("canvas.pdf");
+    
+    // Write histograms in .root file
     TFile *target  = new TFile( "TMVApp.root","RECREATE" );
-    if (Use["BDT"          ])   histBdt    ->Write();
-      
+    if (Use["BDT"]) {
+        histBdt_all->Write();
+        histBdt_signal->Write();
+        histBdt_background->Write();
+        canvas.Write();
+    }
+
     target->Close();
     std::cout << "--- Created root file: \"TMVApp.root\" containing the MVA output histograms" << std::endl;
     delete reader;
