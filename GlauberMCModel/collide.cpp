@@ -11,18 +11,22 @@ using namespace std;
 
 // Const values used in the simulations
 const double
-        pi              = TMath::Pi(),
-        rho0            = 3,
-        r0              = 6.62,
-        a               = 0.542,
-        secIn           = 65,
-        radiusSquared   = (secIn / 10) / pi;
+        pi         = TMath::Pi(),
+        rho0       = 3,                 //fm^-3
+        r0         = 6.62,              //fm
+        a          = 0.542,             //fm
+        secIn      = 6.5,                //fm^2
+        radiusSq   = (secIn) / pi; //fm^2
 
 mutex mtx;
 
 // Structures used to generate and save data.
 struct Nucleon {double x, y;};
-struct Data {int nCol, nPart; double dist;};
+struct Data {
+    int nCol;
+    int nPart;
+    double dist;
+};
 
 // Main code
 void collide (const string& filename = "./data.root", int nucleons = 208,
@@ -32,17 +36,17 @@ int simulations = 1'000'000, const ::int64_t nThreads =std::thread::hardware_con
     // Configure the program to export in a Root file
     Data data{};
     auto *file = new TFile(filename.c_str(),"recreate");
-    auto *save = new TTree("save", "Simulation");
-    save->Branch("Collisions", &data, "col/I:part/I:dist/D");
+    auto *save = new TTree("Data", "Simulation");
+    save->Branch("Collisions", &data, "NColl/I:NPart/I:Par/D");
 
     // Set up the functions to be used in the generators
     auto *distF = new TF1("distF", "x*2*pi", 0, 18);
-    auto *posF = new TF1("posF", "(x*[0]/(1+exp((x-[1])/[2])))/309.310706654",0, 14);
+    auto *posF = new TF1("posF",  "(x*x*[0]/(1+exp((x-[1])/[2])))", 0, 14);
     posF->SetParameters(rho0, r0, a);
 
     // Config RNG
-    mt19937 rng(random_device{}());
-    uniform_real_distribution<> dis(0.0, 1.0);
+    mt19937 rng(std::random_device{}());
+    uniform_real_distribution<> dis(0.0, pi);
     TRandom random;
     random.SetSeed();
 
@@ -58,8 +62,8 @@ int simulations = 1'000'000, const ::int64_t nThreads =std::thread::hardware_con
                 unordered_set<int> nucleonPartTemp;
 
                 // Create the array of Nucleon to represent the Nuclei.
-                Nucleon first[nucleons];
-                Nucleon second[nucleons];
+                Nucleon frst[nucleons];
+                Nucleon scnd[nucleons];
                 int colT = 0;
                 int partT = 0;
                 double distT;
@@ -67,14 +71,19 @@ int simulations = 1'000'000, const ::int64_t nThreads =std::thread::hardware_con
                 // Generate collision data
                 distT = distF->GetRandom();
                 for (int i = 0; i < nucleons; i++) {
+
                     double position = posF->GetRandom();
-                    double var = dis(rng) * pi * 2;
-                    first[i].x = position * sin(var);
-                    first[i].y = position * cos(var);
+                    double theta = dis(rng);
+                    double phi =   dis(rng) * 2;
+                    frst[i].x = position * sin(theta) * cos(phi);
+                    frst[i].y = position * sin(theta) * sin(phi);
+
+
                     position = posF->GetRandom();
-                    var = dis(rng) * pi * 2;
-                    second[i].x = position * sin(var) + distT;
-                    second[i].y = position * cos(var);
+                    theta = dis(rng);
+                    phi =   dis(rng) * 2;
+                    scnd[i].x = position * sin(theta) * cos(phi) + distT;
+                    scnd[i].y = position * sin(theta) * sin(phi);
                 }
 
 
@@ -82,8 +91,11 @@ int simulations = 1'000'000, const ::int64_t nThreads =std::thread::hardware_con
                 for (int i = 0; i < nucleons; i++) {
                     bool passTrough = false;
                     for (int j = 0; j < nucleons; j++) {
-                        if ((pow((first[i].x - second[j].x), 2) +
-                             pow((first[i].y - second[j].y), 2)) < radiusSquared) {
+
+                        double deltaX=frst[i].x-scnd[j].x;
+                        double deltaY=frst[i].y-scnd[j].y;
+
+                        if ((deltaX*deltaX + deltaY*deltaY) < radiusSq) {
                             colT++;
                             passTrough = true;
                             if (nucleonPartTemp.insert(j).second) {
@@ -91,7 +103,9 @@ int simulations = 1'000'000, const ::int64_t nThreads =std::thread::hardware_con
                             }
                         }
                     }
-                    if (passTrough) { partT++;}
+                    if (passTrough) {
+                        partT++;
+                    }
                 }
 
                 // Write the data to the root file

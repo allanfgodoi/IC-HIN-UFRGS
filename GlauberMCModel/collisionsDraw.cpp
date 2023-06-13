@@ -12,7 +12,7 @@ using namespace std;
 
 // Setup functions to calculate the parameters
 double calcProb(double *x, double *par){
-    return (x[0] * par[0] / (1 + exp((x[0] - par[1])/par[2])))/309.3107066;
+    return (x[0] * x[0] * par[0]) / (1 + exp((x[0] - par[1])/par[2]));
 }
 double calcD(double *x, double *par){
     return x[0]*2*TMath::Pi();
@@ -30,11 +30,11 @@ void config(TGraph graph, Color_t color, const char* name){
 // Const values used in the simulations
 const double
     pi              = TMath::Pi(),
-    p0              = 3,
-    r0              = 6.62,
-    a               = 0.542,
-    secIn           = 65,
-    radiusSquared   = (secIn / 10) / pi;
+    p0              = 3,     //1/fm^3
+    r0              = 6.62,  //fm
+    a               = 0.542, //fm
+    secIn           = 6.5,    //fm^2
+    radiusSq   = (secIn) / pi; //fm
 
 // Main code
 void collisionsDraw (int nucleons = 208, int sim = 20, const string& location = "./sim"){
@@ -77,13 +77,15 @@ void collisionsDraw (int nucleons = 208, int sim = 20, const string& location = 
         double d = dist->GetRandom(random);
         for (int i = 0; i < nucleons; i++) {
             double position = pos->GetRandom(random);
-            double var = random->Rndm() * pi * 2;
-            xFirst[i] = position * sin(var);
-            yFirst[i] = position * cos(var);
+            double theta = random->Rndm() * pi * 2;
+            double phi = random->Rndm() * pi;
+            xFirst[i] = position * sin(theta) * sin(phi);
+            yFirst[i] = position * cos(theta) * sin(phi);
             position = pos->GetRandom(random);
-            var = random->Rndm() * pi * 2;
-            xSecond[i] = position * sin(var) + d;
-            ySecond[i] = position * cos(var);
+            theta = random->Rndm() * pi * 2;
+            phi = random->Rndm() * pi;
+            xSecond[i] = position * sin(theta) * sin(phi) + d;
+            ySecond[i] = position * cos(theta) * sin(phi);
         }
 
         // Verify collision partTemp and number
@@ -91,7 +93,7 @@ void collisionsDraw (int nucleons = 208, int sim = 20, const string& location = 
             bool passTrough = false;
             for (int j = 0; j < nucleons; j++) {
                 if (pow(xFirst[i] - xSecond[j], 2) +
-                    pow(yFirst[i] - ySecond[j], 2) < (radiusSquared)) {
+                    pow(yFirst[i] - ySecond[j], 2) < (radiusSq)) {
                     nCol++;
                     passTrough = true;
                     if (nucleonPartTemp.insert(j).second) {
@@ -106,7 +108,7 @@ void collisionsDraw (int nucleons = 208, int sim = 20, const string& location = 
             }
         }
 
-        // Convert from list to array for usage in the TGraph module
+        // Convert from list to array for usage in the TGraph module.
         int fSize = static_cast<int>(xFirstPartTemp.size()),
             sSize = static_cast<int>(xSecondPartTemp.size());
         double xfp[fSize], yfp[fSize],

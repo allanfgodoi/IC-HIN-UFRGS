@@ -43,12 +43,14 @@ void process (const char* dataFile = "./data.root", const string& location = "./
 
     c->SetTicks();
     c->SetGrid();
+
+    // ColorBlind Friendly palette
     gStyle->SetPalette(kRainBow);
     gStyle->SetOptStat(0);
 
-    // Open the ROOT file and get the "save" tree
+    // Open the ROOT file containing generated data and get the “save” tree
     auto *file = new TFile(dataFile);
-    auto *tree = (TTree*) file->Get("save");
+    auto *tree = (TTree*) file->Get("Data");
 
     // Create variables to hold the data
     Data data{};
@@ -56,12 +58,12 @@ void process (const char* dataFile = "./data.root", const string& location = "./
     // Set up branches to read the data into the variables
     tree->SetBranchAddress("Collisions", &data);
 
-    auto partXEvent = new TH1I("ppe", "N_{part} vs eventos", 416, 0, 416);
-    auto colXEvent  = new TH1I("cpe", "N_{coll} vs eventos", 2500, 0, 2500);
-    auto distXEvent = new TH1I("dpe", "d vs eventos", 128, 0, 18);
-    auto distXPart  = new TH2I("dpp", "d vs N_{part}", 200,0,18,416,0, 416);
-    auto distXCol   = new TH2I("dpc", "d vs N_{coll}", 400,0,18,200,0,2000);
-    auto colXPart   = new TH2I("cpp", "N_{coll} vs N_{part}", 416,0,416,200,0,2000);
+    auto partXEvent = new TH1I("ppe", "N_{part} vs events", 416, 0, 416);
+    auto colXEvent  = new TH1I("cpe", "N_{coll} vs events", 4000, 0, 4000);
+    auto distXEvent = new TH1I("dpe", "b vs events", 128, 0, 18);
+    auto distXPart  = new TH2I("dpp", "b vs N_{part}", 200,0,18,416,0, 416);
+    auto distXCol   = new TH2I("dpc", "b vs N_{coll}", 400,0,18,4000,0,4000);
+    auto colXPart   = new TH2I("cpp", "N_{coll} vs N_{part}", 416,0,416,4000,0,4000);
 
     for (Long64_t i = 0; i < tree->GetEntries(); i++) {
         tree->GetEntry(i);
@@ -75,16 +77,16 @@ void process (const char* dataFile = "./data.root", const string& location = "./
 
     // Draw TH2 functions
     c->SetLogz();
-    drawTH2(distXPart, c, "Distancia", "Participantes", location + "/distpart.png");
-    drawTH2(distXCol, c, "Distancia", "Colisoes", location + "/distcol.png");
-    drawTH2(colXPart, c, "Colisoes", "Participantes", location + "/colpart.png");
+    drawTH2(distXPart, c, "Impact parameter (fm)", "Participants", location + "/DistPart.pdf");
+    drawTH2(distXCol, c, "Impact parameter (fm)", "Collisions", location + "/DistCol.pdf");
+    drawTH2(colXPart, c, "Collisions", "Participants", location + "/ColPart.pdf");
 
     // Draw TH1 Functions
     if (gPad) gPad->SetLeftMargin(0.14);
-    drawTH1(distXEvent, c, "Distancia", "Eventos", location + "/dist.png");
+    drawTH1(distXEvent, c, "Impact parameter (fm)", "Events", location + "/DistEvent.pdf");
     c->SetLogy();
     if (gPad) gPad->SetLeftMargin(0.13);
-    drawTH1(partXEvent, c, "Participantes", "Eventos", location + "/part.png");
+    drawTH1(partXEvent, c, "Participants", "Events", location + "/PartEvent.pdf");
     if (gPad) gPad->SetLeftMargin(0.13);
-    drawTH1(colXEvent, c, "Colisoes", "Eventos", location + "/col.png");
+    drawTH1(colXEvent, c, "Collisions", "Events", location + "/ColEvent.pdf");
 }
