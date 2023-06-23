@@ -18,3 +18,7 @@ GlauberMCModel/hist*
 GlauberMCModel/sim*
 GlauberMCModel/out*
 GlauberMCModel/.*
+GlauberMCModel/data.txt*
+GlauberMCModel/graphs
+GlauberMCModel/sim
+.vscode/settings.json
