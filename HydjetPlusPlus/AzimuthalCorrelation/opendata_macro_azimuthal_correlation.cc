@@ -37,11 +37,18 @@ std::cout<<"Starting..."<<std::endl;
 
 const int particle_type = 0; // 0 for all (pions, kaons, protons); 1 for pions; 2 for kaons; 3 for protons
 
+printf("1\n");
+
 ///access Hydjet++ generated events in ROOT  TTree format
 //std::unique_ptr<TFile> f1( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
 //std::unique_ptr<TFile> f2( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC/Softwares/HydjetPlusPlus/RunOutput.root") );
 std::unique_ptr<TFile> f( TFile::Open("/home/pedrolunardi/IC/Events/HiForestAOD_DATA_FlowAnalysis_200k.root") );
-const int NEventsArraySize = 200000; //IMPORTANT: total number of events generated
+
+printf("1,5\n");
+
+const int NEventsArraySize = 9960; //IMPORTANT: total number of events generated
+
+printf("2\n");
 
 ///some global variables -- after can think in add it in a ".h" file
 bool doSymmetrisation_=true; //symmetrise the correlation function in each quadrant
@@ -50,10 +57,14 @@ bool doBackground_=true; //if "true" will do event mixing correlation for backgr
 ///File to store histograms - after we can use a variable to set centrality bins - for now I am just using one single bin
 TFile *output = new TFile(Form("corr_cent_%d_%d.root",0,5), "recreate");
 
+printf("3\n");
+
 //ROOT::Math::PtEtaPhiMVector fourvec_px_py_pz_e;
 TVector3 particle;
 TVector3 trigger;
 TVector3 associated;
+
+printf("4\n");
 
 const int ptTbins_=1, ptNbins_=1; //number of pT ranges for Trigger & Associated particles 
 std::vector<TVector3> allevents[NEventsArraySize][ptTbins_+ptNbins_];
@@ -67,11 +78,14 @@ ptTrigMin_[0]=1.0;
 ptAssMax_[0]=1.0;
 ptAssMin_[0]=0.3;
 
+printf("5\n");
 
 //Get trees
 ///auto input_tree1 = f1->Get<TTree>("td");
 ///auto input_tree2 = f2->Get<TTree>("td");
-auto input_tree = f->Get<TTree>("td");
+auto input_tree = f->Get<TTree>("demo/Flow");
+
+printf("6\n");
 
 ///TList *list = new TList;
 ///list->Add(input_tree1);
@@ -82,46 +96,53 @@ auto input_tree = f->Get<TTree>("td");
 // Disable everything...
 input_tree->SetBranchStatus("*", false);
 
+printf("6,5\n");
+
 // ...but the branch we need
-input_tree->SetBranchStatus("Ntot", true);
+input_tree->SetBranchStatus("Ntrk", true);
+input_tree->SetBranchStatus("trkPt", true);
 //input_tree->SetBranchStatus("Px", true);
 //input_tree->SetBranchStatus("Py", true);
 //input_tree->SetBranchStatus("Pz", true);
-input_tree->SetBranchStatus("E", true);
-input_tree->SetBranchStatus("MotherIndex", true);
-input_tree->SetBranchStatus("final", true);
-input_tree->SetBranchStatus("type", true);
-input_tree->SetBranchStatus("pdg", true);
+input_tree->SetBranchStatus("trkEta", true);
+input_tree->SetBranchStatus("trkPhi", true);
+//input_tree->SetBranchStatus("type", true);
+//input_tree->SetBranchStatus("pdg", true);
 
-int Ntot; // total event multiplicity
+printf("7\n");
+
+//int Ntot; // total event multiplicity
 //float Px[100000]; // x-component of the momentum, in GeV/c
 //float Py[100000]; // y-component of the momentum, in GeV/c 
 //float Pz[100000]; // z-component of the momentum, in GeV/c
 
-double trkPt;
-double trkPhi;
-double trkEta;
+int Ntrk;
 
-float E[100000]; // energy, in GeV
-int pdg[100000]; // Geant particle code
-int type[100000]; // origin of particle (=0 - from soft hydro part, >0 - from hard jet part)
-int MotherIndex[100000]; // index of the mother particle (-1 if its a primary particle)
-int final[100000]; // an integer branch keeping 1 for final state particles and 0 for decayed particles
+float trkPt[2000];
+float trkPhi[2000];
+float trkEta[2000];
 
-input_tree->SetBranchAddress("Ntot",&Ntot);
+//float E[100000]; // energy, in GeV
+//int type[100000]; // origin of particle (=0 - from soft hydro part, >0 - from hard jet part)
+//int MotherIndex[100000]; // index of the mother particle (-1 if its a primary particle)
+//int final[100000]; // an integer branch keeping 1 for final state particles and 0 for decayed particles
+
+input_tree->SetBranchAddress("Ntrk",&Ntrk);
 //input_tree->SetBranchAddress("Px",&Px);
 //input_tree->SetBranchAddress("Py",&Py); 
 //input_tree->SetBranchAddress("Pz",&Pz);
 
 input_tree->SetBranchAddress("trkPt",&trkPt);
-input_tree->SetBranchAddress("trkPhi",&trkPhi);
 input_tree->SetBranchAddress("trkEta",&trkEta);
+input_tree->SetBranchAddress("trkPhi",&trkPhi);
 
-input_tree->SetBranchAddress("E",&E);
-input_tree->SetBranchAddress("pdg",&pdg);
-input_tree->SetBranchAddress("type",&type);
-input_tree->SetBranchAddress("MotherIndex",&MotherIndex);
-input_tree->SetBranchAddress("final",&final);
+//input_tree->SetBranchAddress("E",&E);
+//input_tree->SetBranchAddress("pdg",&pdg);
+//input_tree->SetBranchAddress("type",&type);
+//input_tree->SetBranchAddress("MotherIndex",&MotherIndex);
+//input_tree->SetBranchAddress("final",&final);
+
+printf("8\n");
 
 auto hist_title_label = "";
 if      (particle_type == 0){hist_title_label = "Dados CMS Open Data";}
@@ -132,14 +153,18 @@ else{}
 
 ///Histograms
 
+printf("9\n");
+
 // 1D - From particle four-vector
-auto h_pt = new TH1D("pt",hist_title_label,200,0,20);
-auto h_eta = new TH1D("eta",hist_title_label,200,-2.5,2.5);
-auto h_phi = new TH1D("phi",hist_title_label,100,-3.5,3.5);
+auto h_trkPt = new TH1D("pt",hist_title_label,200,0,20);
+auto h_trkEta = new TH1D("eta",hist_title_label,200,-2.5,2.5);
+auto h_trkPhi = new TH1D("phi",hist_title_label,100,-3.5,3.5);
 //auto h_mass = new TH1D("h_mass",hist_title_label,100,0,1.5);
 
 // Histograms for correlation
-auto h_pt_trigger_all = new TH1D("h_pt_trigger_all","All Trigger Particles",200,0,20);
+auto h_trkPt_trigger_all = new TH1D("h_trkPt_trigger_all","All Trigger Particles",200,0,20);
+
+printf("10\n");
 
 TH2D* signal[ptTbins_][ptNbins_];
 TH2D* background[ptTbins_][ptNbins_];
@@ -157,32 +182,32 @@ for (int i = 0; input_tree->LoadTree(i) >= 0; ++i) {
    input_tree->GetEntry(i);
 
    // Loop over all particles in the event
-   for (int j = 0; j < Ntot; j++) {
+   for (int j = 0; j < Ntrk; j++) {
 
-      if (!func_particleType_(particle_type, MotherIndex[j], final[j], pdg[j])) continue;
+      //if (!func_particleType_(particle_type, MotherIndex[j], final[j], pdg[j])) continue;
 
       //fourvec_px_py_pz_e.SetPxPyPzE(Px[j],Py[j],Pz[j],E[j]); //assign values for a given particle
-      double pt = trkPt;
-      double eta = trkEta;
-      double phi = trkPhi;
+      //float pt = trkPt;
+     //float eta = trkEta;
+      //float phi = trkPhi;
       //double mass = fourvec_px_py_pz_e.M();
 
-      if (!(pt > 0.3 && fabs(eta) < 2.4 && fabs(phi) < 3.2)) continue;
+      if (!(trkPt[j] > 0.3 && fabs(trkEta[j]) < 2.4 && fabs(trkPhi[j]) < 3.2)) continue;
 
-      h_pt->Fill(pt);
-      h_eta->Fill(eta);
-      h_phi->Fill(phi);
-     //h_mass->Fill(mass);
+      //h_pt->Fill(pt);
+      //h_eta->Fill(eta);
+      //h_phi->Fill(phi);
+      //h_mass->Fill(mass);
 
-      particle.SetPtEtaPhi(trkPt,trkEta,trkPhi);
+      particle.SetPtEtaPhi(trkPt[j],trkEta[j],trkPhi[j]);
       //store Associated particles information
       for (int ii = 0; ii < ptNbins_; ii++)
-        if (pt > ptAssMin_[ii] && pt < ptAssMax_[ii] ) (allevents[i][ptTbins_ + ii]).push_back(particle);
+        if (trkPt[j] > ptAssMin_[ii] && trkPt[j] < ptAssMax_[ii] ) (allevents[i][ptTbins_ + ii]).push_back(particle);
 
 
       //store Trigger particles information  
       for (int jj = 0; jj < ptTbins_; jj++)
-         if ( pt > ptTrigMin_[jj] && pt < ptTrigMax_[jj] ) (allevents[i][jj]).push_back(particle);
+         if ( trkPt[j] > ptTrigMin_[jj] && trkPt[j] < ptTrigMax_[jj] ) (allevents[i][jj]).push_back(particle);
 
    }//end particle loop
 
@@ -192,7 +217,7 @@ for (int i = 0; input_tree->LoadTree(i) >= 0; ++i) {
       Ntrig = (allevents[i][i_trigbin]).size(); 
       for (int w = 0; w < Ntrig; w++) {
 	 trigger = (allevents[i][i_trigbin])[w]; 
-         h_pt_trigger_all->Fill(trigger.Pt());
+         h_trkPt_trigger_all->Fill(trigger.Pt());
 	 for (int i_assbin = 0; i_assbin < ptNbins_; i_assbin++) {
 	    Nass = (allevents[i][ptTbins_+i_assbin]).size();
 	    for (int z = 0; z < Nass; z++) {
@@ -215,6 +240,8 @@ for (int i = 0; input_tree->LoadTree(i) >= 0; ++i) {
    }
 }
 
+
+printf("11\n");
 
 ///Background part
 if(doBackground_){
@@ -259,24 +286,25 @@ if(doBackground_){
 }
 
 
+printf("12\n");
 
 ///Plot histograms
 
 auto c_pt = new TCanvas("c_pt", "pT distribution", 500, 500);
 c_pt->cd(0);
-func_setAndDrawHistograms_(h_pt,"p_{T} [GeV/c]","Number of entries per Bin");
+func_setAndDrawHistograms_(h_trkPt,"p_{T} [GeV/c]","Number of entries per Bin");
 gPad->SetLogy();
 func_setAndSaveCanvas_(c_pt,"h_pt");
 
 auto c_eta = new TCanvas("c_eta", "eta distribution", 500, 500);
 c_eta->cd(0);
-func_setAndDrawHistograms_(h_eta,"#eta","Number of entries per Bin");
+func_setAndDrawHistograms_(h_trkEta,"#eta","Number of entries per Bin");
 gPad->SetLogy(0);
 func_setAndSaveCanvas_(c_eta,"h_eta");
 
 auto c_phi = new TCanvas("c_phi", "phi distribution", 500, 500);
 c_phi->cd(0);
-func_setAndDrawHistograms_(h_phi,"#phi","Number of entries per Bin");
+func_setAndDrawHistograms_(h_trkPhi,"#phi","Number of entries per Bin");
 gPad->SetLogy(0);
 func_setAndSaveCanvas_(c_phi,"h_phi");
 
@@ -286,11 +314,12 @@ func_setAndSaveCanvas_(c_phi,"h_phi");
 //gPad->SetLogy();
 //func_setAndSaveCanvas_(c_mass,"h_mass");
 
+printf("13\n");
 
 //For correlations
 auto c_pt_trigger_all = new TCanvas("c_pt_trigger_all", "pT distribution", 500, 500);
 c_pt_trigger_all->cd(0);
-func_setAndDrawHistograms_(h_pt_trigger_all,"p_{T} [GeV/c]","Number of entries per Bin");
+func_setAndDrawHistograms_(h_trkPt_trigger_all,"p_{T} [GeV/c]","Number of entries per Bin");
 gPad->SetLogy();
 func_setAndSaveCanvas_(c_pt_trigger_all,"h_pt_trigger_all");
 
@@ -314,11 +343,12 @@ for (int j = 0; j < ptTbins_; j++) {
    }
 }
 
+printf("14\n");
 
 ///Write the historgrams to the "output" file 
-h_pt->Write();
-h_eta->Write();
-h_phi->Write();
+h_trkPt->Write();
+h_trkEta->Write();
+h_trkPhi->Write();
 //h_mass->Write();
 for (int j = 0; j < ptTbins_; j++) {
    for (int i = 0; i < ptNbins_; i++) {
@@ -329,6 +359,8 @@ for (int j = 0; j < ptTbins_; j++) {
 
 
 std::cout<<"Done..."<<std::endl;
+
+printf("15\n");
 
 return 0;
 
