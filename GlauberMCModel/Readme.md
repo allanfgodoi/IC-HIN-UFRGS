@@ -71,8 +71,7 @@ Generate graphs to visualize the generated data by
 
 * __Datafile:__ Receive the folder that the data file is, the default value is "./data.txt";
 
-* __Location:__ Receive the folder that you want to save the collision data, the default value.
-* is "./graphs".
+* __Location:__ Receive the folder that you want to save the collision data, the default value is "./graphs".
 
 ***
 # NBD
