@@ -36,10 +36,10 @@ value is 1,000,000;
 
 The data saved in the file is in a ROOT TTree format, with
 the following variables:
-* __Collisions (col/I):__ The amount collisions between two nucleons;
-* __Participants (part/I):__ The amount single nucleons that participated in at least
+* __Collisions (NColl/I):__ The amount collisions between two nucleons;
+* __Participants (NPart/I):__ The amount single nucleons that participated in at least
   one collision;
-* __Distance (dist/D):__ The distance in fm between the two nuclei.
+* __Distance (Dist/D):__ The distance in fm between the two nuclei.
 
 ***
 # CollisionsDraw
