@@ -30,14 +30,14 @@ struct Data {
 
 // Main code
 void collide (const string& filename = "./data.root", int nucleons = 208,
-int simulations = 1'000'000, const ::int64_t nThreads =std::thread::hardware_concurrency()){
+int simulations = 1000000, const ::int64_t nThreads =std::thread::hardware_concurrency()){
 
 
     // Configure the program to export in a Root file
     Data data{};
     auto *file = new TFile(filename.c_str(),"recreate");
     auto *save = new TTree("Data", "Simulation");
-    save->Branch("Collisions", &data, "NColl/I:NPart/I:Par/D");
+    save->Branch("Collisions", &data, "NColl/I:NPart/I:Dist/D");
 
     // Set up the functions to be used in the generators
     auto *distF = new TF1("distF", "x*2*pi", 0, 18);

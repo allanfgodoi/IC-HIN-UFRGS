@@ -14,7 +14,7 @@ struct Data{int nCol, nPart; double dist;};
 void drawTH2 (TH2 *th2, TCanvas *canvas, const string& xTitle, const string& yTitle, const string& saveAs){
     th2->GetXaxis()->SetTitle(xTitle.c_str());
     th2->GetYaxis()->SetTitle(yTitle.c_str());
-    th2->SetContour(10'000);
+    th2->SetContour(10000);
     if (gPad) gPad->SetRightMargin(0.12);
     if (gPad) gPad->SetLeftMargin(0.13);
     if (gPad) gPad->SetBottomMargin(0.12);
@@ -39,7 +39,7 @@ void process (const char* dataFile = "./data.root", const string& location = "./
     gSystem->mkdir(location.c_str());
 
     // Config the canvas
-    auto *c = new TCanvas("canvas", "canvas", 1'000, 1'000);
+    auto *c = new TCanvas("canvas", "canvas", 1000, 1000);
 
     c->SetTicks();
     c->SetGrid();
@@ -79,7 +79,7 @@ void process (const char* dataFile = "./data.root", const string& location = "./
     c->SetLogz();
     drawTH2(distXPart, c, "Impact parameter (fm)", "Participants", location + "/DistPart.pdf");
     drawTH2(distXCol, c, "Impact parameter (fm)", "Collisions", location + "/DistCol.pdf");
-    drawTH2(colXPart, c, "Collisions", "Participants", location + "/ColPart.pdf");
+    drawTH2(colXPart, c, "Participants", "Collisions", location + "/ColPart.pdf");
 
     // Draw TH1 Functions
     if (gPad) gPad->SetLeftMargin(0.14);
