@@ -76,7 +76,7 @@ Generate graphs to visualize the generated data by
 ***
 # NBD
 
-We consider that particle production in nucleon-nucleon (proton-proton, proton-neutron, neutron-neutron) collisions follow a Negative Binomial Distribution (NBD), this code tries to fit the generated data with experimental data from colliders (for example, we use CMS public data, CMS Open Data of PbPb collisions at the LHC with nucleon-nucleon center-of-mass energy of 2.76 TeV):
+We consider that particle production in nucleon-nucleon collisions (proton-proton, proton-neutron, neutron-neutron) follow a Negative Binomial Distribution (NBD), this code tries to fit the generated data with experimental data from colliders (for example, we use CMS public data, CMS Open Data of PbPb collisions at the LHC with nucleon-nucleon center-of-mass energy of 2.76 TeV):
 
     root -l 'nbd(int nruns, char* dataFile, char* compareFile, char* location)'
 
