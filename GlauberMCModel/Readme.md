@@ -24,18 +24,18 @@ You should run command with:
 * __Filename:__ Receive the folder and file that you want to save the collision data, the
 default value is "./data.root";
 
-* __Nucleons:__ Specify the numbers of nucleons in the nuclei that you want to simulate, the
-default value is 208, as in a lead nucleus;
+* __Nucleons:__ Specify the number of nucleons in the nuclei that you want to simulate, the
+default value is 208 (lead nucleus);
 
-* __Simulations:__ Specify the numbers of simulations that you wish to run, the default
+* __Simulations:__ Specify the number of simulations that you wish to generate, the default
 value is 1,000,000;
 
-* __nThreads:__ Specify the numbers of processor's threads to be used in the simulation.
+* __nThreads:__ Specify the number of processor's threads to be used in the simulation.
 
 ## Generated data
 
-The data passed to the defined file is going to be saved as a TTree file, with
-the following values:
+The data saved in the file is in a ROOT TTree format, with
+the following variables:
 * __Collisions (col/I):__ The amount collisions between two nucleons;
 * __Participants (part/I):__ The amount single nucleons that participated in at least
   one collision;
