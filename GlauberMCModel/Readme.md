@@ -50,10 +50,10 @@ Generate a visual representation of the collisions, it can be run with:
 
 ## Arguments received
 
-* __Nucleons:__ Specify the numbers of nucleons in the nuclei that you want to simulate,
-the default value is 208, as in a lead nucleus;
+* __Nucleons:__ Specify the number of nucleons in the nuclei that you want to simulate,
+the default value is 208 (lead nucleus);
 
-* __Simulations:__ Specify the numbers of simulations that you wish to graph, the default
+* __Simulations:__ Specify the number of simulations that you wish to graph, the default
 value is 20;
 
 * __Location:__ Receive the folder that you want to save the collision data, the default
