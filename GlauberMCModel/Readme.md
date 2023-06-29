@@ -69,7 +69,7 @@ Generate graphs to visualize the generated data by
 
 ## Arguments received
 
-* __Datafile:__ Receive the folder that the data file is, the default value is "./data.txt";
+* __Datafile:__ Receive the folder that the data file is, the default value is "./data.root";
 
 * __Location:__ Receive the folder that you want to save the collision data, the default value is "./graphs".
 
