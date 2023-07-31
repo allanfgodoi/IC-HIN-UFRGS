@@ -13,3 +13,10 @@ GlauberMCModel/sim
 .vscode/settings.json
 D0MesonsID/MLStudies/canvas.pdf
 D0MesonsID/MLStudies/TMVApp.root
+D0MesonsID/MLStudies/dataset_01/weights/TMVAClassification_BDT.class.C
+D0MesonsID/MLStudies/dataset_01/plots/overtrain_BDT.png
+D0MesonsID/MLStudies/dataset_01/plots/mva_BDT.png
+D0MesonsID/MLStudies/.vscode/settings.json
+
+D0MesonsID/.vscode/settings.json
+D0MesonsID/MLStudies/BDT_ROC_all.C
