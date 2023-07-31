@@ -20,3 +20,9 @@ D0MesonsID/MLStudies/.vscode/settings.json
 
 D0MesonsID/.vscode/settings.json
 D0MesonsID/MLStudies/BDT_ROC_all.C
+D0MesonsID/MLStudies/BDT_ROC.C
+D0MesonsID/MLStudies/dataset_01/weights/TMVAClassification_BDT.weights.xml
+D0MesonsID/MLStudies/TMVApp.root
+D0MesonsID/MLStudies/TMVAClassification_BDT.weights.xml
+D0MesonsID/MLStudies/TMVA_01.root
+
