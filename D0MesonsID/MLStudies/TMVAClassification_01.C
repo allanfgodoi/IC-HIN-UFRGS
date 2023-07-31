@@ -14,33 +14,24 @@
 #include "TROOT.h"
 #include "TFileCollection.h"
 #include "TString.h"
+#include "TStopwatch.h"
 
 #include "TMVA/Factory.h"
 #include "TMVA/DataLoader.h"
 #include "TMVA/Tools.h"
 #include "TMVA/TMVAGui.h"
 
-// Function to measure the time elapsed
+// RUN: root -l TMVAClassification_01.C\(\"BDT\"\) 2>&1 | tee output.txt
 
-void timer()
-{
-    for (int i=0; i<10; i++)
-    {
-    }
-}
+// Function to measure the time elapsed
 
 int TMVAClassification_01( TString myMethodList = "" )
 {
 
    // Starting the timer
 
-   time_t start, end;
-  
-    time(&start);
-    ios_base::sync_with_stdio(false);
-    timer();
-
-    std::cout << "Timer started." << endl;
+   TStopwatch sw;
+   sw.Start();
 
    // The explicit loading of the shared libTMVA is done in TMVAlogon.C, defined in .rootrc
    // if you use your private .rootrc, or run from a different directory, please copy the
@@ -228,13 +219,19 @@ int TMVAClassification_01( TString myMethodList = "" )
    dataloader->AddVariable( "DxyDCASignificanceDaugther2", 'F' );
    dataloader->AddVariable( "DzDCASignificanceDaugther1", 'F' );
    dataloader->AddVariable( "DzDCASignificanceDaugther2", 'F' );
+   dataloader->AddVariable( "DMass", 'F' );
+   dataloader->AddVariable( "DPhi", 'F' );
+   dataloader->AddVariable( "DPt", 'F' );
+   dataloader->AddVariable( "DRapidity", 'F' );
 
    // You can add so-called "Spectator variables", which are not used in the MVA training,
    // but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the
    // input variables, the response values of all trained MVAs, and the spectator variables
  
-////   dataloader->AddSpectator( "spec1 := var1*2",  "Spectator 1", "units", 'F' );
-////   dataloader->AddSpectator( "spec2 := var1*3",  "Spectator 2", "units", 'F' );
+   dataloader->AddSpectator( "DGenpt", 'F' );
+   dataloader->AddSpectator( "DGenphi", 'F' );
+   dataloader->AddSpectator( "DGeny", 'F' );
+   dataloader->AddSpectator( "DGenIndex", 'F' );
  
  
    // global event weights per tree (see below for setting event-wise weights)
@@ -560,14 +557,9 @@ int TMVAClassification_01( TString myMethodList = "" )
    // Launch the GUI for the root macros
    if (!gROOT->IsBatch()) TMVA::TMVAGui( outfileName );
 
-   // Ending the timer and printing the elapsed timer
-
-    time(&end);
-  
-    double time_taken = double(end - start);
-    cout << "Time taken by program is : " << fixed
-         << time_taken << setprecision(5);
-    cout << " sec " << endl;
+   // Get elapsed time
+   sw.Stop();
+   std::cout << "--- End of event loop: "; sw.Print();
 
    return 0;
 }
