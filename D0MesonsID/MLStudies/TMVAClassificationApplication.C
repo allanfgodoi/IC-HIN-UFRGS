@@ -20,51 +20,6 @@ using namespace TMVA;
 
 // RUN: root -l -b -q TMVAClassificationApplication.C\(\"BDT\"\)
 
-void cd_config(TH1F* histBdt_all_x, TH1F* histBdt_signal_x, TH1F* histBdt_background_x, TLegend* leg_x, TPaveStats* st_all_x, TPaveStats* st_signal_x, TPaveStats* st_background_x){
-    histBdt_all_x->SetLineColor(1);
-    histBdt_all_x->SetMarkerColor(1);
-    histBdt_all_x->SetLineWidth(2);
-    histBdt_signal_x->SetLineColor(4);
-    histBdt_signal_x->SetMarkerColor(4);
-    histBdt_signal_x->SetLineWidth(2);
-    histBdt_background_x->SetLineColor(2);
-    histBdt_background_x->SetMarkerColor(2);
-    histBdt_background_x->SetLineStyle(2);
-    histBdt_background_x->SetLineWidth(2);
-    gPad->SetLogy();
-    histBdt_all_x->Draw();
-    gPad->Update();
-    st_all_x = (TPaveStats*)histBdt_all_x->FindObject("stats");
-        st_all_x->SetY1NDC(0.75);
-        st_all_x->SetY2NDC(0.90);
-        st_all_x->SetX1NDC(0.80);
-        st_all_x->SetX2NDC(1.00);
-    histBdt_signal_x->Draw("sameS");
-    gPad->Update();
-    st_signal_x = (TPaveStats*)histBdt_signal_x->FindObject("stats");
-        st_signal_x->SetY1NDC(0.45);
-        st_signal_x->SetY2NDC(0.60);
-        st_signal_x->SetX1NDC(0.80);
-        st_signal_x->SetX2NDC(1.00);
-    histBdt_background_x->Draw("sameS");
-    gPad->Update();
-    st_background_x = (TPaveStats*)histBdt_background_x->FindObject("stats");
-        st_background_x->SetY1NDC(0.60);
-        st_background_x->SetY2NDC(0.75);
-        st_background_x->SetX1NDC(0.80);
-        st_background_x->SetX2NDC(1.00);
-    gPad->Update();
-    leg_x = new TLegend(0.6,0.68,0.85,0.9);
-    leg_x->AddEntry(histBdt_all_x,"All","l");
-    leg_x->AddEntry(histBdt_signal_x,"Signal","l");
-    leg_x->AddEntry(histBdt_background_x,"Background","l");
-    leg_x->SetFillStyle(0);
-    leg_x->SetBorderSize(0);
-    leg_x->SetTextSize(0.045);
-    leg_x->SetTextFont(42);
-    leg_x->Draw();
-}
-
 void TMVAClassificationApplication( TString myMethodList = "" )
 {
         
@@ -212,42 +167,20 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     TH1F *histBdt_signal(0);
     TH1F *histBdt_background(0);
 
-    TH1F *histBdt_all_DMass(0);
-    TH1F *histBdt_signal_DMass(0);
-    TH1F *histBdt_background_DMass(0);
-
-    TH1F *histBdt_all_DPhi(0);
-    TH1F *histBdt_signal_DPhi(0);
-    TH1F *histBdt_background_DPhi(0);
-
-    TH1F *histBdt_all_DPt(0);
-    TH1F *histBdt_signal_DPt(0);
-    TH1F *histBdt_background_DPt(0);
-
-    TH1F *histBdt_all_DRapidity(0);
-    TH1F *histBdt_signal_DRapidity(0);
-    TH1F *histBdt_background_DRapidity(0);
+    TH1F *histBdt_raw_DMass(0);
+    TH1F *histBdt_raw_DPhi(0);
+    TH1F *histBdt_raw_DPt(0);
+    TH1F *histBdt_raw_DRapidity(0);
 
     if (Use["BDT"]) {
-        histBdt_all = new TH1F("MVA_BDT_all", "MVA_BDT_all", nbin, -0.45, 0.25 );
-        histBdt_signal = new TH1F("MVA_BDT_signal", "MVA_BDT_signal", nbin, -0.45, 0.25 );
-        histBdt_background = new TH1F("MVA_BDT_background", "MVA_BDT_background", nbin, -0.45, 0.25 );
-
-        histBdt_all_DMass = new TH1F("MVA_BDT_all_DMass", "MVA_BDT_all_DMass", nbin, -1, 1 );
-        histBdt_signal_DMass = new TH1F("MVA_BDT_signal_DMass", "MVA_BDT_signal_DMass", nbin, -1, 1 );
-        histBdt_background_DMass = new TH1F("MVA_BDT_background_DMass", "MVA_BDT_background_DMass", nbin, -1, 1 );
-
-        histBdt_all_DPhi = new TH1F("MVA_BDT_all_DPhi", "MVA_BDT_all_DPhi", nbin, -1, 1 );
-        histBdt_signal_DPhi = new TH1F("MVA_BDT_signal_DPhi", "MVA_BDT_signal_DPhi", nbin, -1, 1 );
-        histBdt_background_DPhi = new TH1F("MVA_BDT_background_DPhi", "MVA_BDT_background_DPhi", nbin, -1, 1 );
-
-        histBdt_all_DPt = new TH1F("MVA_BDT_all_DPt", "MVA_BDT_all_DPt", nbin, -1, 1 );
-        histBdt_signal_DPt = new TH1F("MVA_BDT_signal_DPt", "MVA_BDT_signal_DPt", nbin, -1, 1 );
-        histBdt_background_DPt = new TH1F("MVA_BDT_background_DPt", "MVA_BDT_background_DPt", nbin, -1, 1 );
-
-        histBdt_all_DRapidity= new TH1F("MVA_BDT_all_DRapidity", "MVA_BDT_all_DRapidity", nbin, -1, 1 );
-        histBdt_signal_DRapidity= new TH1F("MVA_BDT_signal_DRapidity", "MVA_BDT_signal_DRapidity", nbin, -1, 1 );
-        histBdt_background_DRapidity= new TH1F("MVA_BDT_background_DRapidity", "MVA_BDT_background_DRapidity", nbin, -1, 1 );
+        histBdt_all = new TH1F("MVA_BDT_all", "MVA_BDT_all", 10, -0.45, 0.25 );
+        histBdt_signal = new TH1F("MVA_BDT_signal", "MVA_BDT_signal", 10, -0.45, 0.25 );
+        histBdt_background = new TH1F("MVA_BDT_background", "MVA_BDT_background", 10, -0.45, 0.25 );
+        
+        histBdt_raw_DMass = new TH1F("raw_DMass", "raw_DMass", 100, 1.70, 2.05);
+        histBdt_raw_DPhi = new TH1F("raw_DPhi", "raw_DPhi", 100, -3.5, 3.5);
+        histBdt_raw_DPt = new TH1F("raw_DPt", "raw_DPt", 100, 3.4, 4.3);
+        histBdt_raw_DRapidity = new TH1F("raw_DRapidity", "raw_DRapidity", 100, -0.9, 0.9);
     }
 
     // Prepare input tree (this must be replaced by your data source)
@@ -327,20 +260,20 @@ void TMVAClassificationApplication( TString myMethodList = "" )
 
     //this is a loop in the events (each collision)
     std::vector<float> aux_vec_all_trainingVariables;
-    std::vector<float> aux_vec_DMass;
-    std::vector<float> aux_vec_DPhi;
-    std::vector<float> aux_vec_DPt;
-    std::vector<float> aux_vec_DRapidity;
+
     for (Long64_t ievt=0; ievt<theTree->GetEntries();ievt++) {
 
-        if (ievt%100000 == 0) std::cout << "--- ... Processing event: " << ievt << std::endl;
+        if (ievt%10000 == 0){
+            std::cout << "--- ... Processing event: " << ievt << std::endl;
+        }
 
         theTree->GetEntry(ievt);
 
 	//this is a loop in the D0 meson candidates in a given event
 	//NB.: here it can include signal and background 
         for(int iD0=0; iD0<vec_D3DDecayLength->size(); iD0++){
-            //use same sequence of variables as in the weight file        
+            //use same sequence of variables as in the weight file
+
             aux_vec_all_trainingVariables.push_back((*vec_D3DDecayLength)[iD0]); 
 	        if (!TMath::IsNaN((*vec_D3DDecayLengthSignificance)[iD0])) aux_vec_all_trainingVariables.push_back((*vec_D3DDecayLengthSignificance)[iD0]);
 	        aux_vec_all_trainingVariables.push_back((*vec_DTrk1Chi2n)[iD0]);
@@ -358,43 +291,41 @@ void TMVAClassificationApplication( TString myMethodList = "" )
             if (!TMath::IsNaN((*vec_DxyDCASignificanceDaugther2)[iD0])) aux_vec_all_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther2)[iD0]);
             if (!TMath::IsNaN((*vec_DzDCASignificanceDaugther1)[iD0])) aux_vec_all_trainingVariables.push_back((*vec_DzDCASignificanceDaugther1)[iD0]);
             if (!TMath::IsNaN((*vec_DzDCASignificanceDaugther2)[iD0])) aux_vec_all_trainingVariables.push_back((*vec_DzDCASignificanceDaugther2)[iD0]);
-            aux_vec_DMass.push_back((*vec_DMass)[iD0]);
-            aux_vec_DPhi.push_back((*vec_DPhi)[iD0]);
-            aux_vec_DPt.push_back((*vec_DPt)[iD0]);
-            aux_vec_DRapidity.push_back((*vec_DRapidity)[iD0]);
 
             // Return the MVA outputs and fill into histograms
 	        // See method here: https://root.cern.ch/root/html608/Reader_8cxx_source.html#l00486
 
             if (Use["BDT"]) {
-                histBdt_all->Fill(reader->EvaluateMVA(aux_vec_all_trainingVariables,"BDT method"));
-                histBdt_all_DMass->Fill(reader->EvaluateMVA(aux_vec_DMass,"BDT method"));
-                histBdt_all_DPhi->Fill(reader->EvaluateMVA(aux_vec_DPhi,"BDT method"));
-                histBdt_all_DPt->Fill(reader->EvaluateMVA(aux_vec_DPt,"BDT method"));
-                histBdt_all_DRapidity->Fill(reader->EvaluateMVA(aux_vec_DRapidity,"BDT method"));
+                float BDT_score = reader->EvaluateMVA(aux_vec_all_trainingVariables,"BDT method");
 
-                if ((*vec_DGen)[iD0]==23333 || (*vec_DGen)[iD0]==23344){
-                    histBdt_signal->Fill(reader->EvaluateMVA(aux_vec_all_trainingVariables,"BDT method"));
-                    histBdt_signal_DMass->Fill(reader->EvaluateMVA(aux_vec_DMass,"BDT method"));
-                    histBdt_signal_DPhi->Fill(reader->EvaluateMVA(aux_vec_DPhi,"BDT method"));
-                    histBdt_signal_DPt->Fill(reader->EvaluateMVA(aux_vec_DPt,"BDT method"));
-                    histBdt_signal_DRapidity->Fill(reader->EvaluateMVA(aux_vec_DRapidity,"BDT method"));
+                histBdt_all->Fill(BDT_score);
+
+                if ((*vec_DGen)[iD0]==23333 || (*vec_DGen)[iD0]==23344){              
+                    histBdt_signal->Fill(BDT_score);
                 }
 
                 if ((*vec_DGen)[iD0]!=23333 && (*vec_DGen)[iD0]!=23344){
-                    histBdt_background->Fill(reader->EvaluateMVA(aux_vec_all_trainingVariables,"BDT method"));
-                    histBdt_background_DMass->Fill(reader->EvaluateMVA(aux_vec_DMass,"BDT method"));
-                    histBdt_background_DPhi->Fill(reader->EvaluateMVA(aux_vec_DPhi,"BDT method"));
-                    histBdt_background_DPt->Fill(reader->EvaluateMVA(aux_vec_DPt,"BDT method"));
-                    histBdt_background_DRapidity->Fill(reader->EvaluateMVA(aux_vec_DRapidity,"BDT method"));
+                    histBdt_background->Fill(BDT_score);
+                }
+
+                if (!TMath::IsNaN((*vec_DMass)[iD0])){
+                    histBdt_raw_DMass->Fill((*vec_DMass)[iD0]);
+                }
+
+                if (!TMath::IsNaN((*vec_DPhi)[iD0])){
+                    histBdt_raw_DPhi->Fill((*vec_DPhi)[iD0]);
+                }
+
+                if (!TMath::IsNaN((*vec_DPt)[iD0])){
+                    histBdt_raw_DPt->Fill((*vec_DPt)[iD0]);
+                }
+
+                if (!TMath::IsNaN((*vec_DRapidity)[iD0])){
+                    histBdt_raw_DRapidity->Fill((*vec_DRapidity)[iD0]);
                 }
             }
             //clean up the vectors to fill next D0 meson information
-            aux_vec_all_trainingVariables.clear();	
-            aux_vec_DMass.clear();
-            aux_vec_DPhi.clear();
-            aux_vec_DPt.clear();
-            aux_vec_DRapidity.clear();
+            aux_vec_all_trainingVariables.clear();
 	} 
     }
 
@@ -404,41 +335,33 @@ void TMVAClassificationApplication( TString myMethodList = "" )
 
     // Create TCanvas and write histograms
     
-    TCanvas c1("c1","c1", 1000, 1000);
-    c1.Divide(2, 2, 0.01, 0.01);
-    c1.cd(1);
-    histBdt_all->Draw();
-    c1.cd(2);
-    histBdt_signal->Draw();
-    c1.cd(3);
-    histBdt_background->Draw();
+    TCanvas c_all_var("c_all_var","c_all_var", 1000, 1000);
+    c_all_var.Divide(2, 2, 0.01, 0.01);
+    c_all_var.cd(1);
+        histBdt_all->Draw();
+    c_all_var.cd(2);
+        histBdt_signal->Draw();
+    c_all_var.cd(3);
+        histBdt_background->Draw();
 
-    TCanvas ck("ck", "ck", 1000, 1000);
-        ck.Divide(2,2,0.01,0.01);
-        ck.cd(1);
-            TLegend* leg_DMass; TPaveStats* st_all_DMass; TPaveStats* st_signal_DMass; TPaveStats* st_background_DMass;
-            cd_config(histBdt_all_DMass, histBdt_signal_DMass, histBdt_background_DMass, leg_DMass, st_all_DMass, st_signal_DMass, st_background_DMass);
-        
-        ck.cd(2);
-            TLegend* leg_DPhi; TPaveStats* st_all_DPhi; TPaveStats* st_signal_DPhi; TPaveStats* st_background_DPhi;
-            cd_config(histBdt_all_DPhi, histBdt_signal_DPhi, histBdt_background_DPhi, leg_DPhi, st_all_DPhi, st_signal_DPhi, st_background_DPhi);
-        ck.cd(3);
-            TLegend* leg_DPt; TPaveStats* st_all_DPt; TPaveStats* st_signal_DPt; TPaveStats* st_background_DPt;
-            cd_config(histBdt_all_DPt, histBdt_signal_DPt, histBdt_background_DPt, leg_DPt, st_all_DPt, st_signal_DPt, st_background_DPt);
-        ck.cd(4);
-            TLegend *leg_DRapidity; TPaveStats* st_all_DRapidity; TPaveStats* st_signal_DRapidity; TPaveStats* st_background_DRapidity;
-            cd_config(histBdt_all_DRapidity, histBdt_signal_DRapidity, histBdt_background_DRapidity, leg_DRapidity, st_all_DRapidity, st_signal_DRapidity, st_background_DRapidity);
-
+    TCanvas c_raw_kvar("c_raw_kvar","c_raw_kvar", 1000, 1000);
+    c_raw_kvar.Divide(2, 2, 0.01, 0.01);
+    c_raw_kvar.cd(1);
+        histBdt_raw_DMass->Draw();
+    c_raw_kvar.cd(2);
+        histBdt_raw_DPhi->Draw();
+    c_raw_kvar.cd(3);
+        histBdt_raw_DPt->Draw();
+    c_raw_kvar.cd(4);
+        histBdt_raw_DRapidity->Draw();
 
     // Write histograms in .root file
     TFile *target  = new TFile( "TMVApp.root","RECREATE" );
     if (Use["BDT"]) {
         histBdt_all->Write(); histBdt_signal->Write(); histBdt_background->Write();
-        histBdt_all_DMass->Write(); histBdt_signal_DMass->Write(); histBdt_background_DMass->Write();
-        histBdt_all_DPhi->Write(); histBdt_signal_DPhi->Write(); histBdt_background_DPhi->Write();
-        histBdt_all_DPt->Write(); histBdt_signal_DPt->Write(); histBdt_background_DPt->Write();
-        histBdt_all_DRapidity->Write(); histBdt_signal_DRapidity->Write(); histBdt_background_DRapidity->Write();
-        c1.Write(); ck.Write();
+        histBdt_raw_DMass->Write(); histBdt_raw_DPhi->Write(); histBdt_raw_DPt->Write(); histBdt_raw_DRapidity->Write();
+        c_all_var.Write(); c_raw_kvar.Write();
+        c_all_var.Print("c_all_var.pdf"); c_raw_kvar.Print("c_raw_kvar.pdf");
     }
 
     target->Close();
