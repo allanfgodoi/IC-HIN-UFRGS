@@ -4,7 +4,7 @@ ROOTINC=$(shell root-config --cflags)
 
 ROOTLIBS=$(shell root-config --glibs)
 
-all: macro_azimuthal_correlation
+all: opendata_macro_azimuthal_correlation
 
-macro_azimuthal_correlation: macro_azimuthal_correlation.cc
-	$(CC) $(ROOTINC) -o macro_azimuthal_correlation macro_azimuthal_correlation.cc $(ROOTLIBS)
+opendata_macro_azimuthal_correlation: opendata_macro_azimuthal_correlation.cc
+	$(CC) $(ROOTINC) -o opendata_macro_azimuthal_correlation opendata_macro_azimuthal_correlation.cc $(ROOTLIBS)

@@ -7,6 +7,17 @@
 CMakeLists.txt
 cmake-build-debug*
 .idea*
+GlauberMCModel/*.root
+GlauberMCModel/*.txt
+GlauberMCModel/*.png
+GlauberMCModel/*.bak
+GlauberMCModel/graphs*
+GlauberMCModel/cmake*
+GlauberMCModel/build*
+GlauberMCModel/hist*
+GlauberMCModel/sim*
+GlauberMCModel/out*
+GlauberMCModel/.*
 GlauberMCModel/data.txt*
 GlauberMCModel/graphs
 GlauberMCModel/sim
