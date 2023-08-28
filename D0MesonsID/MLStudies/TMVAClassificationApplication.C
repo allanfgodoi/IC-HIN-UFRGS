@@ -10,6 +10,7 @@
 #include "TSystem.h"
 #include "TROOT.h"
 #include "TStopwatch.h"
+#include "TMath.h"
 
 #include "TMVA/Tools.h"
 #include "TMVA/Reader.h"
@@ -17,7 +18,7 @@
 
 using namespace TMVA;
 
-// RUN: root -l -b -q TMVAClassificationApplication.C\(\"BDT\"\) >& OutPut.txt &
+// RUN: root -l -b -q TMVAClassificationApplication.C\(\"BDT\"\)
 
 void TMVAClassificationApplication( TString myMethodList = "" )
 {
@@ -116,7 +117,7 @@ void TMVAClassificationApplication( TString myMethodList = "" )
 
     // Create a set of variables and declare them to the reader
     // - the variable names MUST corresponds in name and type to those given in the weight file(s) used
-    Float_t D3DDecayLength, D3DDecayLengthSignificance, DTrk1Chi2n, DTrk1PtErr, DTrk2Chi2n, DVtxProb, D3DPointingAngle, DDca, DTtrk1Pt, DTrk2Pt, DTrk2PtErr, DTrk1Eta, DTrk2Eta, DxyDCASignificanceDaugther1, DxyDCASignificanceDaugther2, DzDCASignificanceDaugther1, DzDCASignificanceDaugther2;
+    Float_t D3DDecayLength, D3DDecayLengthSignificance, DTrk1Chi2n, DTrk1PtErr, DTrk2Chi2n, DVtxProb, D3DPointingAngle, DDca, DTtrk1Pt, DTrk2Pt, DTrk2PtErr, DTrk1Eta, DTrk2Eta, DxyDCASignificanceDaugther1, DxyDCASignificanceDaugther2, DzDCASignificanceDaugther1, DzDCASignificanceDaugther2, DMass, DPhi, DPt, DRapidity;
     reader->AddVariable("D3DDecayLength", &D3DDecayLength);
     reader->AddVariable("D3DDecayLengthSignificance", &D3DDecayLengthSignificance);
     reader->AddVariable("DTrk1Chi2n", &DTrk1Chi2n);
@@ -134,10 +135,21 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     reader->AddVariable("DxyDCASignificanceDaugther2", &DxyDCASignificanceDaugther2);
     reader->AddVariable("DzDCASignificanceDaugther1", &DzDCASignificanceDaugther1);
     reader->AddVariable("DzDCASignificanceDaugther2", &DzDCASignificanceDaugther2);
+    reader->AddVariable("DMass", &DMass);
+    reader->AddVariable("DPhi", &DPhi);
+    reader->AddVariable("DPt", &DPt);
+    reader->AddVariable("DRapidity", &DRapidity);
+
+    // Spectator variables declared in the training have to be added to the reader, too
+    Float_t DGenpt, DGenphi, DGeny, DGenIndex;
+    reader->AddSpectator("DGenpt", &DGenpt);
+    reader->AddSpectator("DGenphi", &DGenphi);
+    reader->AddSpectator("DGeny", &DGeny);
+    reader->AddSpectator("DGenIndex", &DGenIndex);
 
     // Book the MVA methods
-    ///TString dir    = "/home/allanfgodoi/Desktop/";
-    TString dir    = "/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC_TCC/ReposGit/IC-HIN-UFRGS/D0MesonsID/MLStudies/";
+    TString dir    = "/home/allanfgodoi/Desktop/";
+    //TString dir    = "/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC_TCC/ReposGit/IC-HIN-UFRGS/D0MesonsID/MLStudies/";
     TString prefix = "TMVAClassification";
 
     // Book method(s)
@@ -150,17 +162,34 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     }
 
     // Book output histograms
-    UInt_t nbin = 100;
-    TH1F *histBdt(0);
-    if (Use["BDT"])           histBdt     = new TH1F( "MVA_BDT",           "MVA_BDT",           nbin, -0.8, 0.8 );
+    UInt_t nbin = 10;
+    TH1F *histBdt_all(0);
+    TH1F *histBdt_signal(0);
+    TH1F *histBdt_background(0);
+
+    TH1F *histBdt_raw_DMass(0);
+    TH1F *histBdt_raw_DPhi(0);
+    TH1F *histBdt_raw_DPt(0);
+    TH1F *histBdt_raw_DRapidity(0);
+
+    if (Use["BDT"]) {
+        histBdt_all = new TH1F("MVA_BDT_all", "MVA_BDT_all", 10, -0.45, 0.25 );
+        histBdt_signal = new TH1F("MVA_BDT_signal", "MVA_BDT_signal", 10, -0.45, 0.25 );
+        histBdt_background = new TH1F("MVA_BDT_background", "MVA_BDT_background", 10, -0.45, 0.25 );
+        
+        histBdt_raw_DMass = new TH1F("raw_DMass", "raw_DMass", 100, 1.70, 2.05);
+        histBdt_raw_DPhi = new TH1F("raw_DPhi", "raw_DPhi", 100, -3.5, 3.5);
+        histBdt_raw_DPt = new TH1F("raw_DPt", "raw_DPt", 100, 3.4, 4.3);
+        histBdt_raw_DRapidity = new TH1F("raw_DRapidity", "raw_DRapidity", 100, -0.9, 0.9);
+    }
 
     // Prepare input tree (this must be replaced by your data source)
     // in this example, there is a toy tree with signal and one with background events
     // we'll later on use only the "signal" events for the test in this example.
     //
     TFile *input(0);
-    //TString fname = "/home/allanfgodoi/Desktop/tree_skim_MC_promptTest.root";
-    TString fname = "/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC_TCC/TopicosDeEstudo/D0_Selection/D0_MC_SkimmedTrees/tree_skim_MC_prompt.root";
+    TString fname = "/home/allanfgodoi/Desktop/tree_skim_MC_promptTest.root";
+    //TString fname = "/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/IC_TCC/TopicosDeEstudo/D0_Selection/D0_MC_SkimmedTrees/tree_skim_MC_prompt.root";
     if (!gSystem->AccessPathName( fname ))
         input = TFile::Open( fname ); // check if file in local directory exists
     else
@@ -196,7 +225,12 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     std::vector<float> * vec_DxyDCASignificanceDaugther2 = 0;
     std::vector<float> * vec_DzDCASignificanceDaugther1 = 0;
     std::vector<float> * vec_DzDCASignificanceDaugther2 = 0;
-    //std::vector<float> * vec_DMass = 0;
+    std::vector<float> * vec_DMass = 0;
+    std::vector<float> * vec_DPhi = 0;
+    std::vector<float> * vec_DPt = 0;
+    std::vector<float> * vec_DRapidity = 0;
+    std::vector<float> * vec_DGen = 0;
+    
     theTree->SetBranchAddress("D3DDecayLength", &vec_D3DDecayLength);
     theTree->SetBranchAddress("D3DDecayLengthSignificance", &vec_D3DDecayLengthSignificance);
     theTree->SetBranchAddress("DTrk1Chi2n", &vec_DTrk1Chi2n);
@@ -214,55 +248,122 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     theTree->SetBranchAddress("DxyDCASignificanceDaugther2", &vec_DxyDCASignificanceDaugther2);
     theTree->SetBranchAddress("DzDCASignificanceDaugther1", &vec_DzDCASignificanceDaugther1);
     theTree->SetBranchAddress("DzDCASignificanceDaugther2", &vec_DzDCASignificanceDaugther2);
-    //theTree->SetBranchAddress("DMass", &vec_DMass);
+    theTree->SetBranchAddress("DMass", &vec_DMass);
+    theTree->SetBranchAddress("DPhi", &vec_DPhi);
+    theTree->SetBranchAddress("DPt", &vec_DPt);
+    theTree->SetBranchAddress("DRapidity", &vec_DRapidity);
+    theTree->SetBranchAddress("DGen", &vec_DGen);
 
     std::cout << "--- Processing: " << theTree->GetEntries() << " events" << std::endl;
     TStopwatch sw;
     sw.Start();
+
     //this is a loop in the events (each collision)
     std::vector<float> aux_vec_all_trainingVariables;
+
     for (Long64_t ievt=0; ievt<theTree->GetEntries();ievt++) {
 
-        if (ievt%100000 == 0) std::cout << "--- ... Processing event: " << ievt << std::endl;
+        if (ievt%10000 == 0){
+            std::cout << "--- ... Processing event: " << ievt << std::endl;
+        }
 
         theTree->GetEntry(ievt);
 
 	//this is a loop in the D0 meson candidates in a given event
 	//NB.: here it can include signal and background 
         for(int iD0=0; iD0<vec_D3DDecayLength->size(); iD0++){
-           //use same sequence of variables as in the weight file        
-           aux_vec_all_trainingVariables.push_back((*vec_D3DDecayLength)[iD0]); 
-	   aux_vec_all_trainingVariables.push_back((*vec_D3DDecayLengthSignificance)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DTrk1Chi2n)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DTrk1PtErr)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DTrk2Chi2n)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DVtxProb)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_D3DPointingAngle)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DDca)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DTtrk1Pt)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DTrk2Pt)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DTrk2PtErr)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DTrk1Eta)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DTrk2Eta)[iD0]);
-	   aux_vec_all_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther1)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther2)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DzDCASignificanceDaugther1)[iD0]);
-           aux_vec_all_trainingVariables.push_back((*vec_DzDCASignificanceDaugther2)[iD0]);
-           // Return the MVA outputs and fill into histograms
-	   // See method here: https://root.cern.ch/root/html608/Reader_8cxx_source.html#l00486
-           if (Use["BDT"]) histBdt->Fill(reader->EvaluateMVA(aux_vec_all_trainingVariables,"BDT method"));
-           aux_vec_all_trainingVariables.clear(); //clean up the vector to fill next D0 meson information					  
+            //use same sequence of variables as in the weight file
+
+            aux_vec_all_trainingVariables.push_back((*vec_D3DDecayLength)[iD0]); 
+	        if (!TMath::IsNaN((*vec_D3DDecayLengthSignificance)[iD0])) aux_vec_all_trainingVariables.push_back((*vec_D3DDecayLengthSignificance)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DTrk1Chi2n)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DTrk1PtErr)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DTrk2Chi2n)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DVtxProb)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_D3DPointingAngle)[iD0]);
+	        aux_vec_all_trainingVariables.push_back((*vec_DDca)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DTtrk1Pt)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DTrk2Pt)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DTrk2PtErr)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DTrk1Eta)[iD0]);
+            aux_vec_all_trainingVariables.push_back((*vec_DTrk2Eta)[iD0]);
+	        if (!TMath::IsNaN((*vec_DxyDCASignificanceDaugther1)[iD0])) aux_vec_all_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther1)[iD0]);
+            if (!TMath::IsNaN((*vec_DxyDCASignificanceDaugther2)[iD0])) aux_vec_all_trainingVariables.push_back((*vec_DxyDCASignificanceDaugther2)[iD0]);
+            if (!TMath::IsNaN((*vec_DzDCASignificanceDaugther1)[iD0])) aux_vec_all_trainingVariables.push_back((*vec_DzDCASignificanceDaugther1)[iD0]);
+            if (!TMath::IsNaN((*vec_DzDCASignificanceDaugther2)[iD0])) aux_vec_all_trainingVariables.push_back((*vec_DzDCASignificanceDaugther2)[iD0]);
+
+            // Return the MVA outputs and fill into histograms
+	        // See method here: https://root.cern.ch/root/html608/Reader_8cxx_source.html#l00486
+
+            if (Use["BDT"]) {
+                float BDT_score = reader->EvaluateMVA(aux_vec_all_trainingVariables,"BDT method");
+
+                histBdt_all->Fill(BDT_score);
+
+                if ((*vec_DGen)[iD0]==23333 || (*vec_DGen)[iD0]==23344){              
+                    histBdt_signal->Fill(BDT_score);
+                }
+
+                if ((*vec_DGen)[iD0]!=23333 && (*vec_DGen)[iD0]!=23344){
+                    histBdt_background->Fill(BDT_score);
+                }
+
+                if (!TMath::IsNaN((*vec_DMass)[iD0])){
+                    histBdt_raw_DMass->Fill((*vec_DMass)[iD0]);
+                }
+
+                if (!TMath::IsNaN((*vec_DPhi)[iD0])){
+                    histBdt_raw_DPhi->Fill((*vec_DPhi)[iD0]);
+                }
+
+                if (!TMath::IsNaN((*vec_DPt)[iD0])){
+                    histBdt_raw_DPt->Fill((*vec_DPt)[iD0]);
+                }
+
+                if (!TMath::IsNaN((*vec_DRapidity)[iD0])){
+                    histBdt_raw_DRapidity->Fill((*vec_DRapidity)[iD0]);
+                }
+            }
+            //clean up the vectors to fill next D0 meson information
+            aux_vec_all_trainingVariables.clear();
 	} 
     }
 
     // Get elapsed time
     sw.Stop();
     std::cout << "--- End of event loop: "; sw.Print();
+
+    // Create TCanvas and write histograms
     
-    // Write histograms
+    TCanvas c_all_var("c_all_var","c_all_var", 1000, 1000);
+    c_all_var.Divide(2, 2, 0.01, 0.01);
+    c_all_var.cd(1);
+        histBdt_all->Draw();
+    c_all_var.cd(2);
+        histBdt_signal->Draw();
+    c_all_var.cd(3);
+        histBdt_background->Draw();
+
+    TCanvas c_raw_kvar("c_raw_kvar","c_raw_kvar", 1000, 1000);
+    c_raw_kvar.Divide(2, 2, 0.01, 0.01);
+    c_raw_kvar.cd(1);
+        histBdt_raw_DMass->Draw();
+    c_raw_kvar.cd(2);
+        histBdt_raw_DPhi->Draw();
+    c_raw_kvar.cd(3);
+        histBdt_raw_DPt->Draw();
+    c_raw_kvar.cd(4);
+        histBdt_raw_DRapidity->Draw();
+
+    // Write histograms in .root file
     TFile *target  = new TFile( "TMVApp.root","RECREATE" );
-    if (Use["BDT"          ])   histBdt    ->Write();
-      
+    if (Use["BDT"]) {
+        histBdt_all->Write(); histBdt_signal->Write(); histBdt_background->Write();
+        histBdt_raw_DMass->Write(); histBdt_raw_DPhi->Write(); histBdt_raw_DPt->Write(); histBdt_raw_DRapidity->Write();
+        c_all_var.Write(); c_raw_kvar.Write();
+        c_all_var.Print("c_all_var.pdf"); c_raw_kvar.Print("c_raw_kvar.pdf");
+    }
+
     target->Close();
     std::cout << "--- Created root file: \"TMVApp.root\" containing the MVA output histograms" << std::endl;
     delete reader;

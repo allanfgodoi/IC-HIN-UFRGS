@@ -1,5 +1,5 @@
 ///To run it, please, do: root -l -b -q 'macro_doControlPlots.C("RootFileFullPath/RootFileName.root")'
-///Example: root -l -b -q 'macro_doControlPlots.C("/Users/cesarbernardes/RootTreesD0mesons/tree_skim_MC_prompt.root")'
+///Example: root -l -b -q 'macro_doControlPlots.C("/home/allanfgodoi/Desktop/tree_skim_MC_prompt.root")'
 
 
 ///Let's use RDataFrame :-) 
@@ -38,7 +38,7 @@ void legendStyle(TLegend* tl, TH1D* h_all, TH1D* h_fake, TH1D* h_sig){
 }
 
 ///Main function
-void macro_doControlPlots(std::string filename = "/Users/cesarbernardes/D0_MC_SkimmedTrees/tree_skim_MC_prompt.root"){
+void macro_doControlPlots(std::string filename = "/home/allanfgodoi/Desktop/tree_skim_MC_prompt.root"){
 
 
 auto fileName = filename;
