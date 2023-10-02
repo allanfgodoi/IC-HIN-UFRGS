@@ -117,7 +117,7 @@ void TMVAClassificationApplication( TString myMethodList = "" )
 
     // Create a set of variables and declare them to the reader
     // - the variable names MUST corresponds in name and type to those given in the weight file(s) used
-    Float_t D3DDecayLength, D3DDecayLengthSignificance, DTrk1Chi2n, DTrk1PtErr, DTrk2Chi2n, DVtxProb, D3DPointingAngle, DDca, DTtrk1Pt, DTrk2Pt, DTrk2PtErr, DTrk1Eta, DTrk2Eta, DxyDCASignificanceDaugther1, DxyDCASignificanceDaugther2, DzDCASignificanceDaugther1, DzDCASignificanceDaugther2, DMass, DPhi, DPt, DRapidity;
+    Float_t D3DDecayLength, D3DDecayLengthSignificance, DTrk1Chi2n, DTrk1PtErr, DTrk2Chi2n, DVtxProb, D3DPointingAngle, DDca, DTtrk1Pt, DTrk2Pt, DTrk2PtErr, DTrk1Eta, DTrk2Eta, DxyDCASignificanceDaugther1, DxyDCASignificanceDaugther2, DzDCASignificanceDaugther1, DzDCASignificanceDaugther2, DMass, DPhi, DPt, DRapidity, DGen;
     reader->AddVariable("D3DDecayLength", &D3DDecayLength);
     reader->AddVariable("D3DDecayLengthSignificance", &D3DDecayLengthSignificance);
     reader->AddVariable("DTrk1Chi2n", &DTrk1Chi2n);
@@ -139,6 +139,7 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     reader->AddVariable("DPhi", &DPhi);
     reader->AddVariable("DPt", &DPt);
     reader->AddVariable("DRapidity", &DRapidity);
+    reader->AddVariable("DGen", &DGen);
 
     // Spectator variables declared in the training have to be added to the reader, too
     Float_t DGenpt, DGenphi, DGeny, DGenIndex;
@@ -162,7 +163,7 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     }
 
     // Book output histograms
-    UInt_t nbin = 10;
+    UInt_t nbin = 100;
     TH1F *histBdt_all(0);
     TH1F *histBdt_signal(0);
     TH1F *histBdt_background(0);
@@ -172,15 +173,19 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     TH1F *histBdt_raw_DPt(0);
     TH1F *histBdt_raw_DRapidity(0);
 
+    TH1F *histBdt_DMass_cut(0);
+
     if (Use["BDT"]) {
-        histBdt_all = new TH1F("MVA_BDT_all", "MVA_BDT_all", 10, -0.45, 0.25 );
-        histBdt_signal = new TH1F("MVA_BDT_signal", "MVA_BDT_signal", 10, -0.45, 0.25 );
-        histBdt_background = new TH1F("MVA_BDT_background", "MVA_BDT_background", 10, -0.45, 0.25 );
+        histBdt_all = new TH1F("MVA_BDT_all", "MVA_BDT_all", 100, -0.45, 0.25 );
+        histBdt_signal = new TH1F("MVA_BDT_signal", "MVA_BDT_signal", 100, -0.45, 0.25 );
+        histBdt_background = new TH1F("MVA_BDT_background", "MVA_BDT_background", 100, -0.45, 0.25 );
         
         histBdt_raw_DMass = new TH1F("raw_DMass", "raw_DMass", 100, 1.70, 2.05);
         histBdt_raw_DPhi = new TH1F("raw_DPhi", "raw_DPhi", 100, -3.5, 3.5);
         histBdt_raw_DPt = new TH1F("raw_DPt", "raw_DPt", 100, 3.4, 4.3);
         histBdt_raw_DRapidity = new TH1F("raw_DRapidity", "raw_DRapidity", 100, -0.9, 0.9);
+
+        histBdt_DMass_cut = new TH1F("DMass_(>0.0)", "DMass_(>0.0)", 100, 1.70, 2.05);
     }
 
     // Prepare input tree (this must be replaced by your data source)
@@ -323,6 +328,10 @@ void TMVAClassificationApplication( TString myMethodList = "" )
                 if (!TMath::IsNaN((*vec_DRapidity)[iD0])){
                     histBdt_raw_DRapidity->Fill((*vec_DRapidity)[iD0]);
                 }
+
+                if (BDT_score > 0){
+                    histBdt_DMass_cut->Fill((*vec_DMass)[iD0]);
+                }
             }
             //clean up the vectors to fill next D0 meson information
             aux_vec_all_trainingVariables.clear();
@@ -355,11 +364,15 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     c_raw_kvar.cd(4);
         histBdt_raw_DRapidity->Draw();
 
+    TCanvas c_DMass_cut("c_DMass_5","c_DMass_5", 1000, 1000);
+        histBdt_DMass_cut->Draw();
+
     // Write histograms in .root file
     TFile *target  = new TFile( "TMVApp.root","RECREATE" );
     if (Use["BDT"]) {
         histBdt_all->Write(); histBdt_signal->Write(); histBdt_background->Write();
         histBdt_raw_DMass->Write(); histBdt_raw_DPhi->Write(); histBdt_raw_DPt->Write(); histBdt_raw_DRapidity->Write();
+        histBdt_DMass_cut->Write(); c_DMass_cut.Print("histBdt_DMass_cut.pdf");
         c_all_var.Write(); c_raw_kvar.Write();
         c_all_var.Print("c_all_var.pdf"); c_raw_kvar.Print("c_raw_kvar.pdf");
     }
