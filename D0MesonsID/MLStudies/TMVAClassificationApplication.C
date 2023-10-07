@@ -175,6 +175,9 @@ void TMVAClassificationApplication( TString myMethodList = "" )
 
     TH1F *histBdt_DMass_cut(0);
 
+    TH1D* h_bdtSignal(0);
+    TH1D* h_bdtBackground(0);
+
     if (Use["BDT"]) {
         histBdt_all = new TH1F("MVA_BDT_all", "MVA_BDT_all", 100, -0.45, 0.25 );
         histBdt_signal = new TH1F("MVA_BDT_signal", "MVA_BDT_signal", 100, -0.45, 0.25 );
@@ -186,6 +189,9 @@ void TMVAClassificationApplication( TString myMethodList = "" )
         histBdt_raw_DRapidity = new TH1F("raw_DRapidity", "raw_DRapidity", 100, -0.9, 0.9);
 
         histBdt_DMass_cut = new TH1F("DMass_(>0.0)", "DMass_(>0.0)", 100, 1.70, 2.05);
+
+        h_bdtSignal = new TH1D("BDT_Signal", "BDT_Signal", 100, -0.5, 0.2);
+        h_bdtBackground = new TH1D("BDT_Background", "BDT_Background", 100, -0.5, 0.2);
     }
 
     // Prepare input tree (this must be replaced by your data source)
@@ -330,7 +336,11 @@ void TMVAClassificationApplication( TString myMethodList = "" )
                 }
 
                 if (BDT_score > 0){
+                    // DMass cut
                     histBdt_DMass_cut->Fill((*vec_DMass)[iD0]);
+                    // BDT>0.0 cut to calculate statistic significance
+                    if ((*vec_DGen)[iD0]==23333 || (*vec_DGen)[iD0]==23344) h_bdtSignal->Fill(BDT_score);
+                    else h_bdtBackground->Fill(BDT_score);
                 }
             }
             //clean up the vectors to fill next D0 meson information
@@ -344,6 +354,7 @@ void TMVAClassificationApplication( TString myMethodList = "" )
 
     // Create TCanvas and write histograms
     
+    // All variables canvas
     TCanvas c_all_var("c_all_var","c_all_var", 1000, 1000);
     c_all_var.Divide(2, 2, 0.01, 0.01);
     c_all_var.cd(1);
@@ -353,6 +364,7 @@ void TMVAClassificationApplication( TString myMethodList = "" )
     c_all_var.cd(3);
         histBdt_background->Draw();
 
+    // Kinematic variables canvas
     TCanvas c_raw_kvar("c_raw_kvar","c_raw_kvar", 1000, 1000);
     c_raw_kvar.Divide(2, 2, 0.01, 0.01);
     c_raw_kvar.cd(1);
@@ -366,6 +378,17 @@ void TMVAClassificationApplication( TString myMethodList = "" )
 
     TCanvas c_DMass_cut("c_DMass_5","c_DMass_5", 1000, 1000);
         histBdt_DMass_cut->Draw();
+
+    // Set and print a canvas containing the histograms of BDT>0.0 cut, for checking purposes
+    TCanvas c_bdt_cut("BDT>0.0", "BDT>0.0", 2000, 1000);
+    c_bdt_cut.Divide(2, 1, 0.01, 0.01);
+    c_bdt_cut.cd(1); h_bdtSignal->Draw();
+    c_bdt_cut.cd(2); h_bdtBackground->Draw();
+    c_bdt_cut.Print("BDT>0.pdf");
+
+    // Calculate and print the statistic significance
+    float eff = h_bdtSignal->Integral()/(TMath::Sqrt(h_bdtSignal->Integral()+h_bdtBackground->Integral()));
+    cout << "Statistic significance: " << eff << endl;
 
     // Write histograms in .root file
     TFile *target  = new TFile( "TMVApp.root","RECREATE" );
