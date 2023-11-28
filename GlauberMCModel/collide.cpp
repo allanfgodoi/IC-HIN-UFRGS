@@ -36,7 +36,7 @@ void collide (const string& filename = "./data.root", const ::int64_t nThreads =
     Data data{};
     auto *file = new TFile(filename.c_str(),"recreate");
     auto *save = new TTree("Data", "Simulation");
-    save->Branch("Collisions", &data, "NColl/I:NPart/I:Par/D");
+    save->Branch("Collisions", &data, "NColl/I:NPart/I:Dist/D");
 
     auto *distF = new TF1("distF", "x*2*pi", 0, 3*r0);
     auto *posF = new TF1("posF",  "(x*x)/(1+exp((x-[0])/[1]))", 0, 2*r0);
