@@ -8,30 +8,29 @@
 #include <mutex>
 
 using namespace std;
-
-// Const values used in the simulations
-const double
-        pi         = TMath::Pi(),
-        rho0       = 3,                 //fm^-3
-        r0         = 6.62,              //fm
-        a          = 0.542,             //fm
-        secIn      = 6.5,                //fm^2
-        radiusSq   = (secIn) / pi; //fm^2
-
 mutex mtx;
 
 // Structures used to generate and save data.
-struct Nucleon {double x, y;};
+struct Nucleon {Double_t x, y, z;};
+
 struct Data {
     int nCol;
     int nPart;
-    double dist;
+    double d;
 };
 
-// Main code
-void collide (const string& filename = "./data.root", int nucleons = 208,
-int simulations = 1'000'000, const ::int64_t nThreads =std::thread::hardware_concurrency()){
+// Const values used in the simulations
+const Double_t pi       = TMath::Pi();
+const Double_t r0       = 6.62;       // fm
+const Double_t a        = 0.542;      // fm
+const Double_t sigma    = 6.5;        // fm^2
+const Double_t radiusSq = sigma / pi; // fm^2
+const Double_t minDisSq = 0;          // fm^2
+const int nucleons      = 208;
+const int simulations   = 1e6;
 
+// Main code
+void collide (const string& filename = "./data.root", const ::int64_t nThreads =std::thread::hardware_concurrency()){
 
     // Configure the program to export in a Root file
     Data data{};
@@ -39,16 +38,9 @@ int simulations = 1'000'000, const ::int64_t nThreads =std::thread::hardware_con
     auto *save = new TTree("Data", "Simulation");
     save->Branch("Collisions", &data, "NColl/I:NPart/I:Par/D");
 
-    // Set up the functions to be used in the generators
-    auto *distF = new TF1("distF", "x*2*pi", 0, 18);
-    auto *posF = new TF1("posF",  "(x*x*[0]/(1+exp((x-[1])/[2])))", 0, 14);
-    posF->SetParameters(rho0, r0, a);
-
-    // Config RNG
-    mt19937 rng(std::random_device{}());
-    uniform_real_distribution<> dis(0.0, pi);
-    TRandom random;
-    random.SetSeed();
+    auto *distF = new TF1("distF", "x*2*pi", 0, 3*r0);
+    auto *posF = new TF1("posF",  "(x*x)/(1+exp((x-[0])/[1]))", 0, 2*r0);
+    posF->SetParameters(r0, a);
 
     // Configure multithreading
     ROOT::EnableImplicitMT();
@@ -58,62 +50,96 @@ int simulations = 1'000'000, const ::int64_t nThreads =std::thread::hardware_con
         threads.emplace_back([&, k] {
 
             // Run the simulations
-            for (int p = k; p < simulations;) {
+            for (int p = k; p < simulations;){
                 unordered_set<int> nucleonPartTemp;
 
                 // Create the array of Nucleon to represent the Nuclei.
-                Nucleon frst[nucleons];
-                Nucleon scnd[nucleons];
-                int colT = 0;
-                int partT = 0;
-                double distT;
+                Nucleon n1[nucleons];
+                Nucleon n2[nucleons];
+
+                Double_t cosTheta, sinTheta, phi,  pos;
+
+                int nCol = 0;
+                int nPart = 0;
+                Double_t d;
 
                 // Generate collision data
-                distT = distF->GetRandom();
+                d = distF->GetRandom();
                 for (int i = 0; i < nucleons; i++) {
 
-                    double position = posF->GetRandom();
-                    double theta = dis(rng);
-                    double phi =   dis(rng) * 2;
-                    frst[i].x = position * sin(theta) * cos(phi);
-                    frst[i].y = position * sin(theta) * sin(phi);
+                    // Generate rdm cylindrical coordinates for the n1 nucleus
+                    cosTheta = 2 * gRandom->Rndm() - 1;
+                    sinTheta = sqrt(1 - cosTheta * cosTheta);
+                    phi = 2 * pi * gRandom->Rndm();
+                    pos = posF->GetRandom();
+                    n1[i].x = pos * sinTheta * cos(phi);
+                    n1[i].y = pos * sinTheta * sin(phi);
+                    n1[i].z = pos * cosTheta;
 
+                    cosTheta = 2 * gRandom->Rndm() - 1;
+                    sinTheta = sqrt(1 - cosTheta * cosTheta);
+                    phi = 2 * pi * gRandom->Rndm();
+                    pos = posF->GetRandom();
+                    n2[i].x = pos * sinTheta * cos(phi) + d;
+                    n2[i].y = pos * sinTheta * sin(phi);
+                    n2[i].z = pos * cosTheta;
 
-                    position = posF->GetRandom();
-                    theta = dis(rng);
-                    phi =   dis(rng) * 2;
-                    scnd[i].x = position * sin(theta) * cos(phi) + distT;
-                    scnd[i].y = position * sin(theta) * sin(phi);
-                }
-
-
-                // Verify collision partTemp and number
-                for (int i = 0; i < nucleons; i++) {
-                    bool passTrough = false;
-                    for (int j = 0; j < nucleons; j++) {
-
-                        double deltaX=frst[i].x-scnd[j].x;
-                        double deltaY=frst[i].y-scnd[j].y;
-
-                        if ((deltaX*deltaX + deltaY*deltaY) < radiusSq) {
-                            colT++;
-                            passTrough = true;
-                            if (nucleonPartTemp.insert(j).second) {
-                                partT++;
-                            }
+                    // Check if no nucleon breaks the pauli exclusion principle
+                    for (int j = 0; j < i; j++){
+                        Double_t dx = n1[i].x - n1[j].x;
+                        Double_t dy = n1[i].y - n1[j].y;
+                        Double_t dz = n1[i].z - n1[j].z;
+                        if ((dx*dx + dy*dy + dz*dz) < minDisSq){
+                            cosTheta = 2 * gRandom->Rndm() - 1;
+                            sinTheta = sqrt(1 - cosTheta * cosTheta);
+                            phi = 2 * pi * gRandom->Rndm();
+                            pos = posF->GetRandom();
+                            n1[i].x = pos * sinTheta * cos(phi);
+                            n1[i].y = pos * sinTheta * sin(phi);
+                            n1[i].z = pos * cosTheta;
+                            j = 0;
+                        }
+                        dx = n2[i].x - n2[j].x;
+                        dy = n2[i].y - n2[j].y;
+                        dz = n2[i].z - n2[j].z;
+                        if ((dx*dx + dy*dy + dz*dz) < minDisSq){
+                            cosTheta = 2 * gRandom->Rndm() - 1;
+                            sinTheta = sqrt(1 - cosTheta * cosTheta);
+                            phi = 2 * pi * gRandom->Rndm();
+                            pos = posF->GetRandom();
+                            n2[i].x = pos * sinTheta * cos(phi) + d;
+                            n2[i].y = pos * sinTheta * sin(phi);
+                            n2[i].z = pos * cosTheta;
+                            j = 0;
                         }
                     }
-                    if (passTrough) {
-                        partT++;
+                }
+
+                // Verify collision partTemp and number
+                Double_t dx, dy;
+                bool part1[nucleons] = {false};
+                bool part2[nucleons] = {false};
+                for (int i = 0; i < nucleons; i++) {
+                    for (int j = 0; j < nucleons; j++) {
+
+                        dx = n1[i].x - n2[j].x;
+                        dy = n1[i].y - n2[j].y;
+
+                        if ((dx * dx + dy * dy) < radiusSq) {
+                            nCol++;
+                            part1[i] = true;
+                            part2[j] = true;
+                        }
                     }
+                }
+                for (int i = 0; i < nucleons; ++i) {
+                    nPart += part1[i] + part2[i];
                 }
 
                 // Write the data to the root file
-                if (partT > 0) {
+                if (nPart > 0) {
                     mtx.lock();
-                    data.nCol = colT;
-                    data.nPart = partT;
-                    data.dist = distT;
+                    data.nCol = nCol; data.nPart = nPart;data.d = d;
                     save->Fill();
                     mtx.unlock();
                     p+= (int) nThreads;

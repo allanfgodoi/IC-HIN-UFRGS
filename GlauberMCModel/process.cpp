@@ -9,7 +9,9 @@
 
 using namespace std;
 
-struct Data{int nCol, nPart; double dist;};
+const string format = ".png";
+
+struct Data{int nCol, nPart; double d;};
 
 void drawTH2 (TH2 *th2, TCanvas *canvas, const string& xTitle, const string& yTitle, const string& saveAs){
     th2->GetXaxis()->SetTitle(xTitle.c_str());
@@ -34,12 +36,12 @@ void drawTH1 (TH1 *h, TCanvas *canvas, const string& xTitle, const string& yTitl
 }
 
 // Main code
-void process (const char* dataFile = "./data.root", const string& location = "./graphs"){
+void process (const char* dataFile = "./data.root", const string& location = "./graphs2"){
 
     gSystem->mkdir(location.c_str());
 
     // Config the canvas
-    auto *c = new TCanvas("canvas", "canvas", 1'000, 1'000);
+    auto *c = new TCanvas("canvas", "canvas", 700, 700);
 
     c->SetTicks();
     c->SetGrid();
@@ -58,35 +60,36 @@ void process (const char* dataFile = "./data.root", const string& location = "./
     // Set up branches to read the data into the variables
     tree->SetBranchAddress("Collisions", &data);
 
-    auto partXEvent = new TH1I("ppe", "N_{part} vs events", 416, 0, 416);
-    auto colXEvent  = new TH1I("cpe", "N_{coll} vs events", 4000, 0, 4000);
-    auto distXEvent = new TH1I("dpe", "b vs events", 128, 0, 18);
-    auto distXPart  = new TH2I("dpp", "b vs N_{part}", 200,0,18,416,0, 416);
-    auto distXCol   = new TH2I("dpc", "b vs N_{coll}", 400,0,18,4000,0,4000);
-    auto colXPart   = new TH2I("cpp", "N_{coll} vs N_{part}", 416,0,416,4000,0,4000);
+    int nPartMax = 2500, nCollMax = 418, bMax = 18;
+
+    auto partXEvent = new TH1I("ppe", "Distribuicao de participantes", 209, 0, nCollMax);
+    auto colXEvent  = new TH1I("cpe", "Distribuicao de colisoes", 209, 0, nPartMax);
+    auto distXEvent = new TH1I("dpe", "Distribuicao do parametro", 209, 1e-4, bMax);
+    auto distXPart  = new TH2I("dpp", "Parametro vs participantes", 209,0,bMax,209,1e-4, nCollMax);
+    auto distXCol   = new TH2I("dpc", "Parametro vs colisoes", 209,0,bMax,209,1e-4,nPartMax);
+    auto colXPart   = new TH2I("cpp", "Colisoes vs participantes", 209,0,nCollMax,nPartMax,1e-4,nPartMax);
 
     for (Long64_t i = 0; i < tree->GetEntries(); i++) {
         tree->GetEntry(i);
         partXEvent -> Fill(data.nPart);
         colXEvent  -> Fill(data.nCol);
-        distXEvent -> Fill(data.dist);
-        distXPart  -> Fill(data.dist, data.nPart);
-        distXCol   -> Fill(data.dist, data.nCol);
+        distXEvent -> Fill(data.d);
+        distXPart  -> Fill(data.d, data.nPart);        distXCol   -> Fill(data.d, data.nCol);
         colXPart   -> Fill(data.nPart, data.nCol);
     }
 
     // Draw TH2 functions
     c->SetLogz();
-    drawTH2(distXPart, c, "Impact parameter (fm)", "Participants", location + "/DistPart.pdf");
-    drawTH2(distXCol, c, "Impact parameter (fm)", "Collisions", location + "/DistCol.pdf");
-    drawTH2(colXPart, c, "Collisions", "Participants", location + "/ColPart.pdf");
+    drawTH2(distXPart, c, "Parametro de impacto (fm)", "participantes", location + "/DistPart" + format);
+    drawTH2(distXCol, c, "Parametro de impacto (fm)", "Colisoes", location + "/DistCol" + format);
+    drawTH2(colXPart, c, "Colisoes", "Participantes", location + "/ColPart" + format);
 
     // Draw TH1 Functions
     if (gPad) gPad->SetLeftMargin(0.14);
-    drawTH1(distXEvent, c, "Impact parameter (fm)", "Events", location + "/DistEvent.pdf");
+    drawTH1(distXEvent, c, "Parametro de impacto (fm)", "", location + "/DistEvent" + format);
     c->SetLogy();
     if (gPad) gPad->SetLeftMargin(0.13);
-    drawTH1(partXEvent, c, "Participants", "Events", location + "/PartEvent.pdf");
+    drawTH1(partXEvent, c, "Participantes", "", location + "/PartEvent" + format);
     if (gPad) gPad->SetLeftMargin(0.13);
-    drawTH1(colXEvent, c, "Collisions", "Events", location + "/ColEvent.pdf");
+    drawTH1(colXEvent, c, "Colisoes", "", location + "/ColEvent" + format);
 }
