@@ -11,10 +11,10 @@
 using namespace std;
 
 // Setup functions to calculate the parameters
-double calcProb(double *x, double *par){
+Double_t calcProb(Double_t *x, Double_t *par){
     return (x[0] * x[0] * par[0]) / (1 + exp((x[0] - par[1])/par[2]));
 }
-double calcD(double *x, double *par){
+Double_t calcD(Double_t *x, Double_t *par){
     return x[0]*2*TMath::Pi();
 }
 
@@ -28,13 +28,13 @@ void config(TGraph graph, Color_t color, const char* name){
 }
 
 // Const values used in the simulations
-const double
+const Double_t
     pi              = TMath::Pi(),
     p0              = 3,     //1/fm^3
     r0              = 6.62,  //fm
     a               = 0.542, //fm
-    secIn           = 6.5,    //fm^2
-    radiusSq   = (secIn) / pi; //fm
+    sigma           = 6.5,    //fm^2
+    radiusSq   = (sigma) / pi; //fm
 
 // Main code
 void collisionsDraw (int nucleons = 208, int sim = 20, const string& location = "./sim"){
@@ -45,7 +45,7 @@ void collisionsDraw (int nucleons = 208, int sim = 20, const string& location = 
     random->SetSeed();
 
     // Simulation variables
-    double  xFirst[nucleons] , yFirst[nucleons],  // convert to 2d matrix
+    Double_t  xFirst[nucleons] , yFirst[nucleons],  // convert to 2d matrix
             xSecond[nucleons], ySecond[nucleons];
     int nCol = 0;
 
@@ -53,8 +53,8 @@ void collisionsDraw (int nucleons = 208, int sim = 20, const string& location = 
     TCanvas canvas("B(Z)", "B(Z) linear", 1280, 1000);
     canvas.SetTicks();
     unordered_set<int> nucleonPartTemp;
-    vector<double> xFirstPartTemp, yFirstPartTemp;
-    vector<double> xSecondPartTemp, ySecondPartTemp;
+    vector<Double_t> xFirstPartTemp, yFirstPartTemp;
+    vector<Double_t> xSecondPartTemp, ySecondPartTemp;
 
     for (int p = 0; p < sim; p++) {
 
@@ -69,23 +69,27 @@ void collisionsDraw (int nucleons = 208, int sim = 20, const string& location = 
         f->GetXaxis()->SetTitle("X (fm)");
 
         // Set up the functions to be used in the generators
-        auto *dist = new TF1("dist", calcD, 0, 14, 0);
+        auto *dist = new TF1("d", calcD, 0, 14, 0);
         auto *pos = new TF1("pos", calcProb, 0, 14, 3);
         pos->SetParameters(p0, r0, a);
 
         // Generate collision data
-        double d = dist->GetRandom(random);
+        Double_t d = dist->GetRandom(random);
         for (int i = 0; i < nucleons; i++) {
-            double position = pos->GetRandom(random);
-            double theta = random->Rndm() * pi * 2;
-            double phi = random->Rndm() * pi;
-            xFirst[i] = position * sin(theta) * sin(phi);
-            yFirst[i] = position * cos(theta) * sin(phi);
+
+            Double_t position = pos->GetRandom(random);
+            Double_t phi = random->Rndm() * 2 * pi;
+            Double_t cTheta = 2 * gRandom->Rndm() - 1 ;
+            Double_t sTheta = TMath::Sqrt(1 - cTheta * cTheta);
+
+            xFirst[i] = position * sin(phi) * sTheta;
+            yFirst[i] = position * cos(phi) * sTheta;
             position = pos->GetRandom(random);
-            theta = random->Rndm() * pi * 2;
-            phi = random->Rndm() * pi;
-            xSecond[i] = position * sin(theta) * sin(phi) + d;
-            ySecond[i] = position * cos(theta) * sin(phi);
+            phi = random->Rndm() * 2 * pi;
+            cTheta = 2 * gRandom->Rndm() - 1 ;
+            sTheta = TMath::Sqrt(1 - cTheta * cTheta);
+            xSecond[i] = position * sin(phi) * sTheta + d;
+            ySecond[i] = position * cos(phi) * sTheta;
         }
 
         // Verify collision partTemp and number
@@ -111,7 +115,7 @@ void collisionsDraw (int nucleons = 208, int sim = 20, const string& location = 
         // Convert from list to array for usage in the TGraph module.
         int fSize = static_cast<int>(xFirstPartTemp.size()),
             sSize = static_cast<int>(xSecondPartTemp.size());
-        double xfp[fSize], yfp[fSize],
+        Double_t xfp[fSize], yfp[fSize],
                xsp[sSize], ysp[sSize];
         copy(xFirstPartTemp.begin(), xFirstPartTemp.end(), xfp);
         copy(yFirstPartTemp.begin(), yFirstPartTemp.end(), yfp);
