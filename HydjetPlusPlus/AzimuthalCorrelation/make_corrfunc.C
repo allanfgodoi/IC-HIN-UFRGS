@@ -16,8 +16,12 @@ float apttrigmax[]={2.5};
 
 Double_t c=0.;
 Double_t c1,c2=1.;
+<<<<<<< HEAD
 //Double_t c3=9960; //IMPORTANT (temporary): should be equal to the total number of events generated  
 Double_t c3=30508;
+=======
+Double_t c3=30508; //IMPORTANT (temporary): should be equal to the total number of events generated  
+>>>>>>> c07735aefd0c973177f645b7f3445697a4eeb432
 
 TFile* hfile = new TFile("corr_cent_0_5.root");
 
@@ -82,6 +86,8 @@ for (int i =0; i < nbins; i++) {
    canvas[i]->cd(1)->SetRightMargin(0.043);
    canvas[i]->cd(1)->SetBottomMargin(0.145);
    signal[i]->Draw("SURF1");
+   //signal[i]->SetTitle("30 - 60 %");
+   //signal[i]->SetTitle("10 - 30 %");
    signal[i]->SetTitle("0 - 5 %");
    signal[i]->GetXaxis()->CenterTitle(true);
    signal[i]->GetYaxis()->CenterTitle(true);

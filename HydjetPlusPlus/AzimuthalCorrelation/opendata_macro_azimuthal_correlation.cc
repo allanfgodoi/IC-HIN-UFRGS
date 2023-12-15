@@ -36,11 +36,17 @@ std::cout<<"Starting..."<<std::endl;
 const int particle_type = 0; // 0 for all (pions, kaons, protons); 1 for pions; 2 for kaons; 3 for protons
 
 ///access Hydjet++ generated events in ROOT  TTree format
+<<<<<<< HEAD
 //std::unique_ptr<TFile> f( TFile::Open("/home/pedrolunardi/IC/Events/HiForestAOD_DATA_FlowAnalysis_200k.root") );
 //std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/Tools/CMSOpenData/cms_open_data_work_hin10/CMSSW_3_9_2_patch5/src/HiForest/HiForestProducer/HiForestAOD_DATA_FlowAnalysis_200k.root") );
 std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/Tools/CMSOpenData/cms_open_data_work_hin10/CMSSW_3_9_2_patch5/src/HiForest/HiForestProducer/HiForestAOD_DATA_FlowAnalysis_630k.root") );
 
 //const int NEventsArraySize = 9960; //IMPORTANT: total number of events generated
+=======
+std::unique_ptr<TFile> f( TFile::Open("/home/pedrolunardi/IC/Events/HiForestAOD_DATA_FlowAnalysis_630k.root") );
+//std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/Tools/CMSOpenData/cms_open_data_work_hin10/CMSSW_3_9_2_patch5/src/HiForest/HiForestProducer/HiForestAOD_DATA_FlowAnalysis_200k.root") );
+
+>>>>>>> c07735aefd0c973177f645b7f3445697a4eeb432
 const int NEventsArraySize = 30508; //IMPORTANT: total number of events generated
 
 ///some global variables -- after can think in add it in a ".h" file
@@ -61,10 +67,10 @@ double ptTrigMax_[ptTbins_];
 double ptTrigMin_[ptTbins_];
 double ptAssMax_[ptNbins_];
 double ptAssMin_[ptNbins_];
-ptTrigMax_[0]=2.5; //in GeV/c
-ptTrigMin_[0]=1.0;
-ptAssMax_[0]=1.0;
-ptAssMin_[0]=0.3;
+ptTrigMax_[0]=3.5; //in GeV/c
+ptTrigMin_[0]=3.0;
+ptAssMax_[0]=1.5;
+ptAssMin_[0]=1.0;
 
 
 //Get trees
@@ -75,17 +81,20 @@ input_tree->SetBranchStatus("*", false);
 
 // ...but the branch we need
 input_tree->SetBranchStatus("Ntrk", true);
+input_tree->SetBranchStatus("HFsumET", true);
 input_tree->SetBranchStatus("trkPt", true);
 input_tree->SetBranchStatus("trkEta", true);
 input_tree->SetBranchStatus("trkPhi", true);
 
 int Ntrk;
+float HFsumET;
 
 float trkPt[2000];
 float trkPhi[2000];
 float trkEta[2000];
 
 input_tree->SetBranchAddress("Ntrk",&Ntrk);
+input_tree->SetBranchAddress("HFsumET",&HFsumET);
 input_tree->SetBranchAddress("trkPt",&trkPt);
 input_tree->SetBranchAddress("trkEta",&trkEta);
 input_tree->SetBranchAddress("trkPhi",&trkPhi);
@@ -116,11 +125,18 @@ for (int j = 0; j < ptTbins_; j++) {
    }
 }
 
+//std::cout << "HFsumET: " << HFsumET << std::endl;
 
 for (int i = 0; input_tree->LoadTree(i) >= 0; ++i) {
 
    // Load the data for the given tree entry (i.e. a collision event)
    input_tree->GetEntry(i);
+
+   //if (300 < HFsumET && HFsumET < 1210) continue; //30 - 60%
+
+   //if (1210 < HFsumET && HFsumET < 2775) continue; // 10 - 30%
+						   
+   if (3390 < HFsumET && HFsumET < 4500) continue; // 0 - 5%
 
    // Loop over all particles in the event
    for (int j = 0; j < Ntrk; j++) {
