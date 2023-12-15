@@ -4,14 +4,20 @@
 void make_corrfunc(){
 
 int nbins=1;
-float aptassmin[]={1.0};
+/*float aptassmin[]={1.0};
 float aptassmax[]={1.5};
 float apttrigmin[]={3.0};
 float apttrigmax[]={3.5};
+*/
+float aptassmin[]={0.3};
+float aptassmax[]={1.0};
+float apttrigmin[]={1.0};
+float apttrigmax[]={2.5};
 
 Double_t c=0.;
 Double_t c1,c2=1.;
-Double_t c3=9960; //IMPORTANT (temporary): should be equal to the total number of events generated  
+//Double_t c3=9960; //IMPORTANT (temporary): should be equal to the total number of events generated  
+Double_t c3=30508;
 
 TFile* hfile = new TFile("corr_cent_0_5.root");
 

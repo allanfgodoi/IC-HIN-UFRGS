@@ -37,9 +37,11 @@ const int particle_type = 0; // 0 for all (pions, kaons, protons); 1 for pions; 
 
 ///access Hydjet++ generated events in ROOT  TTree format
 //std::unique_ptr<TFile> f( TFile::Open("/home/pedrolunardi/IC/Events/HiForestAOD_DATA_FlowAnalysis_200k.root") );
-std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/Tools/CMSOpenData/cms_open_data_work_hin10/CMSSW_3_9_2_patch5/src/HiForest/HiForestProducer/HiForestAOD_DATA_FlowAnalysis_200k.root") );
+//std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/Tools/CMSOpenData/cms_open_data_work_hin10/CMSSW_3_9_2_patch5/src/HiForest/HiForestProducer/HiForestAOD_DATA_FlowAnalysis_200k.root") );
+std::unique_ptr<TFile> f( TFile::Open("/Users/cesarbernardes/Dropbox/Ubuntu_1204/AltasEnergias/ProfessorUFRGS/OrientacaoDeAlunos/Tools/CMSOpenData/cms_open_data_work_hin10/CMSSW_3_9_2_patch5/src/HiForest/HiForestProducer/HiForestAOD_DATA_FlowAnalysis_630k.root") );
 
-const int NEventsArraySize = 9960; //IMPORTANT: total number of events generated
+//const int NEventsArraySize = 9960; //IMPORTANT: total number of events generated
+const int NEventsArraySize = 30508; //IMPORTANT: total number of events generated
 
 ///some global variables -- after can think in add it in a ".h" file
 bool doSymmetrisation_=true; //symmetrise the correlation function in each quadrant
