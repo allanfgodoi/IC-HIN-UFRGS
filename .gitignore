@@ -40,3 +40,4 @@ D0MesonsID/MLStudies/TMVA_01.root
 D0MesonsID/MLStudies/output.txt
 .gitignore
 D0MesonsID/ControlPlots/.vscode/settings.json
+D0MesonsID/Skims/data_D0_daughtersPT1_PT2_Eta1_Eta2_Phi1_Phi2_M1_M2_and_D0PT_Y_Phi_Mass.txt
