@@ -6,12 +6,14 @@ using namespace std;
 
 float mean(vector<float> x){
 
-    int N = x.size();
+    int N = 0;
     float acc = 0.0;
-    for (int i=0; i<N; i++){
-        acc += x[i];
+    for (int i=0; i<x.size(); i++){
+        if (!TMath::IsNaN(x[i])){
+            acc += x[i];
+            N += 1;
+        }
     }
-
     float m = acc/N;
     return m;
 }
@@ -106,9 +108,9 @@ void ObsConstructor(){
         vec_f_pt.push_back(f_pt);
         vec_pt_A.push_back(pt_A);
         vec_pt_B.push_back(pt_B);
+        vec_pt_AB.push_back(pt_AB);
     }
 
-    float sigma2 = mean(vec_pt_AB) - mean(vec_pt_A)*mean(vec_pt_B);
+    float sigma2 = mean(vec_pt_AB) - (mean(vec_pt_A)*mean(vec_pt_B));
     float sigma = sqrt(sigma2);
-    cout << sigma;
 }
