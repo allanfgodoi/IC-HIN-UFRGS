@@ -1,4 +1,20 @@
+// RUN COMMAND: root -l -b -q 'ObsConstructor.cpp'
+
+#include <cmath>
+#include "TMath.h"
 using namespace std;
+
+float mean(vector<float> x){
+
+    int N = x.size();
+    float acc = 0.0;
+    for (int i=0; i<N; i++){
+        acc += x[i];
+    }
+
+    float m = acc/N;
+    return m;
+}
 
 void ObsConstructor(){
 
@@ -37,37 +53,62 @@ void ObsConstructor(){
     fTree->SetBranchAddress("trkDxySig", &trkDxySig);
     fTree->SetBranchAddress("trkNpixLayers", &trkNpixLayers);
 
-    // Creates histos to store [pT]_A and [pT]_B
-    TH1F *hist_pt_A = new TH1F("pt_A", "pT per particle A", nBins, 0.3, 10);
-    TH1F *hist_pt_B = new TH1F("pt_B", "pT per particle B", nBins, 0.3, 10);
+    const unsigned int nEvents = fTree->GetEntries();
 
+    // Defining auxiliar constants
     const unsigned int nBins = 97;
-    Float_t f_pt[nBins];
+    vector<vector<float>> vec_f_pt;
+    vector<float> vec_pt_A;
+    vector<float> vec_pt_B;
+    vector<float> vec_pt_AB;
 
-    // Events loop
-    for (Long64_t ievt=0; ievt<fTree->GetEntries(); ievt++){ // Loop over the events
+    TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, 0.3, 10); // Create to scale pT bins and get f(pT)
+
+    for (Long64_t ievt=0; ievt<nEvents; ievt++){ // Loop over the events
+        vector<float> f_pt(nBins, 0.0);
+        float h_pt_A = 0;
+        float h_pt_B = 0;
+        int nTrk_A = 0;
+        int nTrk_B = 0;
 
         fTree->GetEntry(ievt);
+        if (ievt%10000 == 0)
+            cout << "Processing event: " << ievt << endl;
 
         // 100 <= eta <= 375 filter
         if (HFsumET < 100.0 || HFsumET > 375.0)
             continue;
 
-        if (ievt%10000 == 0)
-            cout << "Processing event: " << ievt << endl;
-
-        for(int iTrk=0; iTrk<Ntrk; iTrk++){
-            //for (int j=0; j<nBins; j++){
-                //if (trkPt[iTrk] >= (0.3+0.1*j) && trkPt[iTrk] <= (0.4+0.1*j))
-            //}
-            if (trkEta[iTrk] >= -2.4 && trkEta[iTrk] <= -1.0) // Gets subset A [pT] (-2.4 <= pT <= -1.0)
+        // Track loop
+        for(int iTrk=0; iTrk<Ntrk; iTrk++){ // Loop over the tracks in a event
+            if (trkEta[iTrk] >= -2.4 && trkEta[iTrk] <= -1.0 && !TMath::IsNaN(trkPt[iTrk])){ // Gets subset A [pT] (-2.4 <= pT <= -1.0)
+                h_pt_A += trkPt[iTrk];
+                nTrk_A += 1;
                 hist_pt_A->Fill(trkPt[iTrk]);
-            if (trkEta[iTrk] >= 1.0 && trkEta[iTrk] <= 2.4) // Gets subset B [pT] (1.0 <= pT <= 2.4)
-                hist_pt_B->Fill(trkPt[iTrk]);
+            }
+            if (trkEta[iTrk] >= 1.0 && trkEta[iTrk] <= 2.4 && !TMath::IsNaN(trkPt[iTrk])){ // Gets subset B [pT] (1.0 <= pT <= 2.4)
+                h_pt_B += trkPt[iTrk];
+                nTrk_B += 1;
+            }
         }
+
+        float pt_A = h_pt_A/nTrk_A;
+        float pt_B = h_pt_B/nTrk_B;
+        float pt_AB = pt_A*pt_B;
+
+        // Scaling the created hist and taking the bins content to the array
+        hist_pt_A->Scale();
+        for (int i=0; i<nBins; i++){
+            f_pt[i] = hist_pt_A->GetBinContent(i+1);
+        }
+        hist_pt_A->Reset();
+        
+        vec_f_pt.push_back(f_pt);
+        vec_pt_A.push_back(pt_A);
+        vec_pt_B.push_back(pt_B);
     }
 
-    TCanvas *c1 = new TCanvas("c1", "Track p_{T}", 800, 600);
-    hist_pt_A->Draw();
-    c1->SaveAs("trkPt_hist.png");
+    float sigma2 = mean(vec_pt_AB) - mean(vec_pt_A)*mean(vec_pt_B);
+    float sigma = sqrt(sigma2);
+    cout << sigma;
 }
