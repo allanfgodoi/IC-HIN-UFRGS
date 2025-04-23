@@ -4,6 +4,7 @@
 #include "TMath.h"
 using namespace std;
 
+// Calculates the mean of a given vector
 float mean(vector<float> x){
 
     int N = 0;
@@ -16,6 +17,17 @@ float mean(vector<float> x){
     }
     float m = acc/N;
     return m;
+}
+
+// 
+vector<float> product(vector<float> x, vector<float> y){
+
+    vector<float> vec;
+    for (int i=0; i<x.size(); i++){ // x and y must have the same size
+        vec.push_back(x[i]*y[i]);
+    }
+    return vec;
+
 }
 
 void ObsConstructor(){
@@ -77,7 +89,7 @@ void ObsConstructor(){
         if (ievt%10000 == 0)
             cout << "Processing event: " << ievt << endl;
 
-        // 100 <= eta <= 375 filter
+        // 100 <= HFsumET <= 375 filter
         if (HFsumET < 100.0 || HFsumET > 375.0)
             continue;
 
@@ -99,18 +111,31 @@ void ObsConstructor(){
         float pt_AB = pt_A*pt_B;
 
         // Scaling the created hist and taking the bins content to the array
-        hist_pt_A->Scale();
+        hist_pt_A->Scale(1/hist_pt_A->Integral()); // Defining a normalized histogram
         for (int i=0; i<nBins; i++){
             f_pt[i] = hist_pt_A->GetBinContent(i+1);
         }
         hist_pt_A->Reset();
         
+        // Setting the desired vectors
         vec_f_pt.push_back(f_pt);
         vec_pt_A.push_back(pt_A);
         vec_pt_B.push_back(pt_B);
         vec_pt_AB.push_back(pt_AB);
     }
 
+    // Calculating the std deviation
     float sigma2 = mean(vec_pt_AB) - (mean(vec_pt_A)*mean(vec_pt_B));
     float sigma = sqrt(sigma2);
+
+    vector<float> vec_f_pt_mean;
+    for (int i=0; i<vec_f_pt.size(); i++){
+        vec_f_pt_mean.push_back(mean(vec_f_pt[i]));
+    }
+
+    vector<float> vec_f_pt_mean_times_pt_B;
+    vec_f_pt_mean_times_pt_B = product(vec_f_pt_mean, vec_pt_B);
+
+    float v0pt = (mean(vec_f_pt_mean_times_pt_B)-(mean(vec_f_pt_mean)*mean(vec_pt_B)))/(mean(vec_f_pt_mean)*sigma);
+    cout << v0pt << endl;
 }
