@@ -5,27 +5,24 @@
 using namespace std;
 
 // Calculates the mean of a given vector
-double mean(vector<double> x){
+float mean(vector<float> x){
 
     int N = 0;
-    double acc = 0.0;
+    float acc = 0.0;
     for (int i=0; i<x.size(); i++){
-        if (!TMath::IsNaN(x[i])){
-            acc += x[i];
-            N += 1;
-        }
+        acc += x[i];
+        N += 1;
     }
-    double m = acc/N;
+    float m = acc/N;
     return m;
 }
 
-vector<double> double_vector_mean(vector<vector<double>> x){
+vector<float> double_vector_mean(vector<vector<float>> x, const unsigned int nBins){
 
-    const unsigned int nBins = 97;
     int nEvents_A = x.size();
-    vector<double> vec;
-    for (int i=0; i<nBins; i++){ // pT bins
-        double acc_f_pt = 0;
+    vector<float> vec;
+    for (int i=2; i<nBins; i++){ // pT bins
+        float acc_f_pt = 0;
         for (int j=0; j<nEvents_A; j++){ // Events
             acc_f_pt += x[j][i];
         }
@@ -51,13 +48,13 @@ void ObsConstructor(){
     // Declare arrays and scalars to hold the TTree files
     float_t HFsumET = 0;
     Int_t Ntrk = 0;
-    double_t trkPt[nDummy];
-    double_t trkEta[nDummy];
-    double_t trkPhi[nDummy];
-    double_t trkPtRes[nDummy];
-    double_t trkDzSig[nDummy];
-    double_t trkDxySig[nDummy];
-    double_t trkNpixLayers[nDummy];
+    float_t trkPt[nDummy];
+    float_t trkEta[nDummy];
+    float_t trkPhi[nDummy];
+    float_t trkPtRes[nDummy];
+    float_t trkDzSig[nDummy];
+    float_t trkDxySig[nDummy];
+    float_t trkNpixLayers[nDummy];
 
     // Addresses TTree branches to declared variables
     TTree* fTree = (TTree*)file->Get("demo/HBT");
@@ -72,20 +69,20 @@ void ObsConstructor(){
     fTree->SetBranchAddress("trkNpixLayers", &trkNpixLayers);
 
     //const unsigned int nEvents = 10000;
-    const unsigned int nEvents = fTree->GetEntries(); //MUST BACK TO ORIGINAL VALUE
+    const unsigned int nEvents = fTree->GetEntries(); // MUST BACK TO THIS ORIGINAL VALUE
 
     // Defining auxiliar constants
     const unsigned int nBins = 97; // This way I have 1 bin to a delta pT = 0.1
-    vector<vector<double>> vec_f_pt; // This vector will hold the fractions of pT of all events
-    vector<double> vec_pt_A;
-    vector<double> vec_pt_B;
-    vector<double> vec_pt_AB;
+    vector<vector<float>> vec_f_pt; // This vector will hold the fractions of pT of all events
+    vector<float> vec_pt_A;
+    vector<float> vec_pt_B;
+    vector<float> vec_pt_AB;
 
     TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, 0.3, 10); // Create histogram to scale pT bins and get f(pT)
     for (Long64_t ievt=0; ievt<nEvents; ievt++){ // Loop over the events
-        vector<double> f_pt(nBins, 0.0); // Define vector to hold the fractions of pT in the event
-        double h_pt_A = 0;
-        double h_pt_B = 0;
+        vector<float> f_pt(nBins, 0.0); // Define vector to hold the fractions of pT in the event
+        float h_pt_A = 0;
+        float h_pt_B = 0;
         int nTrk_A = 0;
         int nTrk_B = 0;
 
@@ -99,28 +96,28 @@ void ObsConstructor(){
 
         // Track loop
         for(int iTrk=0; iTrk<Ntrk; iTrk++){ // Loop over the tracks in a event
-            if (trkEta[iTrk] >= -2.4 && trkEta[iTrk] <= -1.0 && !TMath::IsNaN(trkPt[iTrk])){ // Gets subset A [pT] (-2.4 <= pT <= -1.0)
+            if (trkEta[iTrk] >= -2.4 && trkEta[iTrk] <= -1.0 && !TMath::IsNaN(trkPt[iTrk]) && trkPt[iTrk] >= 0.3){ // Gets subset A [pT] (-2.4 <= Eta <= -1.0)
                 h_pt_A += trkPt[iTrk]; // Sum all pT from subset A in the desired range
                 nTrk_A += 1; // Counts the number of pT entries from subset A
                 hist_pt_A->Fill(trkPt[iTrk]); // Fills the auxiliar histogram to scale f(pT) later
+                if (trkPt[iTrk] <= 0.1){
+                    cout << trkPt[iTrk] << endl;
+                }
             }
-            if (trkEta[iTrk] >= 1.0 && trkEta[iTrk] <= 2.4 && !TMath::IsNaN(trkPt[iTrk])){ // Gets subset B [pT] (1.0 <= pT <= 2.4)
+            if (trkEta[iTrk] >= 1.0 && trkEta[iTrk] <= 2.4 && !TMath::IsNaN(trkPt[iTrk]) && trkPt[iTrk] >= 0.3){ // Gets subset B [pT] (1.0 <= Eta <= 2.4)
                 h_pt_B += trkPt[iTrk]; // Sum all pT from subset B
                 nTrk_B += 1; // Counts the number of pT entries from subset B
             }
         }
 
-        if (nTrk_B == 0){ // I'm doing this to avoid division by zero (IDK IF IT'S NEEDED)
-            nTrk_B = 1;
-        }
-        double pt_A = h_pt_A/nTrk_A; // Calculates the mean pT from subset A of each event
-        double pt_B = h_pt_B/nTrk_B; // Calculates the mean pT from subset B of each event
-        double pt_AB = pt_A*pt_B; // [pT]_A * [pT]_B
+        if (nTrk_A == 0) nTrk_A = 1;
+        if (nTrk_B == 0) nTrk_B = 1;
+        float pt_A = h_pt_A/nTrk_A; // Calculates the mean pT from subset A of each event
+        float pt_B = h_pt_B/nTrk_B; // Calculates the mean pT from subset B of each event
+        float pt_AB = pt_A*pt_B; // [pT]_A * [pT]_B
 
         // Scaling the created hist and taking the bins content to the array
-        if (hist_pt_A->Integral() != 0){ // I'm doing this to avoid division by zero in empty fractions bins
-        hist_pt_A->Scale(1/hist_pt_A->Integral()); // Defining a normalized histogram
-        }
+        if (hist_pt_A->Integral() != 0) hist_pt_A->Scale(1/hist_pt_A->Integral()); // Defining a normalized histogram
         for (int i=0; i<nBins; i++){
             f_pt[i] = hist_pt_A->GetBinContent(i+1);
         }
@@ -134,25 +131,31 @@ void ObsConstructor(){
     }
 
     // Calculating the std deviation
-    double sigma2 = mean(vec_pt_AB) - (mean(vec_pt_A)*mean(vec_pt_B));
-    double sigma = sqrt(sigma2);
+    float sigma2 = (mean(vec_pt_AB) - (mean(vec_pt_A)*mean(vec_pt_B)));
+    float sigma = sqrt(sigma2);
 
     int nEvents_A = vec_f_pt.size();
-    vector<vector<double>> vec_pt_B_f_pt(nEvents_A, vector<double>(nBins, 0.0));
+    vector<vector<float>> vec_pt_B_f_pt(nEvents_A, vector<float>(nBins, 0.0));
     for (int j=0; j<nBins; j++){
         for (int i=0; i<nEvents_A; i++){
             vec_pt_B_f_pt[i][j] = vec_pt_B[i]*vec_f_pt[i][j];
         }
     }
 
-    vector<double> vec_v0pt;
-    vector<double> vec_mean_pt_B_f_pt = double_vector_mean(vec_pt_B_f_pt);
-    vector<double> vec_mean_f_pt = double_vector_mean(vec_f_pt);
+    vector<float> vec_v0pt;
+    vector<float> vec_mean_pt_B_f_pt = double_vector_mean(vec_pt_B_f_pt, nBins);
+    vector<float> vec_mean_f_pt = double_vector_mean(vec_f_pt, nBins);
 
-    for (int i=0; i<nBins; i++){
-        double v0pt = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*vec_pt_B[i]))/(vec_mean_f_pt[i]*sigma));
+    for (int i=2; i<nBins; i++){
+        float v0pt = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*vec_pt_B[i]))/(vec_mean_f_pt[i]*sigma));
+        if (TMath::IsNaN(v0pt)) v0pt = 0.0;
         vec_v0pt.push_back(v0pt);
     }
-}
 
-//PROBLEMA EM sigma2 < 0
+    float sum1 = 0;
+    for (int i=0; i<nBins; i++){
+        sum1 += vec_v0pt[i]*vec_mean_f_pt[i];
+    }
+
+    cout << sum1 << endl;
+}
