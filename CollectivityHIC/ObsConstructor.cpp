@@ -43,7 +43,7 @@ void ObsConstructor(){
         exit(1);
     }
 
-    const unsigned int nDummy = 10000; // Used to create a dummy len array to hold the tracks
+    const unsigned int nDummy = 30000; // Used to create a dummy len array to hold the tracks
 
     // Declare arrays and scalars to hold the TTree files
     float_t HFsumET = 0;
@@ -72,7 +72,7 @@ void ObsConstructor(){
     const unsigned int nEvents = fTree->GetEntries(); // MUST BACK TO THIS ORIGINAL VALUE
 
     // Defining auxiliar constants
-    const unsigned int nBins = 97; // This way I have 1 bin to a delta pT = 0.1
+    const unsigned int nBins = 97; // This way I have 1 bin to a delta pT = 0.1 in the range [0.3-10.0]
     vector<vector<float>> vec_f_pt; // This vector will hold the fractions of pT of all events
     vector<float> vec_pt_A;
     vector<float> vec_pt_B;
@@ -146,16 +146,39 @@ void ObsConstructor(){
     vector<float> vec_mean_pt_B_f_pt = double_vector_mean(vec_pt_B_f_pt, nBins);
     vector<float> vec_mean_f_pt = double_vector_mean(vec_f_pt, nBins);
 
-    for (int i=2; i<nBins; i++){
-        float v0pt = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*vec_pt_B[i]))/(vec_mean_f_pt[i]*sigma));
+    for (int i=0; i<nBins; i++){
+        float v0pt = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*mean(vec_pt_B)))/(vec_mean_f_pt[i]*sigma));
         if (TMath::IsNaN(v0pt)) v0pt = 0.0;
         vec_v0pt.push_back(v0pt);
     }
 
     float sum1 = 0;
+    float sum2_left = 0;
+    float acc_sum2_right = 0;
     for (int i=0; i<nBins; i++){
         sum1 += vec_v0pt[i]*vec_mean_f_pt[i];
+        float pT = (i*0.1-0.05+0.1);
+        sum2_left += pT*vec_v0pt[i]*vec_mean_f_pt[i];
+        acc_sum2_right += vec_mean_f_pt[i];
+    }
+    float sum2_right = sigma*acc_sum2_right;
+
+    cout << "Sum rule #1: " << sum1 << " = 0" << endl;
+    cout << "Sum rule #2: " << sum2_left << " = " << sum2_right << endl;
+
+    float arr_pT[nBins];
+    float arr_v0pt[nBins];
+    for (int i=0; i<nBins; i++){
+        arr_pT[i] = (i*0.1-0.05+0.1);
+        arr_v0pt[i] = vec_v0pt[i];
     }
 
-    cout << sum1 << endl;
+    auto c_v0pt = new TCanvas("c_v0pt", "v0(pT) vs pT", 800, 600);
+    auto gr_v0pt = new TGraph(nBins, arr_pT, arr_v0pt);
+    gr_v0pt->SetTitle("v_{0}(p_{T}) vs p_{T}; p_{T} (GeV/c); v_{0}(p_{T}) (GeV/c)");
+    gr_v0pt->SetMarkerSize(0.5);
+    gr_v0pt->SetMarkerColor(kBlue);
+    gr_v0pt->Draw("AP");
+    c_v0pt->Update();
+    c_v0pt->SaveAs("v0pt.png");
 }
