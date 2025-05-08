@@ -175,10 +175,15 @@ void ObsConstructor(){
 
     auto c_v0pt = new TCanvas("c_v0pt", "v0(pT) vs pT", 800, 600);
     auto gr_v0pt = new TGraph(nBins, arr_pT, arr_v0pt);
-    gr_v0pt->SetTitle("v_{0}(p_{T}) vs p_{T}; p_{T} (GeV/c); v_{0}(p_{T}) (GeV/c)");
-    gr_v0pt->SetMarkerSize(0.5);
+    gr_v0pt->SetTitle("v_{0}(p_{T}) vs p_{T}; p_{T} (GeV/c); v_{0}(p_{T})");
+    gr_v0pt->GetXaxis()->SetLimits(0, 10);
+    gr_v0pt->SetMinimum(-0.1);
+    gr_v0pt->SetMaximum(0.4);
+    gr_v0pt->SetMarkerStyle(20);
+    gr_v0pt->SetMarkerSize(0.8);
     gr_v0pt->SetMarkerColor(kBlue);
     gr_v0pt->Draw("AP");
+    c_v0pt->SetLogx();
     c_v0pt->Update();
     c_v0pt->SaveAs("v0pt.png");
 }
