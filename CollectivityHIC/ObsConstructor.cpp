@@ -35,11 +35,13 @@ TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* t
     TGraph* g = new TGraph(nPoints, x, y);
     g->SetTitle(title);
     g->GetXaxis()->SetLimits(xmin, xmax);
+    g->GetXaxis()->CenterTitle();
     g->SetMinimum(ymin);
     g->SetMaximum(ymax);
     g->SetMarkerStyle(style);
     g->SetMarkerColor(color);
     g->SetMarkerSize(1.2);
+    
 
     return g;
 }
@@ -214,19 +216,21 @@ void ObsConstructor(){
 
     auto c_v0pt = new TCanvas("c_v0pt", "Analysis plot", 1000, 500);
     c_v0pt->Divide(2, 1);
-    TGraph* gr_v0pt = create_TGraph(nBins, arr_pT, arr_v0pt, "v_{0}(p_{T}) vs p_{T}; p_{T} (GeV/c); v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.4, 20, 8);
-    TGraph* gr_v0pt_pink = create_TGraph(nPoints_ATLAS, x_v0pt_pink, y_v0pt_pink, "v_{0}(p_{T}) vs p_{T}; p_{T} (GeV/c); v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.4, 47, 6);
-    TGraph* gr_v0pt_purple = create_TGraph(nPoints_ATLAS, x_v0pt_purple, y_v0pt_purple, "v_{0}(p_{T}) vs p_{T}; p_{T} (GeV/c); v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.41, 34, 9);
-    TGraph* gr_v0ptv0 = create_TGraph(nBins, arr_pT, arr_v0ptv0, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} (GeV/c); v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 20, 8);
-    TGraph* gr_v0ptv0_pink = create_TGraph(nPoints_ATLAS, x_v0ptv0_pink, y_v0ptv0_pink, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} (GeV/c); v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 47, 6);
-    TGraph* gr_v0ptv0_purple = create_TGraph(nPoints_ATLAS, x_v0ptv0_purple, y_v0ptv0_purple, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} (GeV/c); v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 34, 9);
-    auto legend_v0pt = new TLegend();
-    auto legend_v0ptv0 = new TLegend();
+    TGraph* gr_v0pt = create_TGraph(nBins, arr_pT, arr_v0pt, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 20, 8);
+    TGraph* gr_v0pt_pink = create_TGraph(nPoints_ATLAS, x_v0pt_pink, y_v0pt_pink, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 47, 6);
+    TGraph* gr_v0pt_purple = create_TGraph(nPoints_ATLAS, x_v0pt_purple, y_v0pt_purple, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.41, 34, 9);
+    TGraph* gr_v0ptv0 = create_TGraph(nBins, arr_pT, arr_v0ptv0, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 20, 8);
+    TGraph* gr_v0ptv0_pink = create_TGraph(nPoints_ATLAS, x_v0ptv0_pink, y_v0ptv0_pink, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 47, 6);
+    TGraph* gr_v0ptv0_purple = create_TGraph(nPoints_ATLAS, x_v0ptv0_purple, y_v0ptv0_purple, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 34, 9);
+    auto legend_v0pt = new TLegend(0.10, 0.75, 0.50, 0.90);
+    auto legend_v0ptv0 = new TLegend(0.10, 0.75, 0.50, 0.90);
+    legend_v0pt->SetTextSize(0.029);
     legend_v0pt->AddEntry(gr_v0pt, "CMS OpenData 2.76 TeV (50-70%)", "p");
     legend_v0pt->AddEntry(gr_v0pt_purple, "ATLAS 5.02 TeV (50-60%)", "p");
     legend_v0pt->AddEntry(gr_v0pt_pink, "ATLAS 5.02 TeV (60-70%)", "p");
     legend_v0pt->SetBorderSize(0);
     legend_v0pt->SetFillStyle(0);
+    legend_v0ptv0->SetTextSize(0.029);
     legend_v0ptv0->AddEntry(gr_v0pt, "CMS OpenData 2.76 TeV (50-70%)", "p");
     legend_v0ptv0->AddEntry(gr_v0pt_purple, "ATLAS 5.02 TeV (50-60%)", "p");
     legend_v0ptv0->AddEntry(gr_v0pt_pink, "ATLAS 5.02 TeV (60-70%)", "p");
