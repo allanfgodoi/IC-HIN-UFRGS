@@ -58,7 +58,8 @@ void ObsConstructor(){
     const unsigned int nDummy = 30000; // Used to create a dummy len array to hold the tracks
 
     // Declare arrays and scalars to hold the TTree files
-    float_t HFsumET = 0;
+    float_t HFsumET = 0.0;
+    float_t pvZ = 0.0;
     Int_t Ntrk = 0;
     float_t trkPt[nDummy];
     float_t trkEta[nDummy];
@@ -71,6 +72,7 @@ void ObsConstructor(){
     // Addresses TTree branches to declared variables
     TTree* fTree = (TTree*)file->Get("demo/HBT");
     fTree->SetBranchAddress("HFsumET", &HFsumET);
+    fTree->SetBranchAddress("pvZ", &pvZ);
     fTree->SetBranchAddress("Ntrk", &Ntrk);
     fTree->SetBranchAddress("trkPt", &trkPt);
     fTree->SetBranchAddress("trkEta", &trkEta);
@@ -84,8 +86,8 @@ void ObsConstructor(){
     const unsigned int nEvents = fTree->GetEntries(); // MUST BACK TO THIS ORIGINAL VALUE
 
     // Defining auxiliar constants
-    const unsigned int nBins = 97; // This way I have 1 bin to a delta pT = 0.1 in the range [0.3-10.0]
-    //const unsigned int nBins = 29;
+    const unsigned int nBins = 95; // This way I have 1 bin to a delta pT = 0.1 in the range [0.5-10.0]
+    const float min_pT = 0.5; // Minimum pT in the range
     int Eta_gap = 2;
     vector<vector<float>> vec_f_pt; // This vector will hold the fractions of pT of all events
     vector<float> vec_pt_A;
@@ -108,16 +110,28 @@ void ObsConstructor(){
         
         if (HFsumET < 100.0 || HFsumET > 375.0) // Applying 100 <= HFsumET <= 375 filter (related to centrality)
             continue;
+        if (pvZ < -15.0 || pvZ > 15.0) // Applying |pvZ| < 15 cm filter
+            continue;
 
         // Track loop
         for(int iTrk=0; iTrk<Ntrk; iTrk++){ // Loop over the tracks in a event
-            if (trkEta[iTrk] >= -2.4 && trkEta[iTrk] <= -Eta_gap/2 && !TMath::IsNaN(trkPt[iTrk]) && trkPt[iTrk] >= 0.3){ // Gets subset A [pT]
+            // Getting subset A: [pT]_A
+            if (trkEta[iTrk] >= -2.4 && trkEta[iTrk] <= -Eta_gap/2 && 
+                trkPt[iTrk] >= 0.5 && trkPt[iTrk] <= 10.0 && 
+                trkDzSig[iTrk] > -3.0 && trkDzSig[iTrk] < 3.0 && 
+                trkDxySig[iTrk] > -3.0 && trkDxySig[iTrk] < 3.0 && 
+                trkPtRes[iTrk] < 0.1){
                 h_pt_A += trkPt[iTrk]; // Sum all pT from subset A in the desired range
                 nTrk_A += 1; // Counts the number of pT entries from subset A
                 hist_pt_A->Fill(trkPt[iTrk]); // Fills the auxiliar histogram to scale f(pT) later
                 hist_all_pt_A->Fill(trkPt[iTrk]);
             }
-            if (trkEta[iTrk] >= Eta_gap/2 && trkEta[iTrk] <= 2.4 && !TMath::IsNaN(trkPt[iTrk]) && trkPt[iTrk] >= 0.3){ // Gets subset B [pT]
+            // Getting subset B: [pT]_B // I AM STILL CONSIDERING WITHOUT PT REF
+            if (trkEta[iTrk] >= Eta_gap/2 && trkEta[iTrk] <= 2.4 && 
+                trkPt[iTrk] >= 0.5 && trkPt[iTrk] <= 10.0 && 
+                trkDzSig[iTrk] > -3.0 && trkDzSig[iTrk] < 3.0 && 
+                trkDxySig[iTrk] > -3.0 && trkDxySig[iTrk] < 3.0 && 
+                trkPtRes[iTrk] < 0.1){
                 h_pt_B += trkPt[iTrk]; // Sum all pT from subset B
                 nTrk_B += 1; // Counts the number of pT entries from subset B
             }
@@ -201,7 +215,7 @@ void ObsConstructor(){
     float acc_sum2_v0ptv0_right = 0;
     for (int i=0; i<nBins; i++){
         sum1_v0ptv0 += vec_v0ptv0[i]*vec_mean_f_pt[i];
-        float pT = (i*0.1-0.05+0.4);
+        float pT = (i*0.1+(min_pT+0.1)-0.05);
         sum2_v0ptv0_left += pT*vec_v0ptv0[i]*vec_mean_f_pt[i];
         acc_sum2_v0ptv0_right += vec_mean_f_pt[i];
     }
@@ -216,7 +230,7 @@ void ObsConstructor(){
     float arr_v0pt[nBins];
     float arr_v0ptv0[nBins];
     for (int i=0; i<nBins; i++){
-        arr_pT[i] = (i*0.1-0.05+0.4);
+        arr_pT[i] = (i*0.1+(min_pT+0.1)-0.05);
         arr_v0pt[i] = vec_v0pt[i];
         arr_v0ptv0[i] = vec_v0ptv0[i];
     }
