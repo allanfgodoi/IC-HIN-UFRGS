@@ -1,0 +1,133 @@
+// TGraph creator function
+TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* title, float xmin, int xmax, float ymin, float ymax, int style, int color){
+    TGraph* g = new TGraph(nPoints, x, y);
+    g->SetTitle(title);
+    g->GetXaxis()->SetLimits(xmin, xmax); // X axis range
+    g->GetXaxis()->CenterTitle(); // Center axis label
+    g->GetYaxis()->CenterTitle(); // Center axis label
+    g->SetMinimum(ymin); // Y axis range
+    g->SetMaximum(ymax); // Y axis range
+    g->SetMarkerStyle(style);
+    g->SetMarkerColor(color);
+    g->SetMarkerSize(1.2);
+    return g;
+}
+
+TGraph* adjustments_TGraph(TGraph g, int mksize, int mkstyle){
+    g->SetMarkerStyle(mkstyle);
+    return g;
+}
+
+void DoPlot4(TString filered, TString fileblue){
+    TString filename_red = filered;
+    TString filename_blue = fileblue;
+
+    // Opening TFiles
+    TFile *file_red;
+    if (!gSystem->AccessPathName(filename_red)) // Verify if the file really exists
+        file_red = TFile::Open(filename_red, "READ");
+    if (!file_red) {
+        cout << "ERROR: couldn't open " << filename_red;
+        exit(1);
+    }
+    TFile *file_blue;
+    if (!gSystem->AccessPathName(filename_blue)) // Verify if the file really exists
+        file_blue = TFile::Open(filename_blue, "READ");
+    if (!file_blue) {
+        cout << "ERROR: couldn't open " << filename_blue;
+        exit(1);
+    }
+
+    // Setting up TGraph variables
+    TGraph *gr_v0pt_red = adjustments_TGraph((TGraph*)file_red->Get("Graph;1"), 47, 1);
+    TGraph *gr_v0ptv0_red = adjustments_TGraph((TGraph*)file_red->Get("Graph;2"), 47, 1);
+    TGraph *gr_v0pt_blue = (TGraph*)file_blue->Get("Graph;1");
+    TGraph *gr_v0ptv0_blue = (TGraph*)file_blue->Get("Graph;2");
+
+    /*
+    // Reading TGraphs
+    file_red->GetObject("v0pt", gr_v0pt_red);
+    file_red->GetObject("v0ptv0", gr_v0ptv0_red);
+    file_blue->GetObject("v0pt", gr_v0pt_blue);
+    file_blue->GetObject("v0ptv0", gr_v0ptv0_blue);
+
+    if (!gr_v0pt_red) std::cerr << "Erro ao carregar graph1_file1!" << std::endl;
+    if (!gr_v0ptv0_red) std::cerr << "Erro ao carregar graph2_file1!" << std::endl;
+    if (!gr_v0pt_blue) std::cerr << "Erro ao carregar graph1_file2!" << std::endl;
+    if (!gr_v0ptv0_blue) std::cerr << "Erro ao carregar graph2_file2!" << std::endl;
+    */
+
+    // Opening and reading file containing ATLAS results
+    // "purple": 50-60% centrality
+    // "pink": 60-70% centrality
+    const int nPoints_ATLAS = 29;
+    float x_v0pt_pink[nPoints_ATLAS], y_v0pt_pink[nPoints_ATLAS];
+    float x_v0pt_purple[nPoints_ATLAS], y_v0pt_purple[nPoints_ATLAS];
+    float x_v0ptv0_pink[nPoints_ATLAS], y_v0ptv0_pink[nPoints_ATLAS];
+    float x_v0ptv0_purple[nPoints_ATLAS], y_v0ptv0_purple[nPoints_ATLAS];
+    ifstream v0pt_pink("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0pt_pink.txt");
+    ifstream v0pt_purple("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0pt_purple.txt");
+    ifstream v0ptv0_pink("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0ptv0_pink.txt");
+    ifstream v0ptv0_purple("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0ptv0_purple.txt");
+    for (int i=0; i<nPoints_ATLAS; i++){
+        v0pt_pink >> x_v0pt_pink[i] >> y_v0pt_pink[i];
+        v0pt_purple >> x_v0pt_purple[i] >> y_v0pt_purple[i];
+        v0ptv0_pink >> x_v0ptv0_pink[i] >> y_v0ptv0_pink[i];
+        v0ptv0_purple >> x_v0ptv0_purple[i] >> y_v0ptv0_purple[i];
+    }
+
+    // Creates canvas and TGraphs
+    auto c_v0pt = new TCanvas("c_v0pt", "Analysis plot", 1000, 500);
+    c_v0pt->Divide(2, 1);
+    TGraph* gr_v0pt_pink = create_TGraph(nPoints_ATLAS, x_v0pt_pink, y_v0pt_pink, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 47, 6);
+    TGraph* gr_v0pt_purple = create_TGraph(nPoints_ATLAS, x_v0pt_purple, y_v0pt_purple, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.41, 34, 52);
+    TGraph* gr_v0ptv0_pink = create_TGraph(nPoints_ATLAS, x_v0ptv0_pink, y_v0ptv0_pink, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 47, 6);
+    TGraph* gr_v0ptv0_purple = create_TGraph(nPoints_ATLAS, x_v0ptv0_purple, y_v0ptv0_purple, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 34, 52);
+
+    // Setting up the legends
+    auto legend_v0pt = new TLegend(0.125, 0.55, 0.585, 0.885);
+    auto legend_v0ptv0 = new TLegend(0.125, 0.55, 0.585, 0.885);
+    legend_v0pt->SetTextSize(0.0325);
+    legend_v0pt->SetMargin(0.05);
+    legend_v0pt->AddEntry((TObject*)0, "#font[62]{Pb+Pb,   #eta_{gap} = 1}", "");
+    legend_v0pt->AddEntry((TObject*)0, "#font[62]{p_{T}^{ref} 0.5-2 GeV}", "");
+    legend_v0pt->AddEntry(gr_v0pt_red, "CMS OpenData 2.76 TeV (50-60%)", "p");
+    legend_v0pt->AddEntry(gr_v0pt_blue, "CMS OpenData 2.76 TeV (60-70%)", "p");
+    legend_v0pt->AddEntry(gr_v0pt_purple, "ATLAS 5.02 TeV (50-60%)", "p");
+    legend_v0pt->AddEntry(gr_v0pt_pink, "ATLAS 5.02 TeV (60-70%)", "p");
+    legend_v0pt->SetBorderSize(0);
+    legend_v0pt->SetFillStyle(0);
+    legend_v0ptv0->SetTextSize(0.0325);
+    legend_v0ptv0->SetMargin(0.05);
+    legend_v0ptv0->AddEntry((TObject*)0, "#font[62]{Pb+Pb,   #eta_{gap} = 1}", "");
+    legend_v0ptv0->AddEntry((TObject*)0, "#font[62]{p_{T}^{ref} 0.5-2 GeV}", "");
+    legend_v0ptv0->AddEntry(gr_v0ptv0_red, "CMS OpenData 2.76 TeV (50-60%)", "p");
+    legend_v0ptv0->AddEntry(gr_v0ptv0_blue, "CMS OpenData 2.76 TeV (60-70%)", "p");
+    legend_v0ptv0->AddEntry(gr_v0pt_purple, "ATLAS 5.02 TeV (50-60%)", "p");
+    legend_v0ptv0->AddEntry(gr_v0pt_pink, "ATLAS 5.02 TeV (60-70%)", "p");
+    legend_v0ptv0->SetBorderSize(0);
+    legend_v0ptv0->SetFillStyle(0);
+
+    // Drawing v0(pT) plot
+    c_v0pt->cd(1);
+    gr_v0pt_red->Draw("AP");
+    gr_v0pt_blue->Draw("P SAME");
+    gr_v0pt_pink->Draw("P SAME");
+    gr_v0pt_purple->Draw("P SAME");
+    legend_v0pt->Draw();
+    gPad->SetLogx();
+
+    // Drawing v0(pT)/v0 plot
+    c_v0pt->cd(2);
+    gr_v0ptv0_red->Draw("AP");
+    gr_v0ptv0_blue->Draw("P SAME");
+    gr_v0ptv0_pink->Draw("P SAME");
+    gr_v0ptv0_purple->Draw("P SAME");
+    legend_v0ptv0->Draw();
+    gPad->SetLogx();
+
+    // Saving canvas as pdf
+    c_v0pt->Update();
+    c_v0pt->SaveAs("plots.pdf");
+    delete c_v0pt;
+}

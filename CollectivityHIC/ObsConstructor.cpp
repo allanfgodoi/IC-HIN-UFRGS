@@ -4,6 +4,21 @@
 #include "TMath.h"
 using namespace std;
 
+// TGraph creator function
+TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* title, float xmin, int xmax, float ymin, float ymax, int style, int color){
+    TGraph* g = new TGraph(nPoints, x, y);
+    g->SetTitle(title);
+    g->GetXaxis()->SetLimits(xmin, xmax); // X axis range
+    g->GetXaxis()->CenterTitle(); // Center axis label
+    g->GetYaxis()->CenterTitle(); // Center axis label
+    g->SetMinimum(ymin); // Y axis range
+    g->SetMaximum(ymax); // Y axis range
+    g->SetMarkerStyle(style);
+    g->SetMarkerColor(color);
+    g->SetMarkerSize(1.2);
+    return g;
+}
+
 // Calculates the mean of a given vector
 float mean(vector<float> x){
     int N = 0;
@@ -29,23 +44,15 @@ vector<float> double_vector_mean(vector<vector<float>> x, const unsigned int nBi
     return vec;
 }
 
-// TGraph creator function
-TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* title, float xmin, int xmax, float ymin, float ymax, int style, int color){
-    TGraph* g = new TGraph(nPoints, x, y);
-    g->SetTitle(title);
-    g->GetXaxis()->SetLimits(xmin, xmax); // X axis range
-    g->GetXaxis()->CenterTitle(); // Center axis label
-    g->GetYaxis()->CenterTitle(); // Center axis label
-    g->SetMinimum(ymin); // Y axis range
-    g->SetMaximum(ymax); // Y axis range
-    g->SetMarkerStyle(style);
-    g->SetMarkerColor(color);
-    g->SetMarkerSize(1.2);
-    return g;
-}
+struct Gathered_Data{
+    vector<vector<float>> vec_f_pt;
+    vector<float> vec_pt_A;
+    vector<float> vec_pt_B;
+    vector<float> vec_pt_AB;
+    float mean_pt;
+};
 
-//void ObsConstructor(int Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Filename){
-void ObsConstructor(){
+Gathered_Data DataGathering(int Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Savename){
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
     TString filename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/HiForestAOD_UPC.root";
@@ -86,28 +93,19 @@ void ObsConstructor(){
     // Defining auxiliar constants
     float pt_min = 0.5;
     float pt_max = 10.0;
-
-    /*
-    float eta_gap = Eta_gap;
+    int eta_gap = Eta_gap;
     float HFSET_min = HFSET_Min;
     float HFSET_max = HFSET_Max;
     float ptr_min = pTr_Min;
     float ptr_max = pTr_Max;
-    string savename = Savename;
-    */
+    TString savename = Savename;
 
-    float eta_gap = 1;
-    float HFSET_min = 210.0;
-    float HFSET_max = 375.0;
-    float ptr_min = 0.5;
-    float ptr_max = 2.0;
-    TString savename = "test.root";
     const unsigned int nBins = 95; // This way I have 1 bin to a delta pT = 0.1 in the range
     const unsigned int nEvents = fTree->GetEntries();
-    vector<vector<float>> vec_f_pt; // This vector will hold the fractions of pT of all events
-    vector<float> vec_pt_A;
-    vector<float> vec_pt_B;
-    vector<float> vec_pt_AB;
+    vector<vector<float>> Vec_f_pt; // This vector will hold the fractions of pT of all events
+    vector<float> Vec_pt_A;
+    vector<float> Vec_pt_B;
+    vector<float> Vec_pt_AB;
 
     TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", nBins, pt_min, pt_max); // Create histogram to calculate <pT_A> (all events)
     TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, pt_min, pt_max); // Create histogram to scale pT bins and get f(pT)
@@ -166,11 +164,49 @@ void ObsConstructor(){
         hist_pt_A->Reset();
         
         // Setting the desired vectors
-        vec_f_pt.push_back(f_pt);
-        vec_pt_A.push_back(pt_A);
-        vec_pt_B.push_back(pt_B);
-        vec_pt_AB.push_back(pt_AB);
+        Vec_f_pt.push_back(f_pt);
+        Vec_pt_A.push_back(pt_A);
+        Vec_pt_B.push_back(pt_B);
+        Vec_pt_AB.push_back(pt_AB);
     }
+
+    float Mean_pt = hist_all_pt_A->GetMean();
+
+    delete hist_all_pt_A;
+    delete hist_pt_A;
+
+    Gathered_Data struct_data;
+    struct_data.vec_f_pt = Vec_f_pt;
+    struct_data.vec_pt_A = Vec_pt_A;
+    struct_data.vec_pt_B = Vec_pt_B;
+    struct_data.vec_pt_AB = Vec_pt_AB;
+    struct_data.mean_pt = Mean_pt;
+
+    return struct_data;
+}
+
+void v0pt_Constructor(float iEta_gap, float iHFSET_Min, float iHFSET_Max, float ipTr_Min, float ipTr_Max, TString iSavename, int iMarker, int iColor){
+
+    int Eta_gap = iEta_gap;
+    float HFSET_Min = iHFSET_Min;
+    float HFSET_Max = iHFSET_Max;
+    float pTr_Min = ipTr_Min;
+    float pTr_Max = ipTr_Max;
+    TString Savename = iSavename;
+
+    int marker = iMarker;
+    int color = iColor;
+
+    constexpr float pt_min = 0.5;
+    constexpr float pt_max = 10.0;
+    constexpr int nBins = 10*(pt_max-pt_min);
+
+    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Savename);
+    vector<vector<float>> vec_f_pt = gData.vec_f_pt;
+    vector<float> vec_pt_A = gData.vec_pt_A;
+    vector<float> vec_pt_B = gData.vec_pt_B;
+    vector<float> vec_pt_AB = gData.vec_pt_AB;
+    float mean_pt = gData.mean_pt;
 
     // Calculating the std deviation
     float sigma2 = (mean(vec_pt_AB) - (mean(vec_pt_A)*mean(vec_pt_B)));
@@ -217,7 +253,7 @@ void ObsConstructor(){
 
 
     // Calculating v0(pT)/v0
-    float mean_pt = hist_all_pt_A->GetMean(); // Gets <pT_A> from previously created hist
+    // Gets <pT_A> from previously created hist
     float v0 = sigma/mean_pt; // Calculates the scaled v0
     vector<float> vec_v0ptv0;
     for (int i=0; i<nBins; i++){
@@ -250,11 +286,15 @@ void ObsConstructor(){
         arr_v0ptv0[i] = vec_v0ptv0[i];
     }
 
-    TGraph* gr_v0pt = create_TGraph(nBins, arr_pT, arr_v0pt, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 20, 8);
-    TGraph* gr_v0ptv0 = create_TGraph(nBins, arr_pT, arr_v0ptv0, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 20, 8);
+    TGraph* gr_v0pt = create_TGraph(nBins, arr_pT, arr_v0pt, "v0pt", 0.0, 10.0, -0.1, 0.42, marker, color);
+    TGraph* gr_v0ptv0 = create_TGraph(nBins, arr_pT, arr_v0ptv0, "v0ptv0", 0.0, 10.0, -4.0, 28.0, marker, color);
 
-    TFile *save_file = new TFile(savename, "RECREATE");
+    TFile *save_file = new TFile(Savename, "RECREATE");
     gr_v0pt->Write();
     gr_v0ptv0->Write();
     save_file->Close();
+}
+
+void v0_Constructor(){
+    cout << "WIP" << endl;
 }
