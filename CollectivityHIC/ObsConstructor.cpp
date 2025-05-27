@@ -44,6 +44,7 @@ TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* t
     return g;
 }
 
+//void ObsConstructor(int Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Filename){
 void ObsConstructor(){
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
@@ -82,20 +83,34 @@ void ObsConstructor(){
     fTree->SetBranchAddress("trkDxySig", &trkDxySig);
     fTree->SetBranchAddress("trkNpixLayers", &trkNpixLayers);
 
-    //const unsigned int nEvents = 10000;
-    const unsigned int nEvents = fTree->GetEntries(); // MUST BACK TO THIS ORIGINAL VALUE
-
     // Defining auxiliar constants
-    const unsigned int nBins = 95; // This way I have 1 bin to a delta pT = 0.1 in the range [0.5-10.0]
-    const float min_pT = 0.5; // Minimum pT in the range
-    int Eta_gap = 2;
+    float pt_min = 0.5;
+    float pt_max = 10.0;
+
+    /*
+    float eta_gap = Eta_gap;
+    float HFSET_min = HFSET_Min;
+    float HFSET_max = HFSET_Max;
+    float ptr_min = pTr_Min;
+    float ptr_max = pTr_Max;
+    string savename = Savename;
+    */
+
+    float eta_gap = 1;
+    float HFSET_min = 210.0;
+    float HFSET_max = 375.0;
+    float ptr_min = 0.5;
+    float ptr_max = 2.0;
+    TString savename = "test.root";
+    const unsigned int nBins = 95; // This way I have 1 bin to a delta pT = 0.1 in the range
+    const unsigned int nEvents = fTree->GetEntries();
     vector<vector<float>> vec_f_pt; // This vector will hold the fractions of pT of all events
     vector<float> vec_pt_A;
     vector<float> vec_pt_B;
     vector<float> vec_pt_AB;
 
-    TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", nBins, 0.3, 10); // Create histogram to calculate <pT_A> (all events)
-    TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, 0.3, 10); // Create histogram to scale pT bins and get f(pT)
+    TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", nBins, pt_min, pt_max); // Create histogram to calculate <pT_A> (all events)
+    TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, pt_min, pt_max); // Create histogram to scale pT bins and get f(pT)
     for (Long64_t ievt=0; ievt<nEvents; ievt++){ // Loop over the events
         vector<float> f_pt(nBins, 0.0); // Define vector to hold the fractions of pT in the event
         float h_pt_A = 0;
@@ -108,7 +123,7 @@ void ObsConstructor(){
             cout << "Processing event: " << ievt << endl;
 
         
-        if (HFsumET < 100.0 || HFsumET > 375.0) // Applying 100 <= HFsumET <= 375 filter (related to centrality)
+        if (HFsumET < HFSET_min || HFSET_max > 375.0) // Applying 100 <= HFsumET <= 375 filter (related to centrality)
             continue;
         if (pvZ < -15.0 || pvZ > 15.0) // Applying |pvZ| < 15 cm filter
             continue;
@@ -116,7 +131,7 @@ void ObsConstructor(){
         // Track loop
         for(int iTrk=0; iTrk<Ntrk; iTrk++){ // Loop over the tracks in a event
             // Getting subset A: [pT]_A
-            if (trkEta[iTrk] >= -2.4 && trkEta[iTrk] <= -Eta_gap/2 && 
+            if (trkEta[iTrk] >= -2.4 && trkEta[iTrk] <= -eta_gap/2 && 
                 trkPt[iTrk] >= 0.5 && trkPt[iTrk] <= 10.0 && 
                 trkDzSig[iTrk] > -3.0 && trkDzSig[iTrk] < 3.0 && 
                 trkDxySig[iTrk] > -3.0 && trkDxySig[iTrk] < 3.0 && 
@@ -126,9 +141,9 @@ void ObsConstructor(){
                 hist_pt_A->Fill(trkPt[iTrk]); // Fills the auxiliar histogram to scale f(pT) later
                 hist_all_pt_A->Fill(trkPt[iTrk]);
             }
-            // Getting subset B: [pT]_B // I AM STILL CONSIDERING WITHOUT PT REF
-            if (trkEta[iTrk] >= Eta_gap/2 && trkEta[iTrk] <= 2.4 && 
-                trkPt[iTrk] >= 0.5 && trkPt[iTrk] <= 10.0 && 
+            // Getting subset B: [pT]_B
+            if (trkEta[iTrk] >= eta_gap/2 && trkEta[iTrk] <= 2.4 && 
+                trkPt[iTrk] >= ptr_min && trkPt[iTrk] <= ptr_max && 
                 trkDzSig[iTrk] > -3.0 && trkDzSig[iTrk] < 3.0 && 
                 trkDxySig[iTrk] > -3.0 && trkDxySig[iTrk] < 3.0 && 
                 trkPtRes[iTrk] < 0.1){
@@ -189,7 +204,7 @@ void ObsConstructor(){
     float acc_sum2_v0pt_right = 0;
     for (int i=0; i<nBins; i++){
         sum1_v0pt += vec_v0pt[i]*vec_mean_f_pt[i];
-        float pT = (i*0.1-0.05+0.4);
+        float pT = (i*0.1+(pt_min+0.1)-0.05);
         sum2_v0pt_left += pT*vec_v0pt[i]*vec_mean_f_pt[i];
         acc_sum2_v0pt_right += vec_mean_f_pt[i];
     }
@@ -215,7 +230,7 @@ void ObsConstructor(){
     float acc_sum2_v0ptv0_right = 0;
     for (int i=0; i<nBins; i++){
         sum1_v0ptv0 += vec_v0ptv0[i]*vec_mean_f_pt[i];
-        float pT = (i*0.1+(min_pT+0.1)-0.05);
+        float pT = (i*0.1+(pt_min+0.1)-0.05);
         sum2_v0ptv0_left += pT*vec_v0ptv0[i]*vec_mean_f_pt[i];
         acc_sum2_v0ptv0_right += vec_mean_f_pt[i];
     }
@@ -230,73 +245,16 @@ void ObsConstructor(){
     float arr_v0pt[nBins];
     float arr_v0ptv0[nBins];
     for (int i=0; i<nBins; i++){
-        arr_pT[i] = (i*0.1+(min_pT+0.1)-0.05);
+        arr_pT[i] = (i*0.1+(pt_min+0.1)-0.05);
         arr_v0pt[i] = vec_v0pt[i];
         arr_v0ptv0[i] = vec_v0ptv0[i];
     }
 
-    // Opening and reading file containing ATLAS results
-    // "purple": 50-60% centrality
-    // "pink": 60-70% centrality
-    const int nPoints_ATLAS = 29;
-    float x_v0pt_pink[nPoints_ATLAS], y_v0pt_pink[nPoints_ATLAS];
-    float x_v0pt_purple[nPoints_ATLAS], y_v0pt_purple[nPoints_ATLAS];
-    float x_v0ptv0_pink[nPoints_ATLAS], y_v0ptv0_pink[nPoints_ATLAS];
-    float x_v0ptv0_purple[nPoints_ATLAS], y_v0ptv0_purple[nPoints_ATLAS];
-    ifstream v0pt_pink("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0pt_pink.txt");
-    ifstream v0pt_purple("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0pt_purple.txt");
-    ifstream v0ptv0_pink("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0ptv0_pink.txt");
-    ifstream v0ptv0_purple("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0ptv0_purple.txt");
-    for (int i=0; i<nPoints_ATLAS; i++){
-        v0pt_pink >> x_v0pt_pink[i] >> y_v0pt_pink[i];
-        v0pt_purple >> x_v0pt_purple[i] >> y_v0pt_purple[i];
-        v0ptv0_pink >> x_v0ptv0_pink[i] >> y_v0ptv0_pink[i];
-        v0ptv0_purple >> x_v0ptv0_purple[i] >> y_v0ptv0_purple[i];
-    }
-
-    // Creates canvas and TGraphs
-    auto c_v0pt = new TCanvas("c_v0pt", "Analysis plot", 1000, 500);
-    c_v0pt->Divide(2, 1);
     TGraph* gr_v0pt = create_TGraph(nBins, arr_pT, arr_v0pt, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 20, 8);
-    TGraph* gr_v0pt_pink = create_TGraph(nPoints_ATLAS, x_v0pt_pink, y_v0pt_pink, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 47, 6);
-    TGraph* gr_v0pt_purple = create_TGraph(nPoints_ATLAS, x_v0pt_purple, y_v0pt_purple, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.41, 34, 9);
     TGraph* gr_v0ptv0 = create_TGraph(nBins, arr_pT, arr_v0ptv0, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 20, 8);
-    TGraph* gr_v0ptv0_pink = create_TGraph(nPoints_ATLAS, x_v0ptv0_pink, y_v0ptv0_pink, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 47, 6);
-    TGraph* gr_v0ptv0_purple = create_TGraph(nPoints_ATLAS, x_v0ptv0_purple, y_v0ptv0_purple, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 34, 9);
 
-    // Setting up the legends
-    auto legend_v0pt = new TLegend(0.10, 0.75, 0.50, 0.90);
-    auto legend_v0ptv0 = new TLegend(0.10, 0.75, 0.50, 0.90);
-    legend_v0pt->SetTextSize(0.029);
-    legend_v0pt->AddEntry(gr_v0pt, "CMS OpenData 2.76 TeV (50-70%)", "p");
-    legend_v0pt->AddEntry(gr_v0pt_purple, "ATLAS 5.02 TeV (50-60%)", "p");
-    legend_v0pt->AddEntry(gr_v0pt_pink, "ATLAS 5.02 TeV (60-70%)", "p");
-    legend_v0pt->SetBorderSize(0);
-    legend_v0pt->SetFillStyle(0);
-    legend_v0ptv0->SetTextSize(0.029);
-    legend_v0ptv0->AddEntry(gr_v0pt, "CMS OpenData 2.76 TeV (50-70%)", "p");
-    legend_v0ptv0->AddEntry(gr_v0pt_purple, "ATLAS 5.02 TeV (50-60%)", "p");
-    legend_v0ptv0->AddEntry(gr_v0pt_pink, "ATLAS 5.02 TeV (60-70%)", "p");
-    legend_v0ptv0->SetBorderSize(0);
-    legend_v0ptv0->SetFillStyle(0);
-
-    // Drawing v0(pT) plot
-    c_v0pt->cd(1);
-    gr_v0pt->Draw("AP");
-    gr_v0pt_pink->Draw("P SAME");
-    gr_v0pt_purple->Draw("P SAME");
-    legend_v0pt->Draw();
-    gPad->SetLogx();
-
-    // Drawing v0(pT)/v0 plot
-    c_v0pt->cd(2);
-    gr_v0ptv0->Draw("AP");
-    gr_v0ptv0_pink->Draw("P SAME");
-    gr_v0ptv0_purple->Draw("P SAME");
-    legend_v0ptv0->Draw();
-    gPad->SetLogx();
-
-    // Saving canvas as pdf
-    c_v0pt->Update();
-    c_v0pt->SaveAs("plots.pdf");
+    TFile *save_file = new TFile(savename, "RECREATE");
+    gr_v0pt->Write();
+    gr_v0ptv0->Write();
+    save_file->Close();
 }
