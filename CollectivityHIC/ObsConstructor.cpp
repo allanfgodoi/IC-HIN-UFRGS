@@ -4,21 +4,6 @@
 #include "TMath.h"
 using namespace std;
 
-// TGraph creator function
-TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* title, float xmin, int xmax, float ymin, float ymax, int style, int color){
-    TGraph* g = new TGraph(nPoints, x, y);
-    g->SetTitle(title);
-    g->GetXaxis()->SetLimits(xmin, xmax); // X axis range
-    g->GetXaxis()->CenterTitle(); // Center axis label
-    g->GetYaxis()->CenterTitle(); // Center axis label
-    g->SetMinimum(ymin); // Y axis range
-    g->SetMaximum(ymax); // Y axis range
-    g->SetMarkerStyle(style);
-    g->SetMarkerColor(color);
-    g->SetMarkerSize(1.2);
-    return g;
-}
-
 // Calculates the mean of a given vector
 float mean(vector<float> x){
     int N = 0;
@@ -52,7 +37,7 @@ struct Gathered_Data{
     float mean_pt;
 };
 
-Gathered_Data DataGathering(int Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Savename){
+Gathered_Data DataGathering(int eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, TString savename){
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
     TString filename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/HiForestAOD_UPC.root";
@@ -93,12 +78,6 @@ Gathered_Data DataGathering(int Eta_gap, float HFSET_Min, float HFSET_Max, float
     // Defining auxiliar constants
     float pt_min = 0.5;
     float pt_max = 10.0;
-    int eta_gap = Eta_gap;
-    float HFSET_min = HFSET_Min;
-    float HFSET_max = HFSET_Max;
-    float ptr_min = pTr_Min;
-    float ptr_max = pTr_Max;
-    TString savename = Savename;
 
     const unsigned int nBins = 95; // This way I have 1 bin to a delta pT = 0.1 in the range
     const unsigned int nEvents = fTree->GetEntries();
@@ -107,7 +86,7 @@ Gathered_Data DataGathering(int Eta_gap, float HFSET_Min, float HFSET_Max, float
     vector<float> Vec_pt_B;
     vector<float> Vec_pt_AB;
 
-    TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", nBins, pt_min, pt_max); // Create histogram to calculate <pT_A> (all events)
+    TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", nBins, pt_min, ptr_max); // Create histogram to calculate <pT_A> (all events)
     TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, pt_min, pt_max); // Create histogram to scale pT bins and get f(pT)
     for (Long64_t ievt=0; ievt<nEvents; ievt++){ // Loop over the events
         vector<float> f_pt(nBins, 0.0); // Define vector to hold the fractions of pT in the event
@@ -185,19 +164,7 @@ Gathered_Data DataGathering(int Eta_gap, float HFSET_Min, float HFSET_Max, float
     return struct_data;
 }
 
-void v0pt_Constructor(float iEta_gap, float iHFSET_Min, float iHFSET_Max, float ipTr_Min, float ipTr_Max, TString iSavename, int iMarker, int iColor, TString iName, string PlotType){
-
-    int Eta_gap = iEta_gap;
-    float HFSET_Min = iHFSET_Min;
-    float HFSET_Max = iHFSET_Max;
-    float pTr_Min = ipTr_Min;
-    float pTr_Max = ipTr_Max;
-    TString Savename = iSavename;
-    TString Name = iName;
-
-    int marker = iMarker;
-    int color = iColor;
-
+void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType){
     constexpr float pt_min = 0.5;
     constexpr float pt_max = 10.0;
     constexpr int nBins = 10*(pt_max-pt_min);
@@ -275,32 +242,52 @@ void v0pt_Constructor(float iEta_gap, float iHFSET_Min, float iHFSET_Max, float 
 
     cout << "----------------- v0(pT)/v0 -----------------" << endl;
     cout << "Sum rule #1: " << sum1_v0ptv0 << " = 0" << endl;
-    cout << "Sum rule #2: " << sum2_v0ptv0_left << " = " << sum2_v0ptv0_right << endl;
-
-    // Defining arrays for plots
-    float arr_pT[nBins];
-    float arr_v0pt[nBins];
-    float arr_v0ptv0[nBins];
-    for (int i=0; i<nBins; i++){
-        arr_pT[i] = (i*0.1+(pt_min+0.1)-0.05);
-        arr_v0pt[i] = vec_v0pt[i];
-        arr_v0ptv0[i] = vec_v0ptv0[i];
-    }
-
-    TGraph* gr_v0pt = create_TGraph(nBins, arr_pT, arr_v0pt, "v0pt", 0.0, 10.0, -0.1, 0.42, marker, color);
-    TGraph* gr_v0ptv0 = create_TGraph(nBins, arr_pT, arr_v0ptv0, "v0ptv0", 0.0, 10.0, -4.0, 28.0, marker, color);
-    
+    cout << "Sum rule #2: " << sum2_v0ptv0_left << " = " << sum2_v0ptv0_right << endl;    
 
     TFile *save_file = new TFile(Savename, "UPDATE");
-    gr_v0pt->SetName(Name);
-    gr_v0pt->Write();
-    gr_v0ptv0->Write();
+
+    if (PlotType == "v0ptv0"){
+        float arr_pT[nBins];
+        float arr_v0pt[nBins];
+        float arr_v0ptv0[nBins];
+        for (int i=0; i<nBins; i++){
+            arr_pT[i] = (i*0.1+(pt_min+0.1)-0.05);
+            arr_v0pt[i] = vec_v0pt[i];
+            arr_v0ptv0[i] = vec_v0ptv0[i];
+        }
+
+        TGraph* gr_v0pt = new TGraph(nBins, arr_pT, arr_v0pt);
+        TString v0pt_name = "v0pt_";
+        v0pt_name += Name;
+        gr_v0pt->SetName(v0pt_name);
+        gr_v0pt->Write();
+        TGraph* gr_v0ptv0 = new TGraph(nBins, arr_pT, arr_v0ptv0);
+        TString v0ptv0_name = "v0ptv0_";
+        v0ptv0_name += Name;
+        gr_v0ptv0->SetName(v0ptv0_name);
+        gr_v0ptv0->Write();
+    }
+
+    if (PlotType == "v0pt"){
+        float arr_pT[nBins];
+        float arr_v0pt[nBins];
+        for (int i=0; i<nBins; i++){
+            arr_pT[i] = (i*0.1+(pt_min+0.1)-0.05);
+            arr_v0pt[i] = vec_v0pt[i];
+        }
+
+        TGraph* gr_v0pt = new TGraph(nBins, arr_pT, arr_v0pt);
+        gr_v0pt->SetName(Name);
+        gr_v0pt->Write();
+
+    }
     if (PlotType == "v0"){
         float y_v0[1];
         float x_cent[1];
         y_v0[0] = v0;
         x_cent[0] = 55.0;
-        TGraph* gr_v0 = create_TGraph(1, x_cent, y_v0, "v0", 45.0, 75.0, 0.0, 0.1, marker, color);
+
+        TGraph* gr_v0 = new TGraph(1, x_cent, y_v0);
         gr_v0->SetName(Name);
         gr_v0->Write();
     }
