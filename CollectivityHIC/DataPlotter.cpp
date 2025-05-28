@@ -1,5 +1,5 @@
 // TGraph creator function
-TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* title, float xmin, int xmax, float ymin, float ymax, int style, int color){
+static TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* title, float xmin, int xmax, float ymin, float ymax, int style, int color){
     TGraph* g = new TGraph(nPoints, x, y);
     g->SetTitle(title);
     g->GetXaxis()->SetLimits(xmin, xmax); // X axis range
@@ -10,11 +10,6 @@ TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* t
     g->SetMarkerStyle(style);
     g->SetMarkerColor(color);
     g->SetMarkerSize(1.2);
-    return g;
-}
-
-TGraph* adjustments_TGraph(TGraph g, int mksize, int mkstyle){
-    g->SetMarkerStyle(mkstyle);
     return g;
 }
 
@@ -39,8 +34,8 @@ void DoPlot4(TString filered, TString fileblue){
     }
 
     // Setting up TGraph variables
-    TGraph *gr_v0pt_red = adjustments_TGraph((TGraph*)file_red->Get("Graph;1"), 47, 1);
-    TGraph *gr_v0ptv0_red = adjustments_TGraph((TGraph*)file_red->Get("Graph;2"), 47, 1);
+    TGraph *gr_v0pt_red = (TGraph*)file_red->Get("Graph;1");
+    TGraph *gr_v0ptv0_red = (TGraph*)file_red->Get("Graph;2");
     TGraph *gr_v0pt_blue = (TGraph*)file_blue->Get("Graph;1");
     TGraph *gr_v0ptv0_blue = (TGraph*)file_blue->Get("Graph;2");
 
@@ -77,12 +72,12 @@ void DoPlot4(TString filered, TString fileblue){
     }
 
     // Creates canvas and TGraphs
-    auto c_v0pt = new TCanvas("c_v0pt", "Analysis plot", 1000, 500);
+    auto c_v0pt = new TCanvas("c_v0pt", "Analysis plot", 850, 500);
     c_v0pt->Divide(2, 1);
     TGraph* gr_v0pt_pink = create_TGraph(nPoints_ATLAS, x_v0pt_pink, y_v0pt_pink, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 47, 6);
     TGraph* gr_v0pt_purple = create_TGraph(nPoints_ATLAS, x_v0pt_purple, y_v0pt_purple, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.41, 34, 52);
-    TGraph* gr_v0ptv0_pink = create_TGraph(nPoints_ATLAS, x_v0ptv0_pink, y_v0ptv0_pink, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 47, 6);
-    TGraph* gr_v0ptv0_purple = create_TGraph(nPoints_ATLAS, x_v0ptv0_purple, y_v0ptv0_purple, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 34, 52);
+    TGraph* gr_v0ptv0_pink = create_TGraph(nPoints_ATLAS, x_v0ptv0_pink, y_v0ptv0_pink, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 47, 6);
+    TGraph* gr_v0ptv0_purple = create_TGraph(nPoints_ATLAS, x_v0ptv0_purple, y_v0ptv0_purple, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 34, 52);
 
     // Setting up the legends
     auto legend_v0pt = new TLegend(0.125, 0.55, 0.585, 0.885);
@@ -110,24 +105,57 @@ void DoPlot4(TString filered, TString fileblue){
 
     // Drawing v0(pT) plot
     c_v0pt->cd(1);
-    gr_v0pt_red->Draw("AP");
-    gr_v0pt_blue->Draw("P SAME");
-    gr_v0pt_pink->Draw("P SAME");
+    gr_v0pt_pink->Draw("AP");
+    gr_v0pt_red->Draw("P SAME");
     gr_v0pt_purple->Draw("P SAME");
+    gr_v0pt_blue->Draw("P SAME");
     legend_v0pt->Draw();
     gPad->SetLogx();
 
     // Drawing v0(pT)/v0 plot
     c_v0pt->cd(2);
-    gr_v0ptv0_red->Draw("AP");
+    gr_v0ptv0_pink->Draw("AP");
     gr_v0ptv0_blue->Draw("P SAME");
-    gr_v0ptv0_pink->Draw("P SAME");
     gr_v0ptv0_purple->Draw("P SAME");
+    gr_v0ptv0_red->Draw("P SAME");
     legend_v0ptv0->Draw();
     gPad->SetLogx();
 
     // Saving canvas as pdf
     c_v0pt->Update();
-    c_v0pt->SaveAs("plots.pdf");
+    c_v0pt->SaveAs("Plot4.pdf");
     delete c_v0pt;
+}
+
+void DoPlot3(){
+    
+    TFile *f = TFile::Open("eta_v0pt.root", "READ");
+
+    TGraph *gr0 = (TGraph*)f->Get("eta0");
+    TGraph *gr1 = (TGraph*)f->Get("eta1");
+    TGraph *gr2 = (TGraph*)f->Get("eta2");
+    TGraph *gr3 = (TGraph*)f->Get("eta3");
+
+    auto c = new TCanvas("c", "c_v0pt_eta", 500, 500);
+    auto leg_title = new TLegend();
+    leg_title->AddEntry((TObject*)0, "#font[62]{Pb+Pb}", "");
+    leg_title->AddEntry((TObject*)0, "#font[62]{p_{T}^{ref}: 0.5-2 GeV}", "");
+    leg_title->AddEntry((TObject*)0, "#font[62]{50-60% Centrality}", "");
+    auto leg_etas = new TLegend();
+    leg_etas->AddEntry(gr0, "#eta_{gap} = 0", "p");
+    leg_etas->AddEntry(gr1, "#eta_{gap} = 1", "p");
+    leg_etas->AddEntry(gr2, "#eta_{gap} = 2", "p");
+    leg_etas->AddEntry(gr3, "#eta_{gap} = 3", "p");
+
+    gr0->Draw("AP");
+    gr1->Draw("P SAME");
+    gr2->Draw("P SAME");
+    gr3->Draw("P SAME");
+    leg_title->Draw();
+    leg_etas->Draw();
+    gPad->SetLogx();
+
+    c->Update();
+    c->SaveAs("Plot3.pdf");
+    delete c;
 }

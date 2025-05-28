@@ -185,7 +185,7 @@ Gathered_Data DataGathering(int Eta_gap, float HFSET_Min, float HFSET_Max, float
     return struct_data;
 }
 
-void v0pt_Constructor(float iEta_gap, float iHFSET_Min, float iHFSET_Max, float ipTr_Min, float ipTr_Max, TString iSavename, int iMarker, int iColor){
+void v0pt_Constructor(float iEta_gap, float iHFSET_Min, float iHFSET_Max, float ipTr_Min, float ipTr_Max, TString iSavename, int iMarker, int iColor, TString iName, string PlotType){
 
     int Eta_gap = iEta_gap;
     float HFSET_Min = iHFSET_Min;
@@ -193,6 +193,7 @@ void v0pt_Constructor(float iEta_gap, float iHFSET_Min, float iHFSET_Max, float 
     float pTr_Min = ipTr_Min;
     float pTr_Max = ipTr_Max;
     TString Savename = iSavename;
+    TString Name = iName;
 
     int marker = iMarker;
     int color = iColor;
@@ -288,13 +289,20 @@ void v0pt_Constructor(float iEta_gap, float iHFSET_Min, float iHFSET_Max, float 
 
     TGraph* gr_v0pt = create_TGraph(nBins, arr_pT, arr_v0pt, "v0pt", 0.0, 10.0, -0.1, 0.42, marker, color);
     TGraph* gr_v0ptv0 = create_TGraph(nBins, arr_pT, arr_v0ptv0, "v0ptv0", 0.0, 10.0, -4.0, 28.0, marker, color);
+    
 
-    TFile *save_file = new TFile(Savename, "RECREATE");
+    TFile *save_file = new TFile(Savename, "UPDATE");
+    gr_v0pt->SetName(Name);
     gr_v0pt->Write();
     gr_v0ptv0->Write();
+    if (PlotType == "v0"){
+        float y_v0[1];
+        float x_cent[1];
+        y_v0[0] = v0;
+        x_cent[0] = 55.0;
+        TGraph* gr_v0 = create_TGraph(1, x_cent, y_v0, "v0", 45.0, 75.0, 0.0, 0.1, marker, color);
+        gr_v0->SetName(Name);
+        gr_v0->Write();
+    }
     save_file->Close();
-}
-
-void v0_Constructor(){
-    cout << "WIP" << endl;
 }
