@@ -1,5 +1,5 @@
 // TGraph creator function
-static TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* title, float xmin, int xmax, float ymin, float ymax, int style, int color){
+TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* title, float xmin, int xmax, float ymin, float ymax, int style, int color){
     TGraph* g = new TGraph(nPoints, x, y);
     g->SetTitle(title);
     g->GetXaxis()->SetLimits(xmin, xmax); // X axis range
@@ -12,6 +12,17 @@ static TGraph* create_TGraph(int nPoints, const float* x, const float* y, const 
     g->SetMarkerSize(1.2);
     return g;
 }
+
+TGraph* create_TGraphFromTxt(string filePath, const int nPoints, const char* title, float xmin, float xmax, float ymin, float ymax, int style, int color){
+    float x[nPoints], y[nPoints];
+    ifstream f(filePath);
+    for (int i=0; i<nPoints; i++){
+        f >> x[i] >> y[i];
+    }
+    TGraph* g = create_TGraph(nPoints, x, y, title, xmin, xmax, ymin, ymax, style, color);
+    return g;
+}
+
 
 void DoPlot4(TString filered, TString fileblue){
     TString filename_red = filered;
@@ -55,29 +66,14 @@ void DoPlot4(TString filered, TString fileblue){
     // Opening and reading file containing ATLAS results
     // "purple": 50-60% centrality
     // "pink": 60-70% centrality
-    const int nPoints_ATLAS = 29;
-    float x_v0pt_pink[nPoints_ATLAS], y_v0pt_pink[nPoints_ATLAS];
-    float x_v0pt_purple[nPoints_ATLAS], y_v0pt_purple[nPoints_ATLAS];
-    float x_v0ptv0_pink[nPoints_ATLAS], y_v0ptv0_pink[nPoints_ATLAS];
-    float x_v0ptv0_purple[nPoints_ATLAS], y_v0ptv0_purple[nPoints_ATLAS];
-    ifstream v0pt_pink("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0pt_pink.txt");
-    ifstream v0pt_purple("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0pt_purple.txt");
-    ifstream v0ptv0_pink("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0ptv0_pink.txt");
-    ifstream v0ptv0_purple("/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/ATLAS_v0ptv0_purple.txt");
-    for (int i=0; i<nPoints_ATLAS; i++){
-        v0pt_pink >> x_v0pt_pink[i] >> y_v0pt_pink[i];
-        v0pt_purple >> x_v0pt_purple[i] >> y_v0pt_purple[i];
-        v0ptv0_pink >> x_v0ptv0_pink[i] >> y_v0ptv0_pink[i];
-        v0ptv0_purple >> x_v0ptv0_purple[i] >> y_v0ptv0_purple[i];
-    }
 
     // Creates canvas and TGraphs
     auto c_v0pt = new TCanvas("c_v0pt", "Analysis plot", 850, 500);
     c_v0pt->Divide(2, 1);
-    TGraph* gr_v0pt_pink = create_TGraph(nPoints_ATLAS, x_v0pt_pink, y_v0pt_pink, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 47, 6);
-    TGraph* gr_v0pt_purple = create_TGraph(nPoints_ATLAS, x_v0pt_purple, y_v0pt_purple, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.41, 34, 52);
-    TGraph* gr_v0ptv0_pink = create_TGraph(nPoints_ATLAS, x_v0ptv0_pink, y_v0ptv0_pink, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 47, 6);
-    TGraph* gr_v0ptv0_purple = create_TGraph(nPoints_ATLAS, x_v0ptv0_purple, y_v0ptv0_purple, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 34, 52);
+    TGraph* gr_v0pt_pink = create_TGraphFromTxt("./Fig4/ATLAS_v0pt_pink.txt/nPoints_ATLAS", const int 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 47, 6);
+    TGraph* gr_v0pt_purple = create_TGraphFromTxt("./Fig4/ATLAS_v0pt_purple.txt/nPoints_ATLAS", const int 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.41, 34, 52);
+    TGraph* gr_v0ptv0_pink = create_TGraphFromTxt("./Fig4/ATLAS_v0ptv0_pink.txt/nPoints_ATLAS", const int 29, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 47, 6);
+    TGraph* gr_v0ptv0_purple = create_TGraphFromTxt("./Fig4/ATLAS_v0ptv0_purple.txt/nPoints_ATLAS", const int 29, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 34, 52);
 
     // Setting up the legends
     auto legend_v0pt = new TLegend(0.125, 0.55, 0.585, 0.885);
