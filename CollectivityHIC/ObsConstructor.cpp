@@ -285,12 +285,13 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         float y_v0[1];
         float x_cent[1];
         y_v0[0] = v0;
+        TString v0_name = "";
         if (HFSET_Max == 375.0){
-            TString v0_name = "55_";
+            v0_name += "55_";
             x_cent[0] = 55.0;
         }
         if (HFSET_Max == 210.0){
-            TString v0_name = "65_";
+            v0_name += "65_";
             x_cent[0] = 65.0;
         }
         v0_name += Name;
@@ -298,8 +299,5 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         gr_v0->SetName(Name);
         gr_v0->Write();
     }
-
-ObsConstructor(1.0, 210.0, 375.0, 0.5, 2.0, "1", "plot1.root", "v0")
-
     save_file->Close();
 }
