@@ -37,28 +37,56 @@ void customize_TGraph(TGraph *g, const char* title, float xmin, float xmax, floa
     g->SetMarkerSize(size);
 }
 
-    void DoPlot3(TString filename){
+void DoPlot2(TString filename){
+    
+}
+
+void DoPlot3(TString filename){
     TFile *f = TFile::Open(filename, "READ");
     TGraph *gr0 = (TGraph*)f->Get("eta0");
     TGraph *gr1 = (TGraph*)f->Get("eta1");
     TGraph *gr2 = (TGraph*)f->Get("eta2");
     TGraph *gr3 = (TGraph*)f->Get("eta3");
 
+    customize_TGraph(gr0, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 47, 52, 1.0);
+    customize_TGraph(gr1, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 34, 7, 1.0);
+    customize_TGraph(gr2, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 22, 95, 1.0);
+    customize_TGraph(gr3, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 33, 8, 1.0);
+
+    TGraph *grd0 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta0.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 20, 2, 1.0);
+    TGraph *grd1 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta1.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 21, 1, 1.0);
+    TGraph *grd2 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta0.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 23, 4, 1.0);
+    TGraph *grd3 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta0.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 45, 6, 1.0);
+
     auto c = new TCanvas("c", "c_v0pt_eta", 500, 500);
-    auto leg_title = new TLegend();
-    leg_title->AddEntry((TObject*)0, "#font[62]{Pb+Pb}", "");
-    leg_title->AddEntry((TObject*)0, "#font[62]{p_{T}^{ref}: 0.5-2 GeV}", "");
-    leg_title->AddEntry((TObject*)0, "#font[62]{50-60% Centrality}", "");
-    auto leg_etas = new TLegend();
-    leg_etas->AddEntry(gr0, "#eta_{gap} = 0", "p");
-    leg_etas->AddEntry(gr1, "#eta_{gap} = 1", "p");
-    leg_etas->AddEntry(gr2, "#eta_{gap} = 2", "p");
-    leg_etas->AddEntry(gr3, "#eta_{gap} = 3", "p");
+    auto leg_title = new TLegend(0.025, 0.89, 0.5, 0.71);
+    leg_title->SetTextSize(0.0457);
+    leg_title->AddEntry((TObject*)0, "Pb+Pb", "");
+    leg_title->AddEntry((TObject*)0, "p_{T}^{ref}: 0.5-2 GeV", "");
+    leg_title->AddEntry((TObject*)0, "50-60% Centrality", "");
+    leg_title->SetBorderSize(0);
+    leg_title->SetFillStyle(0);
+    auto leg_etas = new TLegend(0.23, 0.125, 0.63, 0.43);
+    leg_etas->SetTextSize(0.023);
+    leg_etas->AddEntry(gr0, "CMS Open Data 2.76 TeV    #eta_{gap} = 0", "p");
+    leg_etas->AddEntry(gr1, "CMS Open Data 2.76 TeV    #eta_{gap} = 1", "p");
+    leg_etas->AddEntry(gr2, "CMS Open Data 2.76 TeV    #eta_{gap} = 2", "p");
+    leg_etas->AddEntry(gr3, "CMS Open Data 2.76 TeV    #eta_{gap} = 3", "p");
+    leg_etas->AddEntry(grd0, "ATLAS 5.02 TeV    #eta_{gap} = 0", "p");
+    leg_etas->AddEntry(grd1, "ATLAS 5.02 TeV    #eta_{gap} = 1", "p");
+    leg_etas->AddEntry(grd2, "ATLAS 5.02 TeV    #eta_{gap} = 2", "p");
+    leg_etas->AddEntry(grd3, "ATLAS 5.02 TeV    #eta_{gap} = 3", "p");
+    leg_etas->SetBorderSize(0);
+    leg_etas->SetFillStyle(0);
 
     gr0->Draw("AP");
     gr1->Draw("P SAME");
     gr2->Draw("P SAME");
     gr3->Draw("P SAME");
+    grd0->Draw("P SAME");
+    grd1->Draw("P SAME");
+    grd2->Draw("P SAME");
+    grd3->Draw("P SAME");
     leg_title->Draw();
     leg_etas->Draw();
     gPad->SetLogx();
