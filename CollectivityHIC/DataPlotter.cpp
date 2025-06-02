@@ -39,21 +39,31 @@ void customize_TGraph(TGraph *g, const char* title, float xmin, float xmax, floa
 
 void DoPlot2(TString filename){
     TFile *f = TFile::Open(filename, "READ");
-    TGraph *g1 = (TGraph*)f->Get("1");
-    TGraph *g2 = (TGraph*)f->Get("2");
-    TGraph *g3 = (TGraph*)f->Get("3");
-    customize_TGraph(g1, "test; x; y", 50.0, 70.0, 1e-2, 5e-2, 1, 1, 2.0);
-    int n1 = g1->GetN();
-    customize_TGraph(g2, "test; x; y", 50.0, 70.0, 1e-2, 5e-2, 1, 1, 2.0);
-    customize_TGraph(g2, "test; x; y", 50.0, 70.0, 1e-2, 5e-2, 1, 1, 2.0);
-    auto c = new TCanvas("c", "test c", 500, 500);
-    g1->Draw("AP");
-    g2->Draw("P SAME");
-    g3->Draw("P SAME");
+    TGraph *gr1 = (TGraph*)f->Get("55_1");
+    TGraph *gr2 = (TGraph*)f->Get("55_2");
+    TGraph *gr3 = (TGraph*)f->Get("55_3");
+    TGraph *gr4 = (TGraph*)f->Get("65_1");
+    TGraph *gr5 = (TGraph*)f->Get("65_2");
+    TGraph *gr6 = (TGraph*)f->Get("65_3");
+    TGraph *grd1 = create_TGraphFromTxt("./Data/Fig1/v0_1.txt", 29, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 20, 2, 1.0);
+    TGraph *grd2 = create_TGraphFromTxt("./Data/Fig1/v0_2.txt", 29, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 21, 4, 1.0);
+    TGraph *grd3 = create_TGraphFromTxt("./Data/Fig1/v0_3.txt", 29, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 25, 6, 1.0);
+    customize_TGraph(gr1, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 47, 52, 2.0);
+    customize_TGraph(gr2, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 33, 7, 2.0);
+    customize_TGraph(gr3, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 34, 95, 2.0);
+    auto c = new TCanvas("c", "v0_centrality", 500, 500);
+    grd1->Draw("AP");
+    grd2->Draw("P SAME");
+    grd3->Draw("P SAME");
+    gr1->Draw("P SAME");
+    gr2->Draw("P SAME");
+    gr3->Draw("P SAME");
+    gr4->Draw("P SAME");
+    gr5->Draw("P SAME");
+    gr6->Draw("P SAME");
     c->SetLogy();   
     c->Update();
     c->SaveAs("Plot2.pdf");
-    cout << n1 << endl;
     delete c;
 }
 
