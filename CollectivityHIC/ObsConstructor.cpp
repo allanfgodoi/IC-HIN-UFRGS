@@ -296,7 +296,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         }
         v0_name += Name;
         TGraph* gr_v0 = new TGraph(1, x_cent, y_v0);
-        gr_v0->SetName(Name);
+        gr_v0->SetName(v0_name);
         gr_v0->Write();
     }
     save_file->Close();

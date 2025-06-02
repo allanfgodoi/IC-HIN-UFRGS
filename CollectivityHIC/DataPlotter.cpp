@@ -38,7 +38,23 @@ void customize_TGraph(TGraph *g, const char* title, float xmin, float xmax, floa
 }
 
 void DoPlot2(TString filename){
-    
+    TFile *f = TFile::Open(filename, "READ");
+    TGraph *g1 = (TGraph*)f->Get("1");
+    TGraph *g2 = (TGraph*)f->Get("2");
+    TGraph *g3 = (TGraph*)f->Get("3");
+    customize_TGraph(g1, "test; x; y", 50.0, 70.0, 1e-2, 5e-2, 1, 1, 2.0);
+    int n1 = g1->GetN();
+    customize_TGraph(g2, "test; x; y", 50.0, 70.0, 1e-2, 5e-2, 1, 1, 2.0);
+    customize_TGraph(g2, "test; x; y", 50.0, 70.0, 1e-2, 5e-2, 1, 1, 2.0);
+    auto c = new TCanvas("c", "test c", 500, 500);
+    g1->Draw("AP");
+    g2->Draw("P SAME");
+    g3->Draw("P SAME");
+    c->SetLogy();   
+    c->Update();
+    c->SaveAs("Plot2.pdf");
+    cout << n1 << endl;
+    delete c;
 }
 
 void DoPlot3(TString filename){
