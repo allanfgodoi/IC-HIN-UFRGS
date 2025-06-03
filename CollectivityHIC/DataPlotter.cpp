@@ -37,7 +37,7 @@ void customize_TGraph(TGraph *g, const char* title, float xmin, float xmax, floa
     g->SetMarkerSize(size);
 }
 
-void DoPlot2(TString filename){
+void DoPlot1(TString filename){
     TFile *f = TFile::Open(filename, "READ");
     TGraph *gr1 = (TGraph*)f->Get("55_1");
     TGraph *gr2 = (TGraph*)f->Get("55_2");
