@@ -220,7 +220,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     vector<float> vec_rel;
     for (int i=0; i<nBins; i++){
         float pT = (i*0.1+(pt_min+0.1)-0.05);
-        float rel = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*vec_mean_pt_B))/(vec_mean_f_pt[i]*pT))*1e-3;
+        float rel = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*vec_mean_pt_B))/(vec_mean_f_pt[i]*pT))*1e3;
         vec_rel.push_back(rel);
     }
 
@@ -319,6 +319,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
             arr_rel[i] = vec_rel[i];
             arr_v0pt[i] = vec_v0pt[i];
         }
+
         TGraph* gr_rel = new TGraph(nBins, arr_pT, arr_rel);
         TString rel_name = "rel_";
         rel_name += Name;
@@ -330,6 +331,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         v0pt_name += Name;
         gr_v0pt->SetName(v0pt_name);
         gr_v0pt->Write();
-        }
+    }
+
     save_file->Close();
 }
