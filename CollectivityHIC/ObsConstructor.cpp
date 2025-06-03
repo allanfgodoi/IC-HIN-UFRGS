@@ -1,4 +1,6 @@
 // RUN COMMAND: root -l -b -q 'ObsConstructor.cpp'
+// 50-60% CENTRALITY: HFSUMET = [210, 375] GeV
+// 60-70% CENTRALITY: HFSUMET = [100, 210] GeV
 
 #include <cmath>
 #include "TMath.h"
@@ -214,6 +216,14 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     }
     float sum2_v0pt_right = sigma*acc_sum2_v0pt_right;
 
+    // Calculating Fig2(c)
+    vector<float> vec_rel;
+    for (int i=0; i<nBins; i++){
+        float pT = (i*0.1+(pt_min+0.1)-0.05);
+        float rel = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*vec_mean_pt_B))/(vec_mean_f_pt[i]*pT))*1e-3;
+        vec_rel.push_back(rel);
+    }
+
     // Printing v0(pT) sum rules
     cout << "------------------ v0(pT) ------------------" << endl;
     cout << "Sum rule #1: " << sum1_v0pt << " = 0" << endl;
@@ -299,5 +309,27 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         gr_v0->SetName(v0_name);
         gr_v0->Write();
     }
+
+    if (PlotType == "v0ptrel"){
+        float arr_pT[nBins];
+        float arr_rel[nBins];
+        float arr_v0pt[nBins];
+        for (int i=0; i<nBins; i++){
+            arr_pT[i] = (i*0.1+(pt_min+0.1)-0.05);
+            arr_rel[i] = vec_rel[i];
+            arr_v0pt[i] = vec_v0pt[i];
+        }
+        TGraph* gr_rel = new TGraph(nBins, arr_pT, arr_rel);
+        TString rel_name = "rel_";
+        rel_name += Name;
+        gr_rel->SetName(rel_name);
+        gr_rel->Write();
+
+        TGraph* gr_v0pt = new TGraph(nBins, arr_pT, arr_v0pt);
+        TString v0pt_name = "v0pt_";
+        v0pt_name += Name;
+        gr_v0pt->SetName(v0pt_name);
+        gr_v0pt->Write();
+        }
     save_file->Close();
 }
