@@ -45,13 +45,38 @@ void DoPlot2(TString filename){
     TGraph *gr4 = (TGraph*)f->Get("65_1");
     TGraph *gr5 = (TGraph*)f->Get("65_2");
     TGraph *gr6 = (TGraph*)f->Get("65_3");
-    TGraph *grd1 = create_TGraphFromTxt("./Data/Fig1/v0_1.txt", 29, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 20, 2, 1.0);
-    TGraph *grd2 = create_TGraphFromTxt("./Data/Fig1/v0_2.txt", 29, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 21, 4, 1.0);
-    TGraph *grd3 = create_TGraphFromTxt("./Data/Fig1/v0_3.txt", 29, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 25, 6, 1.0);
-    customize_TGraph(gr1, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 47, 52, 2.0);
-    customize_TGraph(gr2, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 33, 7, 2.0);
-    customize_TGraph(gr3, "v_{0} vs centrality; v_{0}; centrality [%]", 50.0, 70.0, 1e-2, 5e-2, 34, 95, 2.0);
+
+    TGraph *grd1 = create_TGraphFromTxt("./Data/Fig1/v0_1.txt", 29, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 20, 2, 1.0);
+    TGraph *grd2 = create_TGraphFromTxt("./Data/Fig1/v0_2.txt", 29, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 21, 4, 1.0);
+    TGraph *grd3 = create_TGraphFromTxt("./Data/Fig1/v0_3.txt", 29, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 25, 6, 1.0);
+
+    customize_TGraph(gr1, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 47, 52, 1.2);
+    customize_TGraph(gr2, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 33, 7, 1.2);
+    customize_TGraph(gr3, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 34, 95, 1.2);
+    customize_TGraph(gr4, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 47, 52, 1.2);
+    customize_TGraph(gr5, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 33, 7, 1.2);
+    customize_TGraph(gr6, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 34, 95, 1.2);
+
     auto c = new TCanvas("c", "v0_centrality", 500, 500);
+
+    auto leg_title = new TLegend(0.015, 0.97, 0.5, 0.71);
+    leg_title->SetTextSize(0.0457);
+    leg_title->AddEntry((TObject*)0, "Pb+Pb      #eta_{gap} = 1", "");
+    leg_title->SetBorderSize(0);
+    leg_title->SetFillStyle(0);
+
+    auto leg_ptref = new TLegend(0.45, 0.43, 0.7, 0.13);
+    leg_ptref->SetTextSize(0.023);
+    leg_ptref->AddEntry((TObject*)0, "#bf{p_{T}^{ref} range}", "C");
+    leg_ptref->AddEntry(gr1, "CMS Open Data 2.76 TeV   0.5-2 GeV", "p");
+    leg_ptref->AddEntry(gr2, "CMS Open Data 2.76 TeV   0.5-5 GeV", "p");
+    leg_ptref->AddEntry(gr3, "CMS Open Data 2.76 TeV   1-5 GeV", "p");
+    leg_ptref->AddEntry(grd1, "ATLAS 5.02 TeV   0.5-2 GeV", "p");
+    leg_ptref->AddEntry(grd2, "ATLAS 5.02 TeV   0.5-5 GeV", "p");
+    leg_ptref->AddEntry(grd3, "ATLAS 5.02 TeV   1-5 GeV", "p");
+    leg_ptref->SetBorderSize(0);
+    leg_ptref->SetFillStyle(0);
+
     grd1->Draw("AP");
     grd2->Draw("P SAME");
     grd3->Draw("P SAME");
@@ -61,6 +86,8 @@ void DoPlot2(TString filename){
     gr4->Draw("P SAME");
     gr5->Draw("P SAME");
     gr6->Draw("P SAME");
+    leg_title->Draw();
+    leg_ptref->Draw();
     c->SetLogy();   
     c->Update();
     c->SaveAs("Plot2.pdf");
@@ -85,6 +112,7 @@ void DoPlot3(TString filename){
     TGraph *grd3 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta0.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 45, 6, 1.0);
 
     auto c = new TCanvas("c", "c_v0pt_eta", 500, 500);
+
     auto leg_title = new TLegend(0.025, 0.89, 0.5, 0.71);
     leg_title->SetTextSize(0.0457);
     leg_title->AddEntry((TObject*)0, "Pb+Pb", "");
@@ -92,6 +120,7 @@ void DoPlot3(TString filename){
     leg_title->AddEntry((TObject*)0, "50-60% Centrality", "");
     leg_title->SetBorderSize(0);
     leg_title->SetFillStyle(0);
+
     auto leg_etas = new TLegend(0.23, 0.125, 0.63, 0.43);
     leg_etas->SetTextSize(0.023);
     leg_etas->AddEntry(gr0, "CMS Open Data 2.76 TeV    #eta_{gap} = 0", "p");
