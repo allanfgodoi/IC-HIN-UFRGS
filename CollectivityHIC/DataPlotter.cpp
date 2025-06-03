@@ -90,6 +90,60 @@ void DoPlot1(TString filename){
     leg_ptref->Draw();
     c->SetLogy();   
     c->Update();
+    c->SaveAs("Plot1.pdf");
+    delete c;
+}
+
+void DoPlot2(TString filename){
+    TFile *f = TFile::Open(filename, "READ");
+    TGraph *gr_rel1 = (TGraph*)f->Get("rel_1");
+    TGraph *gr_rel2 = (TGraph*)f->Get("rel_2");
+    TGraph *gr_rel3 = (TGraph*)f->Get("rel_3");
+    TGraph *gr_v0pt1 = (TGraph*)f->Get("v0pt_1");
+    TGraph *gr_v0pt2 = (TGraph*)f->Get("v0pt_2");
+    TGraph *gr_v0pt3 = (TGraph*)f->Get("v0pt_3");
+
+    customize_TGraph(gr_rel1, "Relation; v_{0}(p_{T}); #langle N(p_{T}) #delta p_{T} #rangle / #langle N_{0}(p_{T}) #rangle #langle p_{T} #rangle", 0.0, 10.0, -2.0, 8.0, 47, 52, 1.2);
+    customize_TGraph(gr_rel2, "Relation; v_{0}(p_{T}); #langle N(p_{T}) #delta p_{T} #rangle / #langle N_{0}(p_{T}) #rangle #langle p_{T} #rangle", 0.0, 10.0, -2.0, 8.0, 33, 7, 1.2);
+    customize_TGraph(gr_rel3, "Relation; v_{0}(p_{T}); #langle N(p_{T}) #delta p_{T} #rangle / #langle N_{0}(p_{T}) #rangle #langle p_{T} #rangle", 0.0, 10.0, -2.0, 8.0, 34, 95, 1.2);
+    customize_TGraph(gr_v0pt1, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 47, 52, 1.2);
+    customize_TGraph(gr_v0pt2, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 33, 7, 1.2);
+    customize_TGraph(gr_v0pt3, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 34, 95, 1.2);
+
+    auto c = new TCanvas("c", "c", 850, 500);
+    c->Divide(2, 1);
+
+    auto leg_v0pt_title = new TLegend(0.025, 0.89, 0.5, 0.76);
+    leg_v0pt_title->SetTextSize(0.0457);
+    leg_v0pt_title->AddEntry((TObject*)0, "Pb+Pb,   #eta_{gap} = 1", "");
+    leg_v0pt_title->AddEntry((TObject*)0, "50-60% Centrality", "");
+    leg_v0pt_title->SetBorderSize(0);
+    leg_v0pt_title->SetFillStyle(0);
+
+    auto leg_v0pt_ptref = new TLegend(0.103, 0.748, 0.5, 0.57);
+    leg_v0pt_ptref->SetTextSize(0.025);
+    leg_v0pt_ptref->AddEntry((TObject*)0, "#bf{p_{T}^{ref} range}", "C");
+    leg_v0pt_ptref->AddEntry(gr_v0pt1, "CMS OpenData 2.76 TeV: 0.5-2 GeV", "p");
+    leg_v0pt_ptref->AddEntry(gr_v0pt2, "CMS OpenData 2.76 TeV: 0.5-5 GeV", "p");
+    leg_v0pt_ptref->AddEntry(gr_v0pt3, "CMS OpenData 2.76 TeV: 1-5 GeV", "p");
+    leg_v0pt_ptref->SetBorderSize(0);
+    leg_v0pt_ptref->SetFillStyle(0);
+
+    c->cd(1);
+    gr_rel1->Draw("AP");
+    gr_rel2->Draw("P SAME");
+    gr_rel3->Draw("P SAME");
+    gPad->SetLogx();
+
+    c->cd(2);
+    gr_v0pt1->Draw("AP");
+    gr_v0pt2->Draw("P SAME");
+    gr_v0pt3->Draw("P SAME");
+    leg_v0pt_title->Draw();
+    leg_v0pt_ptref->Draw();
+    gPad->SetLogx();
+
+    c->Update();
     c->SaveAs("Plot2.pdf");
     delete c;
 }
