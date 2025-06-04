@@ -110,6 +110,10 @@ void DoPlot2(TString filename){
     customize_TGraph(gr_v0pt2, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 33, 7, 1.2);
     customize_TGraph(gr_v0pt3, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 34, 95, 1.2);
 
+    TGraph *grd_v0pt1 = create_TGraphFromTxt("./Data/Fig2/ATLAS_v0ptref1.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 20, 2, 1.0);
+    TGraph *grd_v0pt2 = create_TGraphFromTxt("./Data/Fig2/ATLAS_v0ptref2.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 21, 4, 1.0);
+    TGraph *grd_v0pt3 = create_TGraphFromTxt("./Data/Fig2/ATLAS_v0ptref3.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 25, 6, 1.0);
+
     auto c = new TCanvas("c", "c", 850, 500);
     c->Divide(2, 1);
 
@@ -126,6 +130,9 @@ void DoPlot2(TString filename){
     leg_v0pt_ptref->AddEntry(gr_v0pt1, "CMS OpenData 2.76 TeV: 0.5-2 GeV", "p");
     leg_v0pt_ptref->AddEntry(gr_v0pt2, "CMS OpenData 2.76 TeV: 0.5-5 GeV", "p");
     leg_v0pt_ptref->AddEntry(gr_v0pt3, "CMS OpenData 2.76 TeV: 1-5 GeV", "p");
+    leg_v0pt_ptref->AddEntry(grd_v0pt1, "ATLAS 5.02 TeV: 0.5-2 GeV", "p");
+    leg_v0pt_ptref->AddEntry(grd_v0pt2, "ATLAS 5.02 TeV: 0.5-5 GeV", "p");
+    leg_v0pt_ptref->AddEntry(grd_v0pt3, "ATLAS 5.02 TeV: 1-5 GeV", "p");
     leg_v0pt_ptref->SetBorderSize(0);
     leg_v0pt_ptref->SetFillStyle(0);
 
@@ -139,6 +146,9 @@ void DoPlot2(TString filename){
     gr_v0pt1->Draw("AP");
     gr_v0pt2->Draw("P SAME");
     gr_v0pt3->Draw("P SAME");
+    grd_v0pt1->Draw("P SAME");
+    grd_v0pt2->Draw("P SAME");
+    grd_v0pt3->Draw("P SAME");
     leg_v0pt_title->Draw();
     leg_v0pt_ptref->Draw();
     gPad->SetLogx();
