@@ -39,7 +39,7 @@ struct Gathered_Data{
     float mean_pt;
 };
 
-Gathered_Data DataGathering(int eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, TString savename){
+Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, TString savename, vector<float> Xaxis_del, vector<float> pT_axis){
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
     TString filename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/HiForestAOD_UPC.root";
@@ -80,16 +80,15 @@ Gathered_Data DataGathering(int eta_gap, float HFSET_min, float HFSET_max, float
     // Defining auxiliar constants
     float pt_min = 0.5;
     float pt_max = 10.0;
-
-    const unsigned int nBins = 95; // This way I have 1 bin to a delta pT = 0.1 in the range
+    int nBins = pT_axis.size();
     const unsigned int nEvents = fTree->GetEntries();
     vector<vector<float>> Vec_f_pt; // This vector will hold the fractions of pT of all events
     vector<float> Vec_pt_A;
     vector<float> Vec_pt_B;
     vector<float> Vec_pt_AB;
 
-    TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", nBins, pt_min, ptr_max); // Create histogram to calculate <pT_A> (all events)
-    TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, pt_min, pt_max); // Create histogram to scale pT bins and get f(pT)
+    TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", nBins, Xaxis_del.data()); // Create histogram to calculate <pT_A> (all events)
+    TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, Xaxis_del.data()); // Create histogram to scale pT bins and get f(pT)
     for (Long64_t ievt=0; ievt<nEvents; ievt++){ // Loop over the events
         vector<float> f_pt(nBins, 0.0); // Define vector to hold the fractions of pT in the event
         float h_pt_A = 0;
@@ -102,7 +101,7 @@ Gathered_Data DataGathering(int eta_gap, float HFSET_min, float HFSET_max, float
             cout << "Processing event: " << ievt << endl;
 
         
-        if (HFsumET < HFSET_min || HFSET_max > 375.0) // Applying 100 <= HFsumET <= 375 filter (related to centrality)
+        if (HFsumET < HFSET_min || HFsumET > HFSET_max) // Applying 100 <= HFsumET <= 375 filter (related to centrality)
             continue;
         if (pvZ < -15.0 || pvZ > 15.0) // Applying |pvZ| < 15 cm filter
             continue;
@@ -169,9 +168,13 @@ Gathered_Data DataGathering(int eta_gap, float HFSET_min, float HFSET_max, float
 void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType){
     constexpr float pt_min = 0.5;
     constexpr float pt_max = 10.0;
-    constexpr int nBins = 10*(pt_max-pt_min);
-
-    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Savename);
+    vector<float> Xaxis_del = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 1.98, 2.2, 2.38, 2.98, 3.18, 6.0, 8.04, 10.0};
+    int nBins = (Xaxis_del.size()-1);
+    vector<float> pT_axis;
+    for (int i=0; i<nBins; i++){
+        pT_axis.push_back((Xaxis_del[i+1]+Xaxis_del[i])/2);
+    }
+    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Savename, Xaxis_del, pT_axis);
     vector<vector<float>> vec_f_pt = gData.vec_f_pt;
     vector<float> vec_pt_A = gData.vec_pt_A;
     vector<float> vec_pt_B = gData.vec_pt_B;
@@ -210,7 +213,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     float acc_sum2_v0pt_right = 0;
     for (int i=0; i<nBins; i++){
         sum1_v0pt += vec_v0pt[i]*vec_mean_f_pt[i];
-        float pT = (i*0.1+(pt_min+0.1)-0.05);
+        float pT = pT_axis[i];
         sum2_v0pt_left += pT*vec_v0pt[i]*vec_mean_f_pt[i];
         acc_sum2_v0pt_right += vec_mean_f_pt[i];
     }
@@ -219,7 +222,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     // Calculating Fig2(c)
     vector<float> vec_rel;
     for (int i=0; i<nBins; i++){
-        float pT = (i*0.1+(pt_min+0.1)-0.05);
+        float pT = pT_axis[i];
         float rel = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*vec_mean_pt_B))/(vec_mean_f_pt[i]*pT))*1e3;
         vec_rel.push_back(rel);
     }
@@ -244,7 +247,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     float acc_sum2_v0ptv0_right = 0;
     for (int i=0; i<nBins; i++){
         sum1_v0ptv0 += vec_v0ptv0[i]*vec_mean_f_pt[i];
-        float pT = (i*0.1+(pt_min+0.1)-0.05);
+        float pT = pT_axis[i];
         sum2_v0ptv0_left += pT*vec_v0ptv0[i]*vec_mean_f_pt[i];
         acc_sum2_v0ptv0_right += vec_mean_f_pt[i];
     }
@@ -257,21 +260,12 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     TFile *save_file = new TFile(Savename, "UPDATE");
 
     if (PlotType == "v0ptv0"){
-        float arr_pT[nBins];
-        float arr_v0pt[nBins];
-        float arr_v0ptv0[nBins];
-        for (int i=0; i<nBins; i++){
-            arr_pT[i] = (i*0.1+(pt_min+0.1)-0.05);
-            arr_v0pt[i] = vec_v0pt[i];
-            arr_v0ptv0[i] = vec_v0ptv0[i];
-        }
-
-        TGraph* gr_v0pt = new TGraph(nBins, arr_pT, arr_v0pt);
+        TGraph* gr_v0pt = new TGraph(nBins, pT_axis.data(), vec_v0pt.data());
         TString v0pt_name = "v0pt_";
         v0pt_name += Name;
         gr_v0pt->SetName(v0pt_name);
         gr_v0pt->Write();
-        TGraph* gr_v0ptv0 = new TGraph(nBins, arr_pT, arr_v0ptv0);
+        TGraph* gr_v0ptv0 = new TGraph(nBins, pT_axis.data(), vec_v0ptv0.data());
         TString v0ptv0_name = "v0ptv0_";
         v0ptv0_name += Name;
         gr_v0ptv0->SetName(v0ptv0_name);
@@ -279,14 +273,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     }
 
     if (PlotType == "v0pt"){
-        float arr_pT[nBins];
-        float arr_v0pt[nBins];
-        for (int i=0; i<nBins; i++){
-            arr_pT[i] = (i*0.1+(pt_min+0.1)-0.05);
-            arr_v0pt[i] = vec_v0pt[i];
-        }
-
-        TGraph* gr_v0pt = new TGraph(nBins, arr_pT, arr_v0pt);
+        TGraph* gr_v0pt = new TGraph(nBins, pT_axis.data(), vec_v0pt.data());
         gr_v0pt->SetName(Name);
         gr_v0pt->Write();
 
@@ -311,22 +298,13 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     }
 
     if (PlotType == "v0ptrel"){
-        float arr_pT[nBins];
-        float arr_rel[nBins];
-        float arr_v0pt[nBins];
-        for (int i=0; i<nBins; i++){
-            arr_pT[i] = (i*0.1+(pt_min+0.1)-0.05);
-            arr_rel[i] = vec_rel[i];
-            arr_v0pt[i] = vec_v0pt[i];
-        }
-
-        TGraph* gr_rel = new TGraph(nBins, arr_pT, arr_rel);
+        TGraph* gr_rel = new TGraph(nBins, pT_axis.data(), vec_rel.data());
         TString rel_name = "rel_";
         rel_name += Name;
         gr_rel->SetName(rel_name);
         gr_rel->Write();
 
-        TGraph* gr_v0pt = new TGraph(nBins, arr_pT, arr_v0pt);
+        TGraph* gr_v0pt = new TGraph(nBins, pT_axis.data(), vec_v0pt.data());
         TString v0pt_name = "v0pt_";
         v0pt_name += Name;
         gr_v0pt->SetName(v0pt_name);
