@@ -46,16 +46,16 @@ void DoPlot1(TString filename){
     TGraph *gr5 = (TGraph*)f->Get("65_2");
     TGraph *gr6 = (TGraph*)f->Get("65_3");
 
-    TGraph *grd1 = create_TGraphFromTxt("./Data/Fig1/v0_1.txt", 29, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 20, 2, 1.0);
-    TGraph *grd2 = create_TGraphFromTxt("./Data/Fig1/v0_2.txt", 29, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 21, 4, 1.0);
-    TGraph *grd3 = create_TGraphFromTxt("./Data/Fig1/v0_3.txt", 29, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 25, 6, 1.0);
+    TGraph *grd1 = create_TGraphFromTxt("./Data/Fig1/v0_1.txt", 29, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 20, 2, 1.0);
+    TGraph *grd2 = create_TGraphFromTxt("./Data/Fig1/v0_2.txt", 29, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 21, 4, 1.0);
+    TGraph *grd3 = create_TGraphFromTxt("./Data/Fig1/v0_3.txt", 29, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 25, 6, 1.0);
 
-    customize_TGraph(gr1, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 47, 52, 1.2);
-    customize_TGraph(gr2, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 33, 7, 1.2);
-    customize_TGraph(gr3, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 34, 95, 1.2);
-    customize_TGraph(gr4, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 47, 52, 1.2);
-    customize_TGraph(gr5, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 33, 7, 1.2);
-    customize_TGraph(gr6, "v_{0} vs centrality; centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 34, 95, 1.2);
+    customize_TGraph(gr1, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 47, 52, 1.2);
+    customize_TGraph(gr2, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 33, 7, 1.2);
+    customize_TGraph(gr3, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 34, 95, 1.2);
+    customize_TGraph(gr4, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 47, 52, 1.2);
+    customize_TGraph(gr5, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 33, 7, 1.2);
+    customize_TGraph(gr6, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 34, 95, 1.2);
 
     auto c = new TCanvas("c", "v0_centrality", 500, 500);
 
@@ -172,8 +172,8 @@ void DoPlot3(TString filename){
 
     TGraph *grd0 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta0.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 20, 2, 1.0);
     TGraph *grd1 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta1.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 21, 1, 1.0);
-    TGraph *grd2 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta0.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 23, 4, 1.0);
-    TGraph *grd3 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta0.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 45, 6, 1.0);
+    TGraph *grd2 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta2.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 23, 4, 1.0);
+    TGraph *grd3 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta3.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 45, 6, 1.0);
 
     auto c = new TCanvas("c", "c_v0pt_eta", 500, 500);
 
