@@ -96,16 +96,16 @@ void DoPlot1(TString filename){
 
 void DoPlot2(TString filename){
     TFile *f = TFile::Open(filename, "READ");
-    TGraph *gr_rel1 = (TGraph*)f->Get("rel_1");
-    TGraph *gr_rel2 = (TGraph*)f->Get("rel_2");
-    TGraph *gr_rel3 = (TGraph*)f->Get("rel_3");
-    TGraph *gr_v0pt1 = (TGraph*)f->Get("v0pt_1");
-    TGraph *gr_v0pt2 = (TGraph*)f->Get("v0pt_2");
-    TGraph *gr_v0pt3 = (TGraph*)f->Get("v0pt_3");
+    //TGraph *gr_rel1 = (TGraph*)f->Get("rel_1");
+    //TGraph *gr_rel2 = (TGraph*)f->Get("rel_2");
+    //TGraph *gr_rel3 = (TGraph*)f->Get("rel_3");
+    TGraph *gr_v0pt1 = (TGraph*)f->Get("1");
+    TGraph *gr_v0pt2 = (TGraph*)f->Get("2");
+    TGraph *gr_v0pt3 = (TGraph*)f->Get("3");
 
-    customize_TGraph(gr_rel1, "Relation; v_{0}(p_{T}); #langle N(p_{T}) #delta p_{T} #rangle / #langle N_{0}(p_{T}) #rangle #langle p_{T} #rangle", 0.0, 10.0, -2.0, 8.0, 47, 52, 1.2);
-    customize_TGraph(gr_rel2, "Relation; v_{0}(p_{T}); #langle N(p_{T}) #delta p_{T} #rangle / #langle N_{0}(p_{T}) #rangle #langle p_{T} #rangle", 0.0, 10.0, -2.0, 8.0, 33, 7, 1.2);
-    customize_TGraph(gr_rel3, "Relation; v_{0}(p_{T}); #langle N(p_{T}) #delta p_{T} #rangle / #langle N_{0}(p_{T}) #rangle #langle p_{T} #rangle", 0.0, 10.0, -2.0, 8.0, 34, 95, 1.2);
+    //customize_TGraph(gr_rel1, "Relation; v_{0}(p_{T}); #langle N(p_{T}) #delta p_{T} #rangle / #langle N_{0}(p_{T}) #rangle #langle p_{T} #rangle", 0.0, 10.0, -2.0, 8.0, 47, 52, 1.2);
+    //customize_TGraph(gr_rel2, "Relation; v_{0}(p_{T}); #langle N(p_{T}) #delta p_{T} #rangle / #langle N_{0}(p_{T}) #rangle #langle p_{T} #rangle", 0.0, 10.0, -2.0, 8.0, 33, 7, 1.2);
+    //customize_TGraph(gr_rel3, "Relation; v_{0}(p_{T}); #langle N(p_{T}) #delta p_{T} #rangle / #langle N_{0}(p_{T}) #rangle #langle p_{T} #rangle", 0.0, 10.0, -2.0, 8.0, 34, 95, 1.2);
     customize_TGraph(gr_v0pt1, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 47, 52, 1.2);
     customize_TGraph(gr_v0pt2, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 33, 7, 1.2);
     customize_TGraph(gr_v0pt3, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 34, 95, 1.2);
@@ -114,8 +114,9 @@ void DoPlot2(TString filename){
     TGraph *grd_v0pt2 = create_TGraphFromTxt("./Data/Fig2/ATLAS_v0ptref2.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 21, 4, 1.0);
     TGraph *grd_v0pt3 = create_TGraphFromTxt("./Data/Fig2/ATLAS_v0ptref3.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 25, 6, 1.0);
 
-    auto c = new TCanvas("c", "c", 850, 500);
-    c->Divide(2, 1);
+    auto c = new TCanvas("c", "c", 500, 500);
+    //auto c = new TCanvas("c", "c", 850, 500);
+    //c->Divide(2, 1);
 
     auto leg_v0pt_title = new TLegend(0.025, 0.89, 0.5, 0.76);
     leg_v0pt_title->SetTextSize(0.0457);
@@ -136,13 +137,13 @@ void DoPlot2(TString filename){
     leg_v0pt_ptref->SetBorderSize(0);
     leg_v0pt_ptref->SetFillStyle(0);
 
-    c->cd(1);
-    gr_rel1->Draw("AP");
-    gr_rel2->Draw("P SAME");
-    gr_rel3->Draw("P SAME");
-    gPad->SetLogx();
+    //c->cd(1);
+    //gr_rel1->Draw("AP");
+    //gr_rel2->Draw("P SAME");
+    //gr_rel3->Draw("P SAME");
+    //gPad->SetLogx();
 
-    c->cd(2);
+    //c->cd(2);
     gr_v0pt1->Draw("AP");
     gr_v0pt2->Draw("P SAME");
     gr_v0pt3->Draw("P SAME");
