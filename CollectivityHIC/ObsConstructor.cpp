@@ -39,16 +39,30 @@ struct Gathered_Data{
     float mean_pt;
 };
 
-Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, TString savename, vector<float> Xaxis_del, vector<float> pT_axis){
+// pT and eta are the transverse momentum and pseudorapidity of the track (considering a 2D histogram where X is eta axis and Y pT axis)
+// it returns a efficiency correction to be applied in histograms as -> Fill(variable,this_weight)
+float getTrkCorrWeight(TFile *trkeff_file, double pT, double eta){
+  if( fabs(eta) > 2.4 ){return 0.0;}
+  if( pT < 0 || pT > 500 ){return 0.0;}
+  float factor = 1.0;
+  TH2 *eff_factor = nullptr;
+  trkeff_file->GetObject("rTotalEff3D", eff_factor); // eff / (1 - fake rate)
+  float eff = eff_factor->GetBinContent( eff_factor->GetXaxis()->FindBin(eta),eff_factor->GetYaxis()->FindBin(pT) );
+  factor = (1.0 / eff);
+  delete eff_factor;                // Free memory (sets ptr to "dangling" state)
+  eff_factor = nullptr;             // Best practice: set to nullptr after deletion
+  return factor;
+}
+
+Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, TString savename, vector<float> Xaxis_del, vector<float> pT_axis, string Correction){
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
+    TFile *cFile(0);
     TString filename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/HiForestAOD_UPC.root";
-    if (!gSystem->AccessPathName(filename)) // Verify if the file really exists
-        file = TFile::Open(filename);
-    if (!file) {
-        cout << "ERROR: couldn't open datafile!";
-        exit(1);
-    }
+    TString cFilename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/TrackCorrections_HIJING_538_OFFICIAL_Mar24.root";
+
+    file = TFile::Open(filename);
+    cFile = TFile::Open(cFilename);
 
     const unsigned int nDummy = 30000; // Used to create a dummy len array to hold the tracks
 
@@ -91,10 +105,10 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, Xaxis_del.data()); // Create histogram to scale pT bins and get f(pT)
     for (Long64_t ievt=0; ievt<nEvents; ievt++){ // Loop over the events
         vector<float> f_pt(nBins, 0.0); // Define vector to hold the fractions of pT in the event
-        float h_pt_A = 0;
-        float h_pt_B = 0;
-        int nTrk_A = 0;
-        int nTrk_B = 0;
+        float h_pt_A = 0.0;
+        float h_pt_B = 0.0;
+        float nTrk_A = 0.0;
+        float nTrk_B = 0.0;
 
         fTree->GetEntry(ievt); // Here I get the events in the opened file
         if (ievt%10000 == 0)
@@ -114,24 +128,31 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                 trkDzSig[iTrk] > -3.0 && trkDzSig[iTrk] < 3.0 && 
                 trkDxySig[iTrk] > -3.0 && trkDxySig[iTrk] < 3.0 && 
                 trkPtRes[iTrk] < 0.1){
-                h_pt_A += trkPt[iTrk]; // Sum all pT from subset A in the desired range
-                nTrk_A += 1; // Counts the number of pT entries from subset A
-                hist_pt_A->Fill(trkPt[iTrk]); // Fills the auxiliar histogram to scale f(pT) later
-                hist_all_pt_A->Fill(trkPt[iTrk]);
+                    float corrFac = 1.0;
+                    if (Correction == "Correc") corrFac = getTrkCorrWeight(cFile, trkPt[iTrk], trkEta[iTrk]);
+                    if (Correction == "noCorrec") corrFac = 1.0;
+                    nTrk_A += corrFac; // Counts the number of pT entries from subset A
+                    h_pt_A += corrFac*trkPt[iTrk]; // Sum all pT from subset A in the desired range
+                    hist_pt_A->Fill(trkPt[iTrk]); // Fills the auxiliar histogram to scale f(pT) later
+                    hist_all_pt_A->Fill(trkPt[iTrk]);
             }
+        
             // Getting subset B: [pT]_B
             if (trkEta[iTrk] >= eta_gap/2 && trkEta[iTrk] <= 2.4 && 
                 trkPt[iTrk] >= ptr_min && trkPt[iTrk] <= ptr_max && 
                 trkDzSig[iTrk] > -3.0 && trkDzSig[iTrk] < 3.0 && 
                 trkDxySig[iTrk] > -3.0 && trkDxySig[iTrk] < 3.0 && 
                 trkPtRes[iTrk] < 0.1){
-                h_pt_B += trkPt[iTrk]; // Sum all pT from subset B
-                nTrk_B += 1; // Counts the number of pT entries from subset B
+                    float corrFac = 1.0;
+                    if (Correction == "Correc") corrFac = getTrkCorrWeight(cFile, trkPt[iTrk], trkEta[iTrk]);
+                    if (Correction == "noCorrec") corrFac = 1.0;
+                    nTrk_B += corrFac; // Counts the number of pT entries from subset B
+                    h_pt_B += corrFac*trkPt[iTrk]; // Sum all pT from subset B
             }
         }
 
-        if (nTrk_A == 0) nTrk_A = 1;
-        if (nTrk_B == 0) nTrk_B = 1;
+        if (nTrk_A == 0.0) nTrk_A = 1.0;
+        if (nTrk_B == 0.0) nTrk_B = 1.0;
         float pt_A = h_pt_A/nTrk_A; // Calculates the mean pT from subset A of each event
         float pt_B = h_pt_B/nTrk_B; // Calculates the mean pT from subset B of each event
         float pt_AB = pt_A*pt_B; // [pT]_A * [pT]_B
@@ -165,7 +186,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     return struct_data;
 }
 
-void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType){
+void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType, string Correction){
     constexpr float pt_min = 0.5;
     constexpr float pt_max = 10.0;
     vector<float> Xaxis_del = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 1.98, 2.2, 2.38, 2.98, 3.18, 6.0, 8.04, 10.0};
@@ -174,7 +195,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     for (int i=0; i<nBins; i++){
         pT_axis.push_back((Xaxis_del[i+1]+Xaxis_del[i])/2);
     }
-    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Savename, Xaxis_del, pT_axis);
+    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Savename, Xaxis_del, pT_axis, Correction);
     vector<vector<float>> vec_f_pt = gData.vec_f_pt;
     vector<float> vec_pt_A = gData.vec_pt_A;
     vector<float> vec_pt_B = gData.vec_pt_B;
@@ -240,6 +261,8 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     for (int i=0; i<nBins; i++){
         vec_v0ptv0.push_back(vec_v0pt[i]/v0); // Calculates v0(pT)/v0
     }
+
+    cout << "v0 = " << v0 << endl;
 
     // Calculating v0(pT)/v0 sum rules
     float sum1_v0ptv0 = 0;
