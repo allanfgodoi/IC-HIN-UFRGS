@@ -113,9 +113,9 @@ void CorrectionPlots(float HFSET_Min, float HFSET_Max){
                 trkPtRes[iTrk] < 0.1){
                     float corrFac = getTrkCorrWeight(cFile, trkPt[iTrk], trkEta[iTrk]);
                     hist_noCorr_pT->Fill(trkPt[iTrk]);
-                    hist_Corr_pT->Fill(trkPt[iTrk]*corrFac);
+                    hist_Corr_pT->Fill(trkPt[iTrk], corrFac);
                     hist_noCorr_Eta->Fill(trkEta[iTrk]);
-                    hist_Corr_Eta->Fill(trkEta[iTrk]*corrFac);
+                    hist_Corr_Eta->Fill(trkEta[iTrk], corrFac);
             }
         }
     }
