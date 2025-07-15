@@ -39,6 +39,7 @@ struct Gathered_Data{
     vector<float> vec_unc_pt_A;
     vector<float> vec_unc_pt_B;
     vector<float> vec_unc_pt_AB;
+    vector<float> vec_unc_f_pt;
     float mean_pt;
 };
 
@@ -94,6 +95,27 @@ float UncPropIndependentAtimesB(float dEA, float sigmaEA, float dEB, float sigma
     return s;
 }
 
+vector<float> VecUncPropIndependentAtimesB(vector<float> dEA, vector<float> sigmaEA, vector<float> dEB, vector<float> sigmaEB){
+    int N = dEA.size();
+    vector<float> s(N, 0.0);
+    if (sigmaEB.size() == 1){
+        float hsu;
+        float hs;
+        float s_dEA = dEA.data()[0];
+        float s_sigmaEB = sigmaEB.data()[0];
+        for (int i=0; i<N; i++){
+            hs = sqrt(pow(2, s_dEA*sigmaEA[i]) + pow(2, dEB[i]*s_sigmaEB));
+            s[i] = hs;
+        }
+    } else{
+        for (int i=0; i<N; i++){
+            hs = sqrt(pow(2, dEA[i]*sigmaEA[i] + pow(2, dEB[i]*sigmaEB[i])));
+            s[i] = hs;
+        }
+    }
+    return s;
+}
+
 Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, TString savename, vector<float> Xaxis_del, vector<float> pT_axis, string Correction){
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
@@ -142,6 +164,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     vector<float> Vec_unc_pt_A(nEvents, 0.0);
     vector<float> Vec_unc_pt_B(nEvents, 0.0);
     vector<float> Vec_unc_pt_AB(nEvents, 0.0);
+    vector<float> Vec_unc_f_pt(nEvents, 0.0);
 
     TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", nBins, Xaxis_del.data()); // Create histogram to calculate <pT_A> (all events)
     TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, Xaxis_del.data()); // Create histogram to scale pT bins and get f(pT)
@@ -271,14 +294,14 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     float mean_pt = gData.mean_pt;
 
     // Calculating some means
-    float vec_mean_pt_A = mean(vec_pt_A);
-    float vec_mean_pt_B = mean(vec_pt_B);
+    float mean_pt_A = mean(vec_pt_A);
+    float mean_pt_B = mean(vec_pt_B);
 
     // Calculating the std deviation
-    float sigma2 = (mean(vec_pt_AB) - (vec_mean_pt_A*vec_mean_pt_B));
+    float sigma2 = (mean(vec_pt_AB) - (mean_pt_A*mean_pt_B));
     float sigma = sqrt(sigma2);
     // Std deviation uncertainty
-    float unc_sigma_2nd_term = UncPropIndependentAtimesB(vec_mean_pt_B, UncMean(vec_unc_pt_A), vec_mean_pt_A, UncMean(vec_unc_pt_B));
+    float unc_sigma_2nd_term = UncPropIndependentAtimesB(mean_pt_B, UncMean(vec_unc_pt_A), mean_pt_A, UncMean(vec_unc_pt_B));
     float unc_sigma = UncPropIndependentAminusB(UncMean(vec_unc_pt_AB), unc_sigma_2nd_term);
 
     cout << sigma << " +- " << unc_sigma << endl;
@@ -299,14 +322,18 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
 
     // Calculating v0(pT)
     for (int i=0; i<nBins; i++){
-        float v0pt = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*vec_mean_pt_B))/(vec_mean_f_pt[i]*sigma));
+        float v0pt = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*mean_pt_B))/(vec_mean_f_pt[i]*sigma));
         if (TMath::IsNaN(v0pt)) v0pt = 0.0;
         vec_v0pt.push_back(v0pt);
     }
 
     // Calculating v0(pT) uncertainty
-    // Denom
-    UncPropPartialCorrAtimesB()
+    // Denominator
+    vector<float> vec_sigma(1, sigma);
+    vector<float> vec_unc_sigma(1, unc_sigma);
+    vector<float> vec_mean_pt_B(1, mean_pt_B);
+    vector<float> unc_v0_denom = VecUncPropIndependentAtimesB(vec_sigma, vec_unc_f_pt, vec_mean_f_pt, vec_unc_sigma);
+    vector<float> unc_v0_num_2 = VecUncPropIndependentAtimesB(vec_mean_pt_B, vec_unc_f_pt, vec_mean_f_pt, UncMean(vec_unc_pt_B));
 
     // Calculating v0(pT) sum rules
     float sum1_v0pt = 0;
@@ -324,7 +351,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     vector<float> vec_rel;
     for (int i=0; i<nBins; i++){
         float pT = pT_axis[i];
-        float rel = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*vec_mean_pt_B))/(vec_mean_f_pt[i]*pT))*1e3;
+        float rel = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*mean_pt_B))/(vec_mean_f_pt[i]*pT))*1e3;
         vec_rel.push_back(rel);
     }
 
