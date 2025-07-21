@@ -87,7 +87,7 @@ float UncPropTotCorrAminusB(float sigmaEA, float sigmaEB){
 }
 
 float UncPropIndependentAtimesB(float EA, float sigmaEA, float EB, float sigmaEB){
-    float s = sqrt(pow(EA*sigmaEA, 2) + pow(EB*sigmaEB, 2));
+    float s = sqrt(pow(EB*sigmaEA, 2) + pow(EA*sigmaEB, 2));
     return s;
 }
 
@@ -256,7 +256,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
 
 // Thats the function we call to construct the observable
 void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType, string Correction){
-    int B = 100;
+    int B = 1000;
     // Defining bins and plot's x axes
     vector<float> Xaxis_del = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 1.98, 2.2, 2.38, 2.98, 3.18, 6.0, 8.04, 10.0}; // Those are the END of each bin, not the middle
     int nBins = (Xaxis_del.size()-1);
@@ -286,8 +286,9 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     // Calculating sigma
     float sigma = sqrt(mean_pt_AB - (mean_pt_A*mean_pt_B));
     // Calculating sigma uncertainty
-    float unc_sigma_2nd_term = UncPropIndependentAtimesB(mean_pt_A, unc_mean_pt_A, mean_pt_B, unc_mean_pt_B);
-    float unc_sigma = UncPropTotCorrAminusB(unc_mean_pt_AB, unc_sigma_2nd_term);
+    float unc_sigma2_2nd_term = UncPropIndependentAtimesB(mean_pt_A, unc_mean_pt_A, mean_pt_B, unc_mean_pt_B);
+    float unc_sigma2 = UncPropTotCorrAminusB(unc_mean_pt_AB, unc_sigma2_2nd_term);
+    float unc_sigma = unc_sigma2/(2*sigma);
 
     cout << sigma << " +- " << unc_sigma << endl;
 
@@ -330,7 +331,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         // Calculating the uncertainty of v0(pT)
         vec_unc_v0pt_num_2[i] = UncPropIndependentAtimesB(vec_mean_f_pt[i], vec_unc_mean_f_pt[i], mean_pt_B, unc_mean_pt_B);
         vec_unc_v0pt_num[i] = UncPropTotCorrAminusB(vec_unc_mean_pt_B_f_pt[i], vec_unc_v0pt_num_2[i]);
-        vec_unc_v0pt_denom[i] = UncPropTotCorrAtimesB(vec_mean_f_pt[i], vec_unc_mean_f_pt[i], sigma, unc_sigma); // Try both independent and tot. correlated
+        vec_unc_v0pt_denom[i] = UncPropIndependentAtimesB(vec_mean_f_pt[i], vec_unc_mean_f_pt[i], sigma, unc_sigma); // Try both independent and tot. correlated
         vec_unc_v0pt[i] = UncPropTotCorrAoverB(vec_v0pt_num[i], vec_unc_v0pt_num[i], vec_v0pt_denom[i], vec_unc_v0pt_denom[i]);
     }
 
