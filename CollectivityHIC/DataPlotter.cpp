@@ -39,12 +39,12 @@ void customize_TGraph(TGraph *g, const char* title, float xmin, float xmax, floa
 
 void DoPlot1(TString filename){
     TFile *f = TFile::Open(filename, "READ");
-    TGraph *gr1 = (TGraph*)f->Get("55_1");
-    TGraph *gr2 = (TGraph*)f->Get("55_2");
-    TGraph *gr3 = (TGraph*)f->Get("55_3");
-    TGraph *gr4 = (TGraph*)f->Get("65_1");
-    TGraph *gr5 = (TGraph*)f->Get("65_2");
-    TGraph *gr6 = (TGraph*)f->Get("65_3");
+    TGraph *gr1 = (TGraph*)f->Get("55_55_1");
+    TGraph *gr2 = (TGraph*)f->Get("55_55_2");
+    TGraph *gr3 = (TGraph*)f->Get("55_55_3");
+    TGraph *gr4 = (TGraph*)f->Get("65_65_1");
+    TGraph *gr5 = (TGraph*)f->Get("65_65_2");
+    TGraph *gr6 = (TGraph*)f->Get("65_65_3");
 
     TGraph *grd1 = create_TGraphFromTxt("./Data/Fig1/v0_1.txt", 29, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 20, 2, 1.0);
     TGraph *grd2 = create_TGraphFromTxt("./Data/Fig1/v0_2.txt", 29, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 21, 4, 1.0);

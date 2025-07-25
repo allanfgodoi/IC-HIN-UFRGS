@@ -54,11 +54,13 @@ float StdPoissonBootstrap(vector<float> x, int B){
     vector<float> bootstrapped(B, 0.0); 
     for (int i=0; i<B; i++){
         vector<float> resampled(N, 0);
+        float n = 0;
         for (int j=0; j<N; j++){
             float rd = rndgen.Poisson(lambda);
+            n += rd;
             resampled[j] = x[j]*rd;
         }
-        bootstrapped[i] = TMath::Mean(N, resampled.data());
+        bootstrapped[i] = TMath::Mean(n, resampled.data());
     }
     float bootstrapped_error = TMath::StdDev(B, bootstrapped.data());
     return bootstrapped_error;
@@ -116,7 +118,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
     TFile *cFile(0);
-    TString filename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/HiForestAOD_UPC.root";
+    TString filename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/HiForestAOD_DATA2011_MB_ppReReco.root";
     TString cFilename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/TrackCorrections_HIJING_538_OFFICIAL_Mar24.root";
 
     file = TFile::Open(filename);
@@ -137,7 +139,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     float_t trkNpixLayers[nDummy];
 
     // Addresses TTree branches to declared variables
-    TTree* fTree = (TTree*)file->Get("demo/HBT");
+    TTree* fTree = (TTree*)file->Get("demo/TreeMBUCC");
     fTree->SetBranchAddress("HFsumET", &HFsumET);
     fTree->SetBranchAddress("pvZ", &pvZ);
     fTree->SetBranchAddress("Ntrk", &Ntrk);
@@ -159,6 +161,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     vector<float> Vec_pt_AB;
 
     TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", nBins, Xaxis_del.data()); // Create histogram to calculate <pT_A> (all events)
+    TH1F *hist_all_pt_B = new TH1F("all_pt_B", "All pT from subset B", nBins, Xaxis_del.data());
     TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, Xaxis_del.data()); // Create histogram to scale pT bins and get f(pT)
     for (Long64_t ievt=0; ievt<nEvents; ievt++){ // Loop over the events
         vector<float> f_pt(nBins, 0.0); // Define vector to hold the fractions of pT in the event
@@ -198,8 +201,8 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                     // These two h_unc_vecs are used for uncertainties
                     h_unc_vec_pt_A[iTrk] = corrFac*trkPt[iTrk];
                     h_unc_vec_pt_AB[iTrk] = corrFac*trkPt[iTrk]; // Define iTrk element as trkPt[iTrk]_A
-                    hist_pt_A->Fill(trkPt[iTrk]); // Fills the auxiliar histogram to scale f(pT) later
-                    hist_all_pt_A->Fill(trkPt[iTrk]);
+                    hist_pt_A->Fill(trkPt[iTrk], corrFac); // Fills the auxiliar histogram to scale f(pT) later
+                    hist_all_pt_A->Fill(trkPt[iTrk], corrFac);
             }
         
             // Getting subset B: [pT]_B
@@ -213,6 +216,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                     if (Correction == "noCorrec") corrFac = 1.0;
                     nTrk_B += corrFac; // Counts the number of pT entries from subset B
                     h_pt_B += corrFac*trkPt[iTrk]; // Sum all pT from subset B
+                    hist_all_pt_B->Fill(trkPt[iTrk], corrFac);
                     // These two h_unc_vecs are used for uncertainties
                     h_unc_vec_pt_B[iTrk] = corrFac*trkPt[iTrk];
                     h_unc_vec_pt_AB[iTrk] *= corrFac*trkPt[iTrk]; // Multiplies already defined iTrk element trkPt[iTrk]_A by trkPt[íTrk]_B
@@ -240,8 +244,13 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     }
 
     float Mean_pt = hist_all_pt_A->GetMean();
+    float Mean_ptB = hist_all_pt_B->GetMean();
+
+    cout << "<pT>_A = " << Mean_pt << endl;
+    cout << "<pT>_B = " << Mean_ptB << endl;
 
     delete hist_all_pt_A;
+    delete hist_all_pt_B;
     delete hist_pt_A;
 
     Gathered_Data struct_data;
@@ -256,7 +265,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
 
 // Thats the function we call to construct the observable
 void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType, string Correction){
-    int B = 1000;
+    int B = 100;
     // Defining bins and plot's x axes
     vector<float> Xaxis_del = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 1.98, 2.2, 2.38, 2.98, 3.18, 6.0, 8.04, 10.0}; // Those are the END of each bin, not the middle
     int nBins = (Xaxis_del.size()-1);
@@ -289,8 +298,6 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     float unc_sigma2_2nd_term = UncPropIndependentAtimesB(mean_pt_A, unc_mean_pt_A, mean_pt_B, unc_mean_pt_B);
     float unc_sigma2 = UncPropTotCorrAminusB(unc_mean_pt_AB, unc_sigma2_2nd_term);
     float unc_sigma = unc_sigma2/(2*sigma);
-
-    cout << sigma << " +- " << unc_sigma << endl;
 
     // Calculating f(pT)[pT]_B term to calculate v0(pT)
     int nEvents_A = vec_f_pt.size();
@@ -335,9 +342,15 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         vec_unc_v0pt[i] = UncPropTotCorrAoverB(vec_v0pt_num[i], vec_unc_v0pt_num[i], vec_v0pt_denom[i], vec_unc_v0pt_denom[i]);
     }
 
+    /*
+    cout << "<[pT]_A> = " << mean_pt_A << " +- " << unc_mean_pt_A << " ; <[pT]_B> = " << mean_pt_B << " +- " << unc_mean_pt_B << "<[pT]_A><[pT]_B> = " << mean_pt_A*mean_pt_B << " +- " << unc_sigma2_2nd_term << " ; <[pT]_A[pT]_B> = " << mean_pt_AB << " +- " << unc_mean_pt_AB << endl;
+    cout << "sigma = " << sigma << " +- " << unc_sigma << endl;
     for (int i=0; i<nBins; i++){
-        cout << i << ": " << vec_v0pt[i] << " +- " << vec_unc_v0pt[i] << endl;
+        cout << "-------- i = " << i << " --------" << endl;
+        cout << "<f(pT)> = " << vec_mean_f_pt[i] << "+-" << vec_unc_mean_f_pt[i] << " ; <f(pT)[pT]_B> = " << vec_mean_pt_B_f_pt[i] << " +- " << vec_unc_mean_pt_B_f_pt[i] << "<f(pT)><[pT]_B> = " << vec_mean_f_pt[i]*mean_pt_B << " +- " << vec_unc_v0pt_num_2[i] << endl;
+        cout << "<f(pT)[pT]_B> - <f(pT)><[pT]_B> = " << vec_v0pt_num[i] << " +- " << vec_unc_v0pt_num[i] << " ; <f(pT)>sigma = " << vec_v0pt_denom[i] << " +- " <<  vec_unc_v0pt_denom[i] << " ; v0(pT) = " << vec_v0pt[i] << " +- " << vec_unc_v0pt[i] << endl;
     }
+    */
 
     // Calculating v0(pT) sum rules
     float sum1_v0pt = 0;
@@ -398,11 +411,13 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     if (PlotType == "v0ptv0"){
         vector<float> vec_zeros(nBins, 0.0);
         TGraphErrors* gr_v0pt = new TGraphErrors(nBins, pT_axis.data(), vec_v0pt.data(), vec_zeros.data(), vec_unc_v0pt.data());
+        //TGraph* gr_v0pt = new TGraph(nBins, pT_axis.data(), vec_v0pt.data());
         TString v0pt_name = "v0pt_";
         v0pt_name += Name;
         gr_v0pt->SetName(v0pt_name);
         gr_v0pt->Write();
         TGraphErrors* gr_v0ptv0 = new TGraphErrors(nBins, pT_axis.data(), vec_v0ptv0.data(), vec_zeros.data(), vec_unc_v0ptv0.data());
+        //TGraph* gr_v0ptv0 = new TGraph(nBins, pT_axis.data(), vec_v0ptv0.data());
         TString v0ptv0_name = "v0ptv0_";
         v0ptv0_name += Name;
         gr_v0ptv0->SetName(v0ptv0_name);

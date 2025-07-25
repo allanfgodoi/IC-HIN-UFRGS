@@ -23,22 +23,22 @@ void customize_TGraph(TGraph *g, const char* title, float xmin, float xmax, floa
     g->SetMarkerSize(size);
 }
 
-void DoPlot1(TString filename1, TString filename2){
+void DoPlots(TString filename1, TString cfilename1, TString filename4, TString cfilename4){
     TFile *f = TFile::Open(filename1, "READ");
-    TGraph *gr1 = (TGraph*)f->Get("55_1");
-    TGraph *gr2 = (TGraph*)f->Get("55_2");
-    TGraph *gr3 = (TGraph*)f->Get("55_3");
-    TGraph *gr4 = (TGraph*)f->Get("65_1");
-    TGraph *gr5 = (TGraph*)f->Get("65_2");
-    TGraph *gr6 = (TGraph*)f->Get("65_3");
+    TGraph *gr1 = (TGraph*)f->Get("55_55_1");
+    TGraph *gr2 = (TGraph*)f->Get("55_55_2");
+    TGraph *gr3 = (TGraph*)f->Get("55_55_3");
+    TGraph *gr4 = (TGraph*)f->Get("65_65_1");
+    TGraph *gr5 = (TGraph*)f->Get("65_65_2");
+    TGraph *gr6 = (TGraph*)f->Get("65_65_3");
 
-    TFile *cf = TFile::Open(filename2, "READ");
-    TGraph *grc1 = (TGraph*)cf->Get("55_1");
-    TGraph *grc2 = (TGraph*)cf->Get("55_2");
-    TGraph *grc3 = (TGraph*)cf->Get("55_3");
-    TGraph *grc4 = (TGraph*)cf->Get("65_1");
-    TGraph *grc5 = (TGraph*)cf->Get("65_2");
-    TGraph *grc6 = (TGraph*)cf->Get("65_3");
+    TFile *cf = TFile::Open(cfilename1, "READ");
+    TGraph *grc1 = (TGraph*)cf->Get("55_55_1");
+    TGraph *grc2 = (TGraph*)cf->Get("55_55_2");
+    TGraph *grc3 = (TGraph*)cf->Get("55_55_3");
+    TGraph *grc4 = (TGraph*)cf->Get("65_65_1");
+    TGraph *grc5 = (TGraph*)cf->Get("65_65_2");
+    TGraph *grc6 = (TGraph*)cf->Get("65_65_3");
 
     customize_TGraph(gr1, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 47, 52, 1.2);
     customize_TGraph(gr2, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 33, 7, 1.2);
@@ -54,17 +54,15 @@ void DoPlot1(TString filename1, TString filename2){
     customize_TGraph(grc5, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 21, 4, 1.0);
     customize_TGraph(grc6, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 25, 6, 1.0);
 
-
-    auto c = new TCanvas("c", "v0_centrality", 500, 500);
-
-    auto leg_title = new TLegend(0.015, 0.97, 0.5, 0.71);
+    auto leg_title = new TLegend(0.018, 0.89, 0.5, 0.76);
     leg_title->SetTextSize(0.0457);
+    leg_title->AddEntry((TObject*)0, "CMS Open Data 2.76 TeV", "");
     leg_title->AddEntry((TObject*)0, "Pb+Pb   #eta_{gap} = 1", "");
     leg_title->SetBorderSize(0);
     leg_title->SetFillStyle(0);
 
-    auto leg_ptref = new TLegend(0.45, 0.43, 0.7, 0.13);
-    leg_ptref->SetTextSize(0.023);
+    auto leg_ptref = new TLegend(0.38, 0.43, 0.67, 0.15);
+    leg_ptref->SetTextSize(0.032);
     leg_ptref->AddEntry((TObject*)0, "#bf{p_{T}^{ref} range}", "C");
     leg_ptref->AddEntry(gr1, "Without correction   0.5-2 GeV", "p");
     leg_ptref->AddEntry(gr2, "Without correction   0.5-5 GeV", "p");
@@ -75,41 +73,20 @@ void DoPlot1(TString filename1, TString filename2){
     leg_ptref->SetBorderSize(0);
     leg_ptref->SetFillStyle(0);
 
-    grc1->Draw("AP");
-    grc2->Draw("P SAME");
-    grc3->Draw("P SAME");
-    grc4->Draw("P SAME");
-    grc5->Draw("P SAME");
-    grc6->Draw("P SAME");
-    gr1->Draw("P SAME");
-    gr2->Draw("P SAME");
-    gr3->Draw("P SAME");
-    gr4->Draw("P SAME");
-    gr5->Draw("P SAME");
-    gr6->Draw("P SAME");
-    leg_title->Draw();
-    leg_ptref->Draw();
-    c->SetLogy();   
-    c->Update();
-    c->SaveAs("CorrectionPlot1.pdf");
-    delete c;
-}
+    TFile *f4;
+    TFile *cf4;
+    f4 = TFile::Open(filename4, "READ");
+    cf4 = TFile::Open(cfilename4, "READ");
 
-void DoPlot4(TString filename, TString cfilename){
-    TFile *f;
-    TFile *cf;
-    f = TFile::Open(filename, "READ");
-    cf = TFile::Open(cfilename, "READ");
+    TGraph *gr_v0pt_red_nc = (TGraph*)f4->Get("v0pt_red");
+    TGraph *gr_v0pt_blue_nc = (TGraph*)f4->Get("v0pt_blue");
+    TGraph *gr_v0ptv0_red_nc = (TGraph*)f4->Get("v0ptv0_red");
+    TGraph *gr_v0ptv0_blue_nc = (TGraph*)f4->Get("v0ptv0_blue");
 
-    TGraph *gr_v0pt_red_nc = (TGraph*)f->Get("v0pt_red");
-    TGraph *gr_v0pt_blue_nc = (TGraph*)f->Get("v0pt_blue");
-    TGraph *gr_v0ptv0_red_nc = (TGraph*)f->Get("v0ptv0_red");
-    TGraph *gr_v0ptv0_blue_nc = (TGraph*)f->Get("v0ptv0_blue");
-
-    TGraph *gr_v0pt_red_c = (TGraph*)cf->Get("v0pt_red");
-    TGraph *gr_v0pt_blue_c = (TGraph*)cf->Get("v0pt_blue");
-    TGraph *gr_v0ptv0_red_c = (TGraph*)cf->Get("v0ptv0_red");
-    TGraph *gr_v0ptv0_blue_c = (TGraph*)cf->Get("v0ptv0_blue");
+    TGraph *gr_v0pt_red_c = (TGraph*)cf4->Get("v0pt_red");
+    TGraph *gr_v0pt_blue_c = (TGraph*)cf4->Get("v0pt_blue");
+    TGraph *gr_v0ptv0_red_c = (TGraph*)cf4->Get("v0ptv0_red");
+    TGraph *gr_v0ptv0_blue_c = (TGraph*)cf4->Get("v0ptv0_blue");
 
     customize_TGraph(gr_v0pt_red_nc, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 47, 2, 1.0);
     customize_TGraph(gr_v0pt_blue_nc, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.42, 34, 4, 1.0);
@@ -121,8 +98,8 @@ void DoPlot4(TString filename, TString cfilename){
     customize_TGraph(gr_v0ptv0_red_c, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 21, 3, 1.0);
     customize_TGraph(gr_v0ptv0_blue_c, "v_{0}(p_{T})/v_{0} vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 20, 5, 1.0);
 
-    auto c = new TCanvas("c", "c", 850, 500);
-    c->Divide(2, 1);
+    auto c = new TCanvas("c", "c", 1500, 500);
+    c->Divide(3, 1);
 
     // v0(pT) legend
     auto legend_v0pt_text = new TLegend(0.025, 0.89, 0.5, 0.76);
@@ -137,7 +114,7 @@ void DoPlot4(TString filename, TString cfilename){
     legend_v0pt_cents->AddEntry(gr_v0pt_red_nc, "Without correction (50-60%)", "p");
     legend_v0pt_cents->AddEntry(gr_v0pt_blue_nc, "Without correction (60-70%)", "p");
     legend_v0pt_cents->AddEntry(gr_v0pt_red_c, "With correction (50-60%)", "p");
-    legend_v0pt_cents->AddEntry(gr_v0pt_blue_c, "With correction (50-60%)", "p");
+    legend_v0pt_cents->AddEntry(gr_v0pt_blue_c, "With correction (60-70%)", "p");
     legend_v0pt_cents->SetBorderSize(0);
     legend_v0pt_cents->SetFillStyle(0);
     
@@ -154,12 +131,29 @@ void DoPlot4(TString filename, TString cfilename){
     legend_v0ptv0_cents->AddEntry(gr_v0pt_red_nc, "Without correction (50-60%)", "p");
     legend_v0ptv0_cents->AddEntry(gr_v0pt_blue_nc, "Without correction (60-70%)", "p");
     legend_v0ptv0_cents->AddEntry(gr_v0ptv0_red_c, "With correction (50-60%)", "p");
-    legend_v0ptv0_cents->AddEntry(gr_v0ptv0_blue_c, "With correction (50-60%)", "p");
+    legend_v0ptv0_cents->AddEntry(gr_v0ptv0_blue_c, "With correction (60-70%)", "p");
     legend_v0ptv0_cents->SetBorderSize(0);
     legend_v0ptv0_cents->SetFillStyle(0);
 
-     // Drawing v0(pT) plot
     c->cd(1);
+    grc1->Draw("AP");
+    grc2->Draw("P SAME");
+    grc3->Draw("P SAME");
+    grc4->Draw("P SAME");
+    grc5->Draw("P SAME");
+    grc6->Draw("P SAME");
+    gr1->Draw("P SAME");
+    gr2->Draw("P SAME");
+    gr3->Draw("P SAME");
+    gr4->Draw("P SAME");
+    gr5->Draw("P SAME");
+    gr6->Draw("P SAME");
+    leg_title->Draw();
+    leg_ptref->Draw();
+    c->SetLogy();   
+
+     // Drawing v0(pT) plot
+    c->cd(2);
     gr_v0pt_red_c->Draw("AP");
     gr_v0pt_blue_c->Draw("P SAME");
     gr_v0pt_red_nc->Draw("P SAME");
@@ -169,7 +163,7 @@ void DoPlot4(TString filename, TString cfilename){
     gPad->SetLogx();
 
     // Drawing v0(pT)/v0 plot
-    c->cd(2);
+    c->cd(3);
     gr_v0ptv0_red_c->Draw("AP");
     gr_v0ptv0_blue_nc->Draw("P SAME");
     gr_v0ptv0_blue_c->Draw("P SAME");
@@ -180,6 +174,6 @@ void DoPlot4(TString filename, TString cfilename){
 
     // Saving canvas as pdf
     c->Update();
-    c->SaveAs("CorrectionPlot4.pdf");
+    c->SaveAs("CorrectionPlots.pdf");
     delete c;
 }
