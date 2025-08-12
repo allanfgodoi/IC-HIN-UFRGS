@@ -153,8 +153,8 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
 
     // Defining auxiliar constants
     int nBins = pT_axis.size();
-    const unsigned int nEvents = fTree->GetEntries();
-    //const unsigned int nEvents = 10000;
+    //const unsigned int nEvents = fTree->GetEntries();
+    const unsigned int nEvents = 560000;
     vector<vector<float>> Vec_f_pt; // This vector will hold the fractions of pT of all events
     vector<float> Vec_pt_A;
     vector<float> Vec_pt_B;
@@ -180,11 +180,6 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
         if (pvZ < -15.0 || pvZ > 15.0) // Applying |pvZ| < 15 cm filter
             continue;
 
-        // Holder vectors from each event to calculate uncertainties
-        vector<float> h_unc_vec_pt_A(Ntrk, 0.0);
-        vector<float> h_unc_vec_pt_B(Ntrk, 0.0);
-        vector<float> h_unc_vec_pt_AB(Ntrk, 0.0);
-
         // Track loop
         for(int iTrk=0; iTrk<Ntrk; iTrk++){ // Loop over the tracks in a event
             // Getting subset A: [pT]_A
@@ -198,9 +193,6 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                     if (Correction == "noCorrec") corrFac = 1.0;
                     nTrk_A += corrFac; // Counts the number of pT entries from subset A
                     h_pt_A += corrFac*trkPt[iTrk]; // Sum all pT from subset A in the desired range
-                    // These two h_unc_vecs are used for uncertainties
-                    h_unc_vec_pt_A[iTrk] = corrFac*trkPt[iTrk];
-                    h_unc_vec_pt_AB[iTrk] = corrFac*trkPt[iTrk]; // Define iTrk element as trkPt[iTrk]_A
                     hist_pt_A->Fill(trkPt[iTrk], corrFac); // Fills the auxiliar histogram to scale f(pT) later
                     hist_all_pt_A->Fill(trkPt[iTrk], corrFac);
             }
@@ -217,9 +209,6 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                     nTrk_B += corrFac; // Counts the number of pT entries from subset B
                     h_pt_B += corrFac*trkPt[iTrk]; // Sum all pT from subset B
                     hist_all_pt_B->Fill(trkPt[iTrk], corrFac);
-                    // These two h_unc_vecs are used for uncertainties
-                    h_unc_vec_pt_B[iTrk] = corrFac*trkPt[iTrk];
-                    h_unc_vec_pt_AB[iTrk] *= corrFac*trkPt[iTrk]; // Multiplies already defined iTrk element trkPt[iTrk]_A by trkPt[íTrk]_B
             }
         }
 
@@ -342,7 +331,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         vec_unc_v0pt[i] = UncPropTotCorrAoverB(vec_v0pt_num[i], vec_unc_v0pt_num[i], vec_v0pt_denom[i], vec_unc_v0pt_denom[i]);
     }
 
-    /*
+
     cout << "<[pT]_A> = " << mean_pt_A << " +- " << unc_mean_pt_A << " ; <[pT]_B> = " << mean_pt_B << " +- " << unc_mean_pt_B << "<[pT]_A><[pT]_B> = " << mean_pt_A*mean_pt_B << " +- " << unc_sigma2_2nd_term << " ; <[pT]_A[pT]_B> = " << mean_pt_AB << " +- " << unc_mean_pt_AB << endl;
     cout << "sigma = " << sigma << " +- " << unc_sigma << endl;
     for (int i=0; i<nBins; i++){
@@ -350,7 +339,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         cout << "<f(pT)> = " << vec_mean_f_pt[i] << "+-" << vec_unc_mean_f_pt[i] << " ; <f(pT)[pT]_B> = " << vec_mean_pt_B_f_pt[i] << " +- " << vec_unc_mean_pt_B_f_pt[i] << "<f(pT)><[pT]_B> = " << vec_mean_f_pt[i]*mean_pt_B << " +- " << vec_unc_v0pt_num_2[i] << endl;
         cout << "<f(pT)[pT]_B> - <f(pT)><[pT]_B> = " << vec_v0pt_num[i] << " +- " << vec_unc_v0pt_num[i] << " ; <f(pT)>sigma = " << vec_v0pt_denom[i] << " +- " <<  vec_unc_v0pt_denom[i] << " ; v0(pT) = " << vec_v0pt[i] << " +- " << vec_unc_v0pt[i] << endl;
     }
-    */
+
 
     // Calculating v0(pT) sum rules
     float sum1_v0pt = 0;
