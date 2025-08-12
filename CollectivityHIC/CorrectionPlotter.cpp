@@ -54,7 +54,7 @@ void DoPlots(TString filename1, TString cfilename1, TString filename4, TString c
     customize_TGraph(grc5, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 21, 4, 1.0);
     customize_TGraph(grc6, "v_{0} vs Centrality; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 25, 6, 1.0);
 
-    auto leg_title = new TLegend(0.018, 0.89, 0.5, 0.76);
+    auto leg_title = new TLegend(0.1, 0.89, 0.5, 0.76);
     leg_title->SetTextSize(0.0457);
     leg_title->AddEntry((TObject*)0, "CMS Open Data 2.76 TeV", "");
     leg_title->AddEntry((TObject*)0, "Pb+Pb   #eta_{gap} = 1", "");
@@ -102,14 +102,14 @@ void DoPlots(TString filename1, TString cfilename1, TString filename4, TString c
     c->Divide(3, 1);
 
     // v0(pT) legend
-    auto legend_v0pt_text = new TLegend(0.025, 0.89, 0.5, 0.76);
+    auto legend_v0pt_text = new TLegend(0.065, 0.89, 0.5, 0.76);
     legend_v0pt_text->SetTextSize(0.0457);
     legend_v0pt_text->AddEntry((TObject*)0, "CMS Open Data 2.76 TeV", "");
     legend_v0pt_text->AddEntry((TObject*)0, "Pb+Pb,   #eta_{gap} = 1   p_{T}^{ref} 0.5-2 GeV", "");
     legend_v0pt_text->SetBorderSize(0);
     legend_v0pt_text->SetFillStyle(0);
 
-    auto legend_v0pt_cents = new TLegend(0.103, 0.748, 0.5, 0.57);
+    auto legend_v0pt_cents = new TLegend(0.113, 0.748, 0.5, 0.57);
     legend_v0pt_cents->SetTextSize(0.0325);
     legend_v0pt_cents->AddEntry(gr_v0pt_red_nc, "Without correction (50-60%)", "p");
     legend_v0pt_cents->AddEntry(gr_v0pt_blue_nc, "Without correction (60-70%)", "p");
@@ -119,14 +119,14 @@ void DoPlots(TString filename1, TString cfilename1, TString filename4, TString c
     legend_v0pt_cents->SetFillStyle(0);
     
     // v0(pT)/v0 legend
-    auto legend_v0ptv0_text = new TLegend(0.025, 0.89, 0.5, 0.76);
+    auto legend_v0ptv0_text = new TLegend(0.065, 0.89, 0.5, 0.76);
     legend_v0ptv0_text->SetTextSize(0.0457);
     legend_v0ptv0_text->AddEntry((TObject*)0, "CMS Open Data 2.76 TeV", "");
     legend_v0ptv0_text->AddEntry((TObject*)0, "Pb+Pb,   #eta_{gap} = 1   p_{T}^{ref} 0.5-2 GeV", "");
     legend_v0ptv0_text->SetBorderSize(0);
     legend_v0ptv0_text->SetFillStyle(0);
 
-    auto legend_v0ptv0_cents = new TLegend(0.103, 0.748, 0.5, 0.57);
+    auto legend_v0ptv0_cents = new TLegend(0.113, 0.748, 0.5, 0.57);
     legend_v0ptv0_cents->SetTextSize(0.0325);
     legend_v0ptv0_cents->AddEntry(gr_v0pt_red_nc, "Without correction (50-60%)", "p");
     legend_v0ptv0_cents->AddEntry(gr_v0pt_blue_nc, "Without correction (60-70%)", "p");
@@ -150,6 +150,7 @@ void DoPlots(TString filename1, TString cfilename1, TString filename4, TString c
     gr6->Draw("P SAME");
     leg_title->Draw();
     leg_ptref->Draw();
+    gPad->SetLeftMargin(0.14);
     c->SetLogy();   
 
      // Drawing v0(pT) plot
@@ -160,6 +161,7 @@ void DoPlots(TString filename1, TString cfilename1, TString filename4, TString c
     gr_v0pt_blue_nc->Draw("P SAME");
     legend_v0pt_text->Draw();
     legend_v0pt_cents->Draw();
+    gPad->SetLeftMargin(0.12);
     gPad->SetLogx();
 
     // Drawing v0(pT)/v0 plot
@@ -170,6 +172,7 @@ void DoPlots(TString filename1, TString cfilename1, TString filename4, TString c
     gr_v0ptv0_red_nc->Draw("P SAME");
     legend_v0ptv0_text->Draw();
     legend_v0ptv0_cents->Draw();
+    gPad->SetLeftMargin(0.12);
     gPad->SetLogx();
 
     // Saving canvas as pdf
