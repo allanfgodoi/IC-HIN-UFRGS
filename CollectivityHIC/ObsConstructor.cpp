@@ -104,13 +104,12 @@ float UncPropTotCorrAtimesB(float EA, float sigmaEA, float EB, float sigmaEB){
 }
 
 struct Gathered_Data{
-    vector<vector<float>> vec_f_pt;
-    vector<float> vec_pt_A;
-    vector<float> vec_pt_B;
-    vector<float> vec_pt_AB;
-    vector<float> vec_unc_pt_A;
-    vector<float> vec_unc_pt_B;
-    vector<float> vec_unc_pt_AB;
+    vector<vector<float>> vec_f_pt_A;
+    vector<vector<float>> vec_f_pt_B;
+    vector<vector<float>> vec_f_pt_AB;
+    vector<float> vec_dpt_A;
+    vector<float> vec_dpt_B;
+    vector<float> vec_dpt_AB;
     float mean_pt;
 };
 
@@ -153,18 +152,29 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
 
     // Defining auxiliar constants
     int nBins = pT_axis.size();
-    //const unsigned int nEvents = fTree->GetEntries();
-    const unsigned int nEvents = 560000;
-    vector<vector<float>> Vec_f_pt; // This vector will hold the fractions of pT of all events
+    const unsigned int nEvents = fTree->GetEntries();
+    //const unsigned int nEvents = 560000;
+    vector<vector<float>> Vec_f_pt_A; // This vector will hold the fractions of pT of all events
+    vector<vector<float>> Vec_f_pt_B;
+    vector<vector<float>> Vec_f_pt_AB;
     vector<float> Vec_pt_A;
     vector<float> Vec_pt_B;
     vector<float> Vec_pt_AB;
+    vector<float> Vec_dpt_A;
+    vector<float> Vec_dpt_B;
+    vector<float> Vec_dpt_AB;
 
     TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", nBins, Xaxis_del.data()); // Create histogram to calculate <pT_A> (all events)
     TH1F *hist_all_pt_B = new TH1F("all_pt_B", "All pT from subset B", nBins, Xaxis_del.data());
+    TH1F *hist_all_pt_AB = new TH1F("all_pt_AB", "All pT", nBins, Xaxis_del.data());
+    TH1F *hist_pt_AB = new TH1F("all_pt", "pT", nBins, Xaxis_del.data());
     TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, Xaxis_del.data()); // Create histogram to scale pT bins and get f(pT)
+    TH1F *hist_pt_B = new TH1F("pt_B", "pT from subset B", nBins, Xaxis_del.data());
+
     for (Long64_t ievt=0; ievt<nEvents; ievt++){ // Loop over the events
-        vector<float> f_pt(nBins, 0.0); // Define vector to hold the fractions of pT in the event
+        vector<float> f_pt_A(nBins, 0.0); // Define vector to hold the fractions of pT in the event
+        vector<float> f_pt_B(nBins, 0.0);
+        vector<float> f_pt_AB(nBins, 0.0);
         float h_pt_A = 0.0;
         float h_pt_B = 0.0;
         float nTrk_A = 0.0;
@@ -195,6 +205,8 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                     h_pt_A += corrFac*trkPt[iTrk]; // Sum all pT from subset A in the desired range
                     hist_pt_A->Fill(trkPt[iTrk], corrFac); // Fills the auxiliar histogram to scale f(pT) later
                     hist_all_pt_A->Fill(trkPt[iTrk], corrFac);
+                    hist_pt_AB->Fill(trkPt[iTrk], corrFac);
+                    hist_all_pt_AB->Fill(trkPt[iTrk], corrFac);
             }
         
             // Getting subset B: [pT]_B
@@ -208,7 +220,10 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                     if (Correction == "noCorrec") corrFac = 1.0;
                     nTrk_B += corrFac; // Counts the number of pT entries from subset B
                     h_pt_B += corrFac*trkPt[iTrk]; // Sum all pT from subset B
+                    hist_pt_B->Fill(trkPt[iTrk], corrFac);
                     hist_all_pt_B->Fill(trkPt[iTrk], corrFac);
+                    hist_pt_AB->Fill(trkPt[iTrk], corrFac);
+                    hist_all_pt_AB->Fill(trkPt[iTrk], corrFac);
             }
         }
 
@@ -216,39 +231,54 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
         if (nTrk_B == 0.0) nTrk_B = 1.0;
         float pt_A = h_pt_A/nTrk_A; // Calculates the mean pT from subset A of each event
         float pt_B = h_pt_B/nTrk_B; // Calculates the mean pT from subset B of each event
-        float pt_AB = pt_A*pt_B; // [pT]_A * [pT]_B
 
         // Scaling the created hist and taking the bins content to the array
         if (hist_pt_A->Integral() != 0) hist_pt_A->Scale(1/hist_pt_A->Integral()); // Defining a normalized histogram
+        if (hist_pt_B->Integral() != 0) hist_pt_B->Scale(1/hist_pt_B->Integral());
+        if (hist_pt_AB->Integral() != 0) hist_pt_AB->Scale(1/hist_pt_AB->Integral());
         for (int i=0; i<nBins; i++){
-            f_pt[i] = hist_pt_A->GetBinContent(i+1);
+            f_pt_A[i] = hist_pt_A->GetBinContent(i+1);
+            f_pt_B[i] = hist_pt_B->GetBinContent(i+1);
+            f_pt_AB[i] = hist_pt_AB->GetBinContent(i+1);
         }
         hist_pt_A->Reset();
+        hist_pt_B->Reset();
+        hist_pt_AB->Reset();
         
         // Setting the desired vectors
-        Vec_f_pt.push_back(f_pt);
+        Vec_f_pt_A.push_back(f_pt_A);
+        Vec_f_pt_B.push_back(f_pt_B);
+        Vec_f_pt_AB.push_back(f_pt_AB);
+
         Vec_pt_A.push_back(pt_A);
         Vec_pt_B.push_back(pt_B);
-        Vec_pt_AB.push_back(pt_AB);
     }
 
-    float Mean_pt = hist_all_pt_A->GetMean();
-    float Mean_ptB = hist_all_pt_B->GetMean();
+    float Mean_pt_A = hist_all_pt_A->GetMean();
+    float Mean_pt_B = hist_all_pt_B->GetMean();
+    float Mean_pt = hist_all_pt_AB->GetMean();
 
-    cout << "<pT>_A = " << Mean_pt << endl;
-    cout << "<pT>_B = " << Mean_ptB << endl;
+    for (int i=0; i<Vec_pt_A.size(); i++){
+        Vec_dpt_A.push_back(Vec_pt_A[i]-Mean_pt_A);
+        Vec_dpt_B.push_back(Vec_pt_B[i]-Mean_pt_B);
+        Vec_dpt_AB.push_back(Vec_dpt_A[i]*Vec_dpt_B[i]);
+    }
 
     delete hist_all_pt_A;
     delete hist_all_pt_B;
+    delete hist_all_pt_AB;
+    delete hist_pt_AB;
     delete hist_pt_A;
+    delete hist_pt_B;
 
     Gathered_Data struct_data;
-    struct_data.vec_f_pt = Vec_f_pt;
-    struct_data.vec_pt_A = Vec_pt_A;
-    struct_data.vec_pt_B = Vec_pt_B;
-    struct_data.vec_pt_AB = Vec_pt_AB;
+    struct_data.vec_f_pt_A = Vec_f_pt_A;
+    struct_data.vec_f_pt_B = Vec_f_pt_B;
+    struct_data.vec_f_pt_AB = Vec_f_pt_AB;
+    struct_data.vec_dpt_A = Vec_dpt_A;
+    struct_data.vec_dpt_B = Vec_dpt_B;
+    struct_data.vec_dpt_AB = Vec_dpt_AB;
     struct_data.mean_pt = Mean_pt;
-
     return struct_data;
 }
 
@@ -265,101 +295,56 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
 
     // Calls DataGathering function to get selected data and get them from it using struct
     Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Savename, Xaxis_del, pT_axis, Correction);
-    vector<vector<float>> vec_f_pt = gData.vec_f_pt;
-    vector<float> vec_pt_A = gData.vec_pt_A;
-    vector<float> vec_pt_B = gData.vec_pt_B;
-    vector<float> vec_pt_AB = gData.vec_pt_AB;
+    vector<vector<float>> vec_f_pt_A = gData.vec_f_pt_A;
+    vector<vector<float>> vec_f_pt_B = gData.vec_f_pt_B;
+    vector<vector<float>> vec_f_pt_AB = gData.vec_f_pt_AB;
+    vector<float> vec_dpt_A = gData.vec_dpt_A;
+    vector<float> vec_dpt_B = gData.vec_dpt_B;
+    vector<float> vec_dpt_AB = gData.vec_dpt_AB;
     float mean_pt = gData.mean_pt;
 
-    // Calculating some means
-    float mean_pt_A = mean(vec_pt_A);
-    float mean_pt_B = mean(vec_pt_B);
-    float mean_pt_AB = mean(vec_pt_AB);
-    
-    // Bootstrapping samples
-    float unc_mean_pt_A = StdPoissonBootstrap(vec_pt_A, B);
-    float unc_mean_pt_B = StdPoissonBootstrap(vec_pt_B, B);
-    float unc_mean_pt_AB = StdPoissonBootstrap(vec_pt_AB, B);
-
     // Calculating sigma
-    float sigma = sqrt(mean_pt_AB - (mean_pt_A*mean_pt_B));
+    float sigma = sqrt(mean(vec_dpt_AB));
     // Calculating sigma uncertainty
-    float unc_sigma2_2nd_term = UncPropIndependentAtimesB(mean_pt_A, unc_mean_pt_A, mean_pt_B, unc_mean_pt_B);
-    float unc_sigma2 = UncPropTotCorrAminusB(unc_mean_pt_AB, unc_sigma2_2nd_term);
-    float unc_sigma = unc_sigma2/(2*sigma);
 
-    // Calculating f(pT)[pT]_B term to calculate v0(pT)
-    int nEvents_A = vec_f_pt.size();
-    vector<vector<float>> vec_pt_B_f_pt(nEvents_A, vector<float>(nBins, 0.0));
+
+    // Calculating f_A(pT)*d[pT]_B + f_B(pT)*d[pT]_A
+    int nEvents = vec_f_pt_A.size();
+    vector<vector<float>> vec_sum_pt_f_pt(nEvents, vector<float>(nBins, 0.0));
     for (int j=0; j<nBins; j++){ // pT bins
-        for (int i=0; i<nEvents_A; i++){ // Events
-            vec_pt_B_f_pt[i][j] = vec_pt_B[i]*vec_f_pt[i][j];
+        for (int i=0; i<nEvents; i++){ // Events
+            vec_sum_pt_f_pt[i][j] = (vec_f_pt_A[i][j]*vec_dpt_B[i])+(vec_f_pt_B[i][j]*vec_dpt_A[i]);
         }
     }
 
     // Defining auxiliar vectors to calculate v0(pT)
     vector<float> vec_v0pt(nBins, 0.0);
-    vector<float> vec_v0pt_num(nBins, 0.0);
     vector<float> vec_v0pt_denom(nBins, 0.0);
-    vector<float> vec_mean_f_pt = double_vector_mean(vec_f_pt, nBins);
-    vector<float> vec_mean_pt_B_f_pt = double_vector_mean(vec_pt_B_f_pt, nBins);
-
-    // Bootstrapping more samples
-    vector<float> vec_unc_mean_f_pt(nBins, 0.0);
-    vector<float> vec_unc_mean_pt_B_f_pt(nBins, 0.0);
-    for (int i=0; i<nBins; i++){
-        vec_unc_mean_f_pt[i] = StdPoissonBootstrap(transpose(vec_f_pt)[i], B);
-        vec_unc_mean_pt_B_f_pt[i] = StdPoissonBootstrap(transpose(vec_pt_B_f_pt)[i], B);
-    }
+    vector<float> vec_mean_f_pt_A = double_vector_mean(vec_f_pt_A, nBins);
+    vector<float> vec_mean_f_pt_B = double_vector_mean(vec_f_pt_B, nBins);
+    vector<float> vec_mean_f_pt_AB = double_vector_mean(vec_f_pt_AB, nBins);
     
-    // Defining auxiliar vectors to calculate v0(pT) uncertainty
-    vector<float> vec_unc_v0pt_denom(nBins, 0.0);
-    vector<float> vec_unc_v0pt_num_2(nBins, 0.0);
-    vector<float> vec_unc_v0pt_num(nBins, 0.0);
-    vector<float> vec_unc_v0pt(nBins, 0.0);
-
+    
     // Calculating v0(pT) and its uncertainty
+    vector<float> vec_v0pt_num = double_vector_mean(vec_sum_pt_f_pt, nBins); // v0(pT) numerator
     for (int i=0; i<nBins; i++){
         // Calculating the observable v0(pT)
-        vec_v0pt_num[i] = vec_mean_pt_B_f_pt[i]-vec_mean_f_pt[i]*mean_pt_B;
-        vec_v0pt_denom[i] = vec_mean_f_pt[i]*sigma;
-        vec_v0pt[i] = vec_v0pt_num[i]/vec_v0pt_denom[i];
+        vec_v0pt_denom[i] = vec_mean_f_pt_AB[i]*sigma;
+        vec_v0pt[i] = 0.5*vec_v0pt_num[i]/vec_v0pt_denom[i];
         // Calculating the uncertainty of v0(pT)
-        vec_unc_v0pt_num_2[i] = UncPropIndependentAtimesB(vec_mean_f_pt[i], vec_unc_mean_f_pt[i], mean_pt_B, unc_mean_pt_B);
-        vec_unc_v0pt_num[i] = UncPropTotCorrAminusB(vec_unc_mean_pt_B_f_pt[i], vec_unc_v0pt_num_2[i]);
-        vec_unc_v0pt_denom[i] = UncPropIndependentAtimesB(vec_mean_f_pt[i], vec_unc_mean_f_pt[i], sigma, unc_sigma); // Try both independent and tot. correlated
-        vec_unc_v0pt[i] = UncPropTotCorrAoverB(vec_v0pt_num[i], vec_unc_v0pt_num[i], vec_v0pt_denom[i], vec_unc_v0pt_denom[i]);
     }
-
-
-    cout << "<[pT]_A> = " << mean_pt_A << " +- " << unc_mean_pt_A << " ; <[pT]_B> = " << mean_pt_B << " +- " << unc_mean_pt_B << "<[pT]_A><[pT]_B> = " << mean_pt_A*mean_pt_B << " +- " << unc_sigma2_2nd_term << " ; <[pT]_A[pT]_B> = " << mean_pt_AB << " +- " << unc_mean_pt_AB << endl;
-    cout << "sigma = " << sigma << " +- " << unc_sigma << endl;
-    for (int i=0; i<nBins; i++){
-        cout << "-------- i = " << i << " --------" << endl;
-        cout << "<f(pT)> = " << vec_mean_f_pt[i] << "+-" << vec_unc_mean_f_pt[i] << " ; <f(pT)[pT]_B> = " << vec_mean_pt_B_f_pt[i] << " +- " << vec_unc_mean_pt_B_f_pt[i] << "<f(pT)><[pT]_B> = " << vec_mean_f_pt[i]*mean_pt_B << " +- " << vec_unc_v0pt_num_2[i] << endl;
-        cout << "<f(pT)[pT]_B> - <f(pT)><[pT]_B> = " << vec_v0pt_num[i] << " +- " << vec_unc_v0pt_num[i] << " ; <f(pT)>sigma = " << vec_v0pt_denom[i] << " +- " <<  vec_unc_v0pt_denom[i] << " ; v0(pT) = " << vec_v0pt[i] << " +- " << vec_unc_v0pt[i] << endl;
-    }
-
 
     // Calculating v0(pT) sum rules
     float sum1_v0pt = 0;
     float sum2_v0pt_left = 0;
     float acc_sum2_v0pt_right = 0;
     for (int i=0; i<nBins; i++){
-        sum1_v0pt += vec_v0pt[i]*vec_mean_f_pt[i];
+        sum1_v0pt += vec_v0pt[i]*vec_mean_f_pt_AB[i];
         float pT = pT_axis[i];
-        sum2_v0pt_left += pT*vec_v0pt[i]*vec_mean_f_pt[i];
-        acc_sum2_v0pt_right += vec_mean_f_pt[i];
+        sum2_v0pt_left += pT*vec_v0pt[i]*vec_mean_f_pt_AB[i];
+        acc_sum2_v0pt_right += vec_mean_f_pt_AB[i];
     }
     float sum2_v0pt_right = sigma*acc_sum2_v0pt_right;
-
-    // Calculating Fig2(c)
-    vector<float> vec_rel;
-    for (int i=0; i<nBins; i++){
-        float pT = pT_axis[i];
-        float rel = ((vec_mean_pt_B_f_pt[i]-(vec_mean_f_pt[i]*mean_pt_B))/(vec_mean_f_pt[i]*pT))*1e3;
-        vec_rel.push_back(rel);
-    }
 
     // Printing v0(pT) sum rules
     cout << "------------------ v0(pT) ------------------" << endl;
@@ -369,13 +354,12 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
 
     // Calculating v0(pT)/v0 and its uncertainty
     float v0 = sigma/mean_pt; // Calculates the scaled v0
+    cout << v0 << " " << sigma << " " << mean_pt << endl;
     vector<float> vec_v0ptv0;
-    vector<float> vec_unc_v0ptv0(nBins, 0.0);
     for (int i=0; i<nBins; i++){
         // Calculating v0(pT)/v0
         vec_v0ptv0.push_back(vec_v0pt[i]/v0); // Calculates v0(pT)/v0
-        // Calculating v0(pT)/v0 uncertainty (USING unc_sigma AS V0 UNCERTAINTY!!!)
-        vec_unc_v0ptv0[i] = UncPropTotCorrAoverB(vec_v0pt[i], vec_unc_v0pt[i], v0, unc_sigma);
+        // Calculating v0(pT)/v0 uncertainty
     }
 
     // Calculating v0(pT)/v0 sum rules
@@ -383,10 +367,10 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     float sum2_v0ptv0_left = 0;
     float acc_sum2_v0ptv0_right = 0;
     for (int i=0; i<nBins; i++){
-        sum1_v0ptv0 += vec_v0ptv0[i]*vec_mean_f_pt[i];
+        sum1_v0ptv0 += vec_v0ptv0[i]*vec_mean_f_pt_AB[i];
         float pT = pT_axis[i];
-        sum2_v0ptv0_left += pT*vec_v0ptv0[i]*vec_mean_f_pt[i];
-        acc_sum2_v0ptv0_right += vec_mean_f_pt[i];
+        sum2_v0ptv0_left += pT*vec_v0ptv0[i]*vec_mean_f_pt_AB[i];
+        acc_sum2_v0ptv0_right += vec_mean_f_pt_AB[i];
     }
     float sum2_v0ptv0_right = mean_pt*acc_sum2_v0ptv0_right;
 
@@ -399,14 +383,14 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
 
     if (PlotType == "v0ptv0"){
         vector<float> vec_zeros(nBins, 0.0);
-        TGraphErrors* gr_v0pt = new TGraphErrors(nBins, pT_axis.data(), vec_v0pt.data(), vec_zeros.data(), vec_unc_v0pt.data());
-        //TGraph* gr_v0pt = new TGraph(nBins, pT_axis.data(), vec_v0pt.data());
+        //TGraphErrors* gr_v0pt = new TGraphErrors(nBins, pT_axis.data(), vec_v0pt.data(), vec_zeros.data(), vec_unc_v0pt.data());
+        TGraph* gr_v0pt = new TGraph(nBins, pT_axis.data(), vec_v0pt.data());
         TString v0pt_name = "v0pt_";
         v0pt_name += Name;
         gr_v0pt->SetName(v0pt_name);
         gr_v0pt->Write();
-        TGraphErrors* gr_v0ptv0 = new TGraphErrors(nBins, pT_axis.data(), vec_v0ptv0.data(), vec_zeros.data(), vec_unc_v0ptv0.data());
-        //TGraph* gr_v0ptv0 = new TGraph(nBins, pT_axis.data(), vec_v0ptv0.data());
+        //TGraphErrors* gr_v0ptv0 = new TGraphErrors(nBins, pT_axis.data(), vec_v0ptv0.data(), vec_zeros.data(), vec_unc_v0ptv0.data());
+        TGraph* gr_v0ptv0 = new TGraph(nBins, pT_axis.data(), vec_v0ptv0.data());
         TString v0ptv0_name = "v0ptv0_";
         v0ptv0_name += Name;
         gr_v0ptv0->SetName(v0ptv0_name);
@@ -436,20 +420,6 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         TGraph* gr_v0 = new TGraph(1, x_cent, y_v0);
         gr_v0->SetName(v0_name);
         gr_v0->Write();
-    }
-
-    if (PlotType == "v0ptrel"){
-        TGraph* gr_rel = new TGraph(nBins, pT_axis.data(), vec_rel.data());
-        TString rel_name = "rel_";
-        rel_name += Name;
-        gr_rel->SetName(rel_name);
-        gr_rel->Write();
-
-        TGraph* gr_v0pt = new TGraph(nBins, pT_axis.data(), vec_v0pt.data());
-        TString v0pt_name = "v0pt_";
-        v0pt_name += Name;
-        gr_v0pt->SetName(v0pt_name);
-        gr_v0pt->Write();
     }
 
     save_file->Close();
