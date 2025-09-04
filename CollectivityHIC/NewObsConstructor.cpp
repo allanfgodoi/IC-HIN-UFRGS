@@ -56,6 +56,8 @@ float StdPoissonBootstrap(vector<float> x, int B){
 struct Gathered_Data{
     vector<float> vec_dPt_A;
     vector<float> vec_dPt_B;
+    vector<float> vec_dPt_ref_A;
+    vector<float> vec_dPt_ref_B;
     vector<vector<float>> vec_n_pt_AB;
     vector<vector<float>> vec_n_pt_A;
     vector<vector<float>> vec_n_pt_B;
@@ -227,43 +229,59 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
 
     vector<vector<float>> Matrix_dtrkPt_A; // Shape: nEvents x nTrk, but nTrk isn't fixed
     vector<vector<float>> Matrix_dtrkPt_B;
+    vector<vector<float>> Matrix_dtrkPt_ref_A;
+    vector<vector<float>> Matrix_dtrkPt_ref_B;
     vector<float> Vec_dtrkPt_A;
     vector<float> Vec_dtrkPt_B;
+    vector<float> Vec_dtrkPt_ref_A;
+    vector<float> Vec_dtrkPt_ref_B;
     for (int i=0; i<Matrix_trkPt_A.size(); i++){ // Events (i)
         for (int j=0; j<Matrix_trkPt_A[i].size(); j++){ // Tracks (j)
-            Vec_dtrkPt_A.push_back(Matrix_trkPt_A[i][j]-Mean_pt_ref_A);
+            Vec_dtrkPt_A.push_back(Matrix_trkPt_A[i][j]-Mean_pt_A);
+            Vec_dtrkPt_ref_A.push_back(Matrix_trkPt_A[i][j]-Mean_pt_ref_A);
         }
         Matrix_dtrkPt_A.push_back(Vec_dtrkPt_A);
+        Matrix_dtrkPt_ref_A.push_back(Vec_dtrkPt_ref_A);
         Vec_dtrkPt_A.clear();
+        Vec_dtrkPt_ref_A.clear();
     }
     for (int i=0; i<Matrix_trkPt_B.size(); i++){ // Events (i)
         for (int j=0; j<Matrix_trkPt_B[i].size(); j++){ // Tracks (j)
-            Vec_dtrkPt_B.push_back(Matrix_trkPt_B[i][j]-Mean_pt_ref_B);
+            Vec_dtrkPt_B.push_back(Matrix_trkPt_B[i][j]-Mean_pt_B);
+            Vec_dtrkPt_ref_B.push_back(Matrix_trkPt_B[i][j]-Mean_pt_ref_B);
         }
         Matrix_dtrkPt_B.push_back(Vec_dtrkPt_B);
+        Matrix_dtrkPt_ref_B.push_back(Vec_dtrkPt_ref_B);
         Vec_dtrkPt_B.clear();
+        Vec_dtrkPt_ref_B.clear();
     }
-
     int nValid_Events = Matrix_trkPt_A.size(); // Non-zero events. Subset A and B have de same number of events
 
     vector<float> Vec_dPt_A(nValid_Events, 0.0);
     vector<float> Vec_dPt_B(nValid_Events, 0.0);
+    vector<float> Vec_dPt_ref_A(nValid_Events, 0.0);
+    vector<float> Vec_dPt_ref_B(nValid_Events, 0.0);
 
     for (int i=0; i<nValid_Events; i++){
         float sum_WdPt_A = 0.0; float sum_W_A = 0.0;
         float sum_WdPt_B = 0.0; float sum_W_B = 0.0;
+        float sum_WdPt_ref_A = 0.0; float sum_WdPt_ref_B = 0.0;
         for (int j=0; j<Matrix_dtrkPt_A[i].size(); j++){
             sum_WdPt_A += Matrix_trkW_A[i][j]*Matrix_dtrkPt_A[i][j];
+            sum_WdPt_ref_A += Matrix_trkW_A[i][j]*Matrix_dtrkPt_ref_A[i][j];
             sum_W_A += Matrix_trkW_A[i][j];
         }
         for (int j=0; j<Matrix_dtrkPt_B[i].size(); j++){
             sum_WdPt_B += Matrix_trkW_B[i][j]*Matrix_dtrkPt_B[i][j];
+            sum_WdPt_ref_B += Matrix_trkW_B[i][j]*Matrix_dtrkPt_ref_B[i][j];
             sum_W_B += Matrix_trkW_B[i][j];
         }
         if (sum_W_A == 0) sum_W_A = 1.0;
         if (sum_W_B == 0) sum_W_B = 1.0;
         Vec_dPt_A[i] = sum_WdPt_A/sum_W_A;
         Vec_dPt_B[i] = sum_WdPt_B/sum_W_B;
+        Vec_dPt_ref_A[i] = sum_WdPt_ref_A/sum_W_A;
+        Vec_dPt_ref_B[i] = sum_WdPt_ref_B/sum_W_B;
     }
     
 
@@ -274,6 +292,8 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     Gathered_Data struct_data;
     struct_data.vec_dPt_A = Vec_dPt_A;
     struct_data.vec_dPt_B = Vec_dPt_B;
+    struct_data.vec_dPt_ref_A = Vec_dPt_ref_A;
+    struct_data.vec_dPt_ref_B = Vec_dPt_ref_B;
     struct_data.vec_n_pt_AB = Vec_n_pt_AB;
     struct_data.vec_n_pt_A = Vec_n_pt_A;
     struct_data.vec_n_pt_B = Vec_n_pt_B;
@@ -296,6 +316,8 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Xaxis_del, pT_axis);
     vector<float> vec_dPt_A = gData.vec_dPt_A;
     vector<float> vec_dPt_B = gData.vec_dPt_B;
+    vector<float> vec_dPt_ref_A = gData.vec_dPt_ref_A;
+    vector<float> vec_dPt_ref_B = gData.vec_dPt_ref_B;
     vector<vector<float>> vec_n_pt_AB = gData.vec_n_pt_AB;
     vector<vector<float>> vec_n_pt_A = gData.vec_n_pt_A;
     vector<vector<float>> vec_n_pt_B = gData.vec_n_pt_B;
@@ -305,19 +327,19 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     int nEvents = vec_dPt_A.size();
 
     // v0
-    vector<float> vec_dPt_AB(nEvents, 0.0);
+    vector<float> vec_dPt_ref_AB(nEvents, 0.0);
     for (int i=0; i<nEvents; i++){
-        float h_dPt_AB = vec_dPt_A[i]*vec_dPt_B[i];
-        if (TMath::IsNaN(h_dPt_AB) || !TMath::Finite(h_dPt_AB)){
-            vec_dPt_AB[i] = 0.0;
+        float h_dPt_ref_AB = vec_dPt_ref_A[i]*vec_dPt_ref_B[i];
+        if (TMath::IsNaN(h_dPt_ref_AB) || !TMath::Finite(h_dPt_ref_AB)){
+            vec_dPt_ref_AB[i] = 0.0;
         } else{
-            vec_dPt_AB[i] = h_dPt_AB;
+            vec_dPt_ref_AB[i] = h_dPt_ref_AB;
         }
     }
-    float sigma = sqrt(TMath::Mean(nEvents, vec_dPt_AB.data()));
+    float sigma = sqrt(TMath::Mean(nEvents, vec_dPt_ref_AB.data()));
     float v0 = sigma/mean_pt_ref;
     // v0 uncertainty
-    float unc_v0 = StdPoissonBootstrap(vec_dPt_AB, B);
+    float unc_v0 = StdPoissonBootstrap(vec_dPt_ref_AB, B);
     cout << "v0 = " << v0 << " +- " << unc_v0 << endl;
     
 
