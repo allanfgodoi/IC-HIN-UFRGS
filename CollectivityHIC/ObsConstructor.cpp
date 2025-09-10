@@ -113,7 +113,7 @@ struct Gathered_Data{
     float mean_pt_ref;
 };
 
-Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, TString savename, vector<float> Xaxis_del, vector<float> pT_axis, string Correction){
+Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, TString savename, vector<float> Xaxis_del, vector<float> pT_axis){
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
     TFile *cFile(0);
@@ -284,7 +284,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
 }
 
 // Thats the function we call to construct the observable
-void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType, string Correction){
+void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType){
     int B = 100;
     // Defining bins and plot's x axes
     vector<float> Xaxis_del = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 1.98, 2.2, 2.38, 2.98, 3.18, 6.0, 8.04, 10.0}; // Those are the END of each bin, not the middle
@@ -295,7 +295,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     }
 
     // Calls DataGathering function to get selected data and get them from it using struct
-    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Savename, Xaxis_del, pT_axis, Correction);
+    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Savename, Xaxis_del, pT_axis);
     vector<vector<float>> vec_n_pt_A = gData.vec_n_pt_A;
     vector<vector<float>> vec_n_pt_B = gData.vec_n_pt_B;
     vector<vector<float>> vec_n_pt_AB = gData.vec_n_pt_AB;
