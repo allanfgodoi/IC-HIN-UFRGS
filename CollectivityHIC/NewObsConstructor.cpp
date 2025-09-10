@@ -20,6 +20,18 @@ float getTrkCorrWeight(TFile *trkeff_file, double pT, double eta){
     return factor;
 }
 
+vector<vector<float>> transpose(vector<vector<float>> x){
+    int rows = x.size();
+    int cols = x[0].size();
+    vector<vector<float>> transposed(cols, vector<float>(rows, 0.0));
+    for (int i=0; i<rows; i++){
+        for (int j=0; j<cols; j++){
+            transposed[j][i] = x[i][j];
+        }
+    }
+    return transposed;
+}
+
 vector<float> double_vector_mean(vector<vector<float>> x, const unsigned int nBins){
     int nEvents_A = x.size();
     vector<float> vec;
@@ -120,8 +132,6 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     TH1F *hist_all_pt_A = new TH1F("all_pt_A", "All pT from subset A", 100, 0, 100); 
     TH1F *hist_all_pt_B = new TH1F("all_pt_B", "All pT from subset B", 100, 0, 100);
     TH1F *hist_all_pt_ref_AB = new TH1F("all_pt_ref", "All pT-ref", 100, 0, 100); // Create histogram to calculate <pT-ref_A> (all events)
-    TH1F *hist_all_pt_ref_A = new TH1F("all_pt_ref_A", "All pT-ref from subset A", 100, 0, 100); 
-    TH1F *hist_all_pt_ref_B = new TH1F("all_pt_ref_B", "All pT-ref from subset B", 100, 0, 100);
     TH1F *hist_pt_AB = new TH1F("pt", "pT", nBins, Xaxis_del.data()); // Create histogram to scale pT bins and get n(pT)
     TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, Xaxis_del.data());
     TH1F *hist_pt_B = new TH1F("pt_B", "pT from subset B", nBins, Xaxis_del.data());
@@ -152,10 +162,9 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                     //float corrFac = getTrkCorrWeight(cFile, trkPt[iTrk], trkEta[iTrk]);
                     float corrFac = 1.0;
                     if (corrFac > 10.0) corrFac = 0.0;
-                    if (trkPt[iTrk] >= ptr_min && trkPt[iTrk] <= ptr_max){
+                    if (trkPt[iTrk] >= ptr_min && trkPt[iTrk] <= ptr_max){ // ARRUMAR
                         Vec_trkPt_A.push_back(trkPt[iTrk]);
                         Vec_trkW_A.push_back(corrFac);
-                        hist_all_pt_ref_A->Fill(trkPt[iTrk], corrFac);
                         hist_all_pt_ref_AB->Fill(trkPt[iTrk], corrFac);
                     }
                     hist_all_pt_A->Fill(trkPt[iTrk], corrFac);
@@ -173,10 +182,9 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                     //float corrFac = getTrkCorrWeight(cFile, trkPt[iTrk], trkEta[iTrk]);
                     float corrFac = 1.0;
                     if (corrFac > 10.0) corrFac = 0.0;
-                    if (trkPt[iTrk] >= ptr_min && trkPt[iTrk] <= ptr_max){
+                    if (trkPt[iTrk] >= ptr_min && trkPt[iTrk] <= ptr_max){ // ARRUMAR
                         Vec_trkPt_B.push_back(trkPt[iTrk]);
                         Vec_trkW_B.push_back(corrFac);
-                        hist_all_pt_ref_B->Fill(trkPt[iTrk], corrFac);
                         hist_all_pt_ref_AB->Fill(trkPt[iTrk], corrFac);
                     }
                     hist_all_pt_B->Fill(trkPt[iTrk], corrFac);   
@@ -221,8 +229,6 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     float Mean_pt_A = hist_all_pt_A->GetMean();
     float Mean_pt_B = hist_all_pt_B->GetMean();
     float Mean_pt = hist_all_pt_AB->GetMean();
-    float Mean_pt_ref_A = hist_all_pt_ref_A->GetMean();
-    float Mean_pt_ref_B = hist_all_pt_ref_B->GetMean();
     float Mean_pt_ref = hist_all_pt_ref_AB->GetMean();
 
     vector<vector<float>> Matrix_dtrkPt_A; // Shape: nEvents x nTrk, but nTrk isn't fixed
@@ -231,14 +237,14 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     vector<float> Vec_dtrkPt_B;
     for (int i=0; i<Matrix_trkPt_A.size(); i++){ // Events (i)
         for (int j=0; j<Matrix_trkPt_A[i].size(); j++){ // Tracks (j)
-            Vec_dtrkPt_A.push_back(Matrix_trkPt_A[i][j]-Mean_pt_ref_A);
+            Vec_dtrkPt_A.push_back(Matrix_trkPt_A[i][j]-Mean_pt_A);
         }
         Matrix_dtrkPt_A.push_back(Vec_dtrkPt_A);
         Vec_dtrkPt_A.clear();
     }
     for (int i=0; i<Matrix_trkPt_B.size(); i++){ // Events (i)
         for (int j=0; j<Matrix_trkPt_B[i].size(); j++){ // Tracks (j)
-            Vec_dtrkPt_B.push_back(Matrix_trkPt_B[i][j]-Mean_pt_ref_B);
+            Vec_dtrkPt_B.push_back(Matrix_trkPt_B[i][j]-Mean_pt_B);
         }
         Matrix_dtrkPt_B.push_back(Vec_dtrkPt_B);
         Vec_dtrkPt_B.clear();
@@ -303,6 +309,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     float mean_pt = gData.mean_pt;
 
     int nEvents = vec_dPt_A.size();
+    cout << vec_n_pt_AB.size() << " " << vec_n_pt_AB[0].size() << endl;
 
     // v0
     vector<float> vec_dPt_AB(nEvents, 0.0);
@@ -332,14 +339,14 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     // Defining auxiliar vectors to calculate v0(pT)v0
     vector<float> vec_v0ptv0(nBins, 0.0);
     vector<float> vec_v0ptv0_denom(nBins, 0.0);
-    vector<float> vec_mean_n_pt_A = double_vector_mean(vec_n_pt_A, nBins);
-    vector<float> vec_mean_n_pt_B = double_vector_mean(vec_n_pt_B, nBins);
     vector<float> vec_mean_n_pt_AB = double_vector_mean(vec_n_pt_AB, nBins);
+    float vec_mean2_n_pt_AB = TMath::Mean(nBins, vec_mean_n_pt_AB.data());
+
     // Calculating v0(pT)v0 and its uncertainty
     vector<float> vec_v0ptv0_num = double_vector_mean(vec_sum_dpt_n_pt, nBins); // v0(pT) numerator
     for (int i=0; i<nBins; i++){
         // Calculating the observable v0(pT)v0
-        vec_v0ptv0_denom[i] = vec_mean_n_pt_AB[i]*mean_pt;
+        vec_v0ptv0_denom[i] = vec_mean2_n_pt_AB*mean_pt_ref;
         vec_v0ptv0[i] = 0.5*vec_v0ptv0_num[i]/vec_v0ptv0_denom[i];
         // Calculating the uncertainty of v0(pT)
     }
