@@ -121,7 +121,7 @@ void DoPlotRefsEta(){
     // pT-ref: [1.0, 5.0]
     TGraph *gr_v0ptv0_ptref_3 = (TGraph*)f_v0ptv0_ptref->Get("v0ptv0_ptref_3");
     // EDITING OUR DATA TGRAPH
-    customize_TGraph(gr_v0ptv0_ptref_1, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -50.0, 8.0, 47, 52, 1.2);
+    customize_TGraph(gr_v0ptv0_ptref_1, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -0.002, 0.01, 47, 52, 1.2);
     customize_TGraph(gr_v0ptv0_ptref_2, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -5.0, 8.0, 33, 7, 1.2);
     customize_TGraph(gr_v0ptv0_ptref_3, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -5.0, 8.0, 34, 95, 1.2);
 
