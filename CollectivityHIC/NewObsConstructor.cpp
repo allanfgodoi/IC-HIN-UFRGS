@@ -290,9 +290,6 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
         Vec_dPt_B[i] = sum_WdPt_B/sum_W_B;
     }
 
-    cout << Vec_n_pt_A.size() << " " << Vec_n_pt_B.size() << endl;
-    cout << transpose(Vec_n_pt_A)[0].size() << endl;
-
     // Calculating delta n(pT)
     vector<float> Vec_mean_n_pt_A(nBins, 0.0);
     vector<float> Vec_mean_n_pt_B(nBins, 0.0);
@@ -328,7 +325,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
 
 // Thats the function we call to construct the observable
 void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType){
-    int B = 100; // Number of Poisson bootstrap samples
+    int B = 3000; // Number of Poisson bootstrap samples
     // Defining bins and plot's x axes
     vector<float> Xaxis_del = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 1.98, 2.2, 2.38, 2.98, 3.18, 6.0, 8.04, 10.0}; // Those are the END of each bin, not the middle
     int nBins = (Xaxis_del.size()-1);
@@ -363,8 +360,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     float v0 = sigma/mean_pt_ref;
     // v0 uncertainty
     float unc_v0 = StdPoissonBootstrap(vec_dPt_ref_AB, B);
-    cout << "v0 = " << v0 << " +- " << unc_v0 << endl;
-    
+    cout << "v0 = " << v0 << " +- " << unc_v0 << endl;    
 
     // Calculating n_A(pT)*d[pT]_B + n_B(pT)*d[pT]_A
     vector<vector<float>> vec_sum_dpt_dn_pt(nEvents, vector<float>(nBins, 0.0));
@@ -385,7 +381,6 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         // Calculating the observable v0(pT)v0
         vec_v0ptv0_denom[i] = vec_mean_n_pt_AB[i]*mean_pt_ref;
         vec_v0ptv0[i] = 0.5*vec_v0ptv0_num[i]/vec_v0ptv0_denom[i];
-        cout << vec_v0ptv0[i] << " " << vec_v0ptv0_num[i] << " " << vec_mean_n_pt_AB[i] << " " << mean_pt_ref << endl;
         // Calculating the uncertainty of v0(pT)
     }
 
