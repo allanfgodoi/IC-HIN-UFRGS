@@ -359,7 +359,8 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     float sigma = sqrt(TMath::Mean(nEvents, vec_dPt_ref_AB.data()));
     float v0 = sigma/mean_pt_ref;
     // v0 uncertainty
-    float unc_v0 = StdPoissonBootstrap(vec_dPt_ref_AB, B);
+    float unc_dPt_ref_AB = StdPoissonBootstrap(vec_dPt_ref_AB, B);
+    float unc_v0 = unc_dPt_ref_AB/(2*mean_pt_ref*sqrt(unc_dPt_ref_AB));
     cout << "v0 = " << v0 << " +- " << unc_v0 << endl;    
 
     // Calculating n_A(pT)*d[pT]_B + n_B(pT)*d[pT]_A
