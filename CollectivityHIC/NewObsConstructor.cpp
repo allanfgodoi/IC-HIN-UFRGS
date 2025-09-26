@@ -49,23 +49,25 @@ float StdPoissonBootstrap(vector<float> x, int B){
     TRandom3 rndgen;
     int N = x.size();
     float lambda = 1.0;
-
     vector<float> bootstrapped(B, 0.0); 
     for (int i=0; i<B; i++){
-        vector<float> resampled(N, 0);
-        float n = 0;
+        float acc = 0.0;
+        float n = 0.0;
         for (int j=0; j<N; j++){
             float rd = rndgen.Poisson(lambda);
+            acc += x[j]*rd;
             n += rd;
-            resampled[j] = x[j]*rd;
         }
-        bootstrapped[i] = TMath::Mean(n, resampled.data());
+        bootstrapped[i] = acc/n;
     }
     float bootstrapped_error = TMath::StdDev(B, bootstrapped.data());
     return bootstrapped_error;
 }
 
+
+
 struct Gathered_Data{
+    vector<float> pT_axis;
     vector<float> vec_dPt_A;
     vector<float> vec_dPt_B;
     vector<float> vec_dPt_ref_A;
@@ -76,10 +78,11 @@ struct Gathered_Data{
     float mean_pt_ref;
 };
 
-Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, vector<float> Xaxis_del, vector<float> pT_axis){
+Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, vector<float> Xaxis_del){
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
     TFile *cFile(0);
+    //TString filename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/HiForestAOD_DATA2011_MB_ppReReco_part2_03102024.root";
     TString filename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/HiForestAOD_DATA2011_MB_ppReReco.root";
     TString cFilename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/TrackCorrections_HIJING_538_OFFICIAL_Mar24.root";
 
@@ -114,7 +117,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     fTree->SetBranchAddress("trkNpixLayers", &trkNpixLayers);
 
     // Defining auxiliar constants
-    int nBins = pT_axis.size();
+    int nBins = (Xaxis_del.size()-1);
     const unsigned int nEvents = fTree->GetEntries();
     //const unsigned int nEvents = 100000;
     vector<vector<float>> Matrix_trkPt_A;
@@ -137,6 +140,8 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     TH1F *hist_pt_AB = new TH1F("pt", "pT", nBins, Xaxis_del.data()); // Create histogram to scale pT bins and get n(pT)
     TH1F *hist_pt_A = new TH1F("pt_A", "pT from subset A", nBins, Xaxis_del.data());
     TH1F *hist_pt_B = new TH1F("pt_B", "pT from subset B", nBins, Xaxis_del.data());
+    
+    TProfile *PpT = new TProfile("PpT", "pT bins mean", nBins, Xaxis_del.data());
 
     for (Long64_t ievt=0; ievt<nEvents; ievt++){ // Loop over the events
         vector<float> n_pt_A(nBins, 0.0); // Define vector to hold the fractions of pT in the event
@@ -161,8 +166,8 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                 trkDzSig[iTrk] > -3.0 && trkDzSig[iTrk] < 3.0 && 
                 trkDxySig[iTrk] > -3.0 && trkDxySig[iTrk] < 3.0 && 
                 trkPtRes[iTrk] < 0.1){
-                    //float corrFac = getTrkCorrWeight(cFile, trkPt[iTrk], trkEta[iTrk]);
-                    float corrFac = 1.0;
+                    float corrFac = getTrkCorrWeight(cFile, trkPt[iTrk], trkEta[iTrk]);
+                    //float corrFac = 1.0;
                     if (trkPt[iTrk] >= ptr_min && trkPt[iTrk] <= ptr_max){ // ARRUMAR
                         Vec_trkPt_A.push_back(trkPt[iTrk]);
                         Vec_trkW_A.push_back(corrFac);
@@ -172,6 +177,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                     hist_pt_A->Fill(trkPt[iTrk], corrFac);
                     hist_pt_AB->Fill(trkPt[iTrk], corrFac);
                     hist_all_pt_A->Fill(trkPt[iTrk], corrFac);
+                    PpT->Fill(trkPt[iTrk], trkPt[iTrk], corrFac);
             }
         
             // Getting subset B: [pT]_B
@@ -180,8 +186,8 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                 trkDzSig[iTrk] > -3.0 && trkDzSig[iTrk] < 3.0 && 
                 trkDxySig[iTrk] > -3.0 && trkDxySig[iTrk] < 3.0 && 
                 trkPtRes[iTrk] < 0.1){
-                    //float corrFac = getTrkCorrWeight(cFile, trkPt[iTrk], trkEta[iTrk]);
-                    float corrFac = 1.0;
+                    float corrFac = getTrkCorrWeight(cFile, trkPt[iTrk], trkEta[iTrk]);
+                    //float corrFac = 1.0;
                     if (trkPt[iTrk] >= ptr_min && trkPt[iTrk] <= ptr_max){ // ARRUMAR
                         Vec_trkPt_B.push_back(trkPt[iTrk]);
                         Vec_trkW_B.push_back(corrFac);
@@ -191,6 +197,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
                     hist_pt_B->Fill(trkPt[iTrk], corrFac);
                     hist_pt_AB->Fill(trkPt[iTrk], corrFac);
                     hist_all_pt_B->Fill(trkPt[iTrk], corrFac);
+                    PpT->Fill(trkPt[iTrk], trkPt[iTrk], corrFac);
             }
         }
 
@@ -232,6 +239,11 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     float Mean_pt_ref_A = hist_all_pt_ref_A->GetMean();
     float Mean_pt_ref_B = hist_all_pt_ref_B->GetMean();
 
+    vector<float> Pt_axis(nBins, 0.0);
+    for (int i=0; i<nBins; i++){
+        Pt_axis[i] = PpT->GetBinContent(i+1);
+    }
+
     vector<vector<float>> Matrix_dtrkPt_ref_A; // Shape: nEvents x nTrk, but nTrk isn't fixed
     vector<vector<float>> Matrix_dtrkPt_ref_B;
     vector<vector<float>> Matrix_dtrkPt_A; 
@@ -242,7 +254,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     vector<float> Vec_dtrkPt_B;
     for (int i=0; i<Matrix_trkPt_A.size(); i++){ // Events (i)
         for (int j=0; j<Matrix_trkPt_A[i].size(); j++){ // Tracks (j)
-            Vec_dtrkPt_A.push_back(Matrix_trkPt_A[i][j]-Mean_pt_A);
+            Vec_dtrkPt_A.push_back(Matrix_trkPt_A[i][j]-Mean_pt_ref_A);
             Vec_dtrkPt_ref_A.push_back(Matrix_trkPt_A[i][j]-Mean_pt_ref_A);
         }
         Matrix_dtrkPt_ref_A.push_back(Vec_dtrkPt_ref_A);
@@ -252,7 +264,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     }
     for (int i=0; i<Matrix_trkPt_B.size(); i++){ // Events (i)
         for (int j=0; j<Matrix_trkPt_B[i].size(); j++){ // Tracks (j)
-            Vec_dtrkPt_B.push_back(Matrix_trkPt_B[i][j]-Mean_pt_B);
+            Vec_dtrkPt_B.push_back(Matrix_trkPt_B[i][j]-Mean_pt_ref_B);
             Vec_dtrkPt_ref_B.push_back(Matrix_trkPt_B[i][j]-Mean_pt_ref_B);
         }
         Matrix_dtrkPt_ref_B.push_back(Vec_dtrkPt_ref_B);
@@ -306,12 +318,20 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
         }
     }
 
-    
     delete hist_all_pt_ref_A;
     delete hist_all_pt_ref_B;
     delete hist_all_pt_ref_AB;
+    delete hist_all_pt_A;
+    delete hist_all_pt_B;
+    delete hist_pt_AB;
+    delete hist_pt_A;
+    delete hist_pt_B;
+
+    file->Close();
+    cFile->Close();
 
     Gathered_Data struct_data;
+    struct_data.pT_axis = Pt_axis;
     struct_data.vec_dPt_A = Vec_dPt_A;
     struct_data.vec_dPt_B = Vec_dPt_B;
     struct_data.vec_dPt_ref_A = Vec_dPt_ref_A;
@@ -325,16 +345,13 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
 
 // Thats the function we call to construct the observable
 void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType){
-    int B = 3000; // Number of Poisson bootstrap samples
+    int B = 100; // Number of Poisson bootstrap samples
     // Defining bins and plot's x axes
     vector<float> Xaxis_del = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 1.98, 2.2, 2.38, 2.98, 3.18, 6.0, 8.04, 10.0}; // Those are the END of each bin, not the middle
     int nBins = (Xaxis_del.size()-1);
-    vector<float> pT_axis;
-    for (int i=0; i<nBins; i++){
-        pT_axis.push_back((Xaxis_del[i+1]+Xaxis_del[i])/2); // Here we define the x axis points as the middle of each bin
-    }
 
-    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Xaxis_del, pT_axis);
+    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Xaxis_del);
+    vector<float> pT_axis = gData.pT_axis;
     vector<float> vec_dPt_A = gData.vec_dPt_A;
     vector<float> vec_dPt_B = gData.vec_dPt_B;
     vector<float> vec_dPt_ref_A = gData.vec_dPt_ref_A;
@@ -356,6 +373,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
             vec_dPt_ref_AB[i] = h_dPt_ref_AB;
         }
     }
+
     float sigma = sqrt(TMath::Mean(nEvents, vec_dPt_ref_AB.data()));
     float v0 = sigma/mean_pt_ref;
     // v0 uncertainty
@@ -371,10 +389,13 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         }
     }
 
-    // Defining auxiliar vectors to calculate v0(pT)v0
+    // Defining auxiliar vectors to calculate v0(pT)v0 and its uncertainty
     vector<float> vec_v0ptv0(nBins, 0.0);
     vector<float> vec_v0ptv0_denom(nBins, 0.0);
     vector<float> vec_mean_n_pt_AB = double_vector_mean(vec_n_pt_AB, nBins);
+    vector<float> vec_unc_v0ptv0_num(nBins, 0.0);
+    vector<float> vec_unc_n_pt_AB(nBins, 0.0);
+    vector<float> vec_unc_v0ptv0(nBins, 0.0);
 
     // Calculating v0(pT)v0 and its uncertainty
     vector<float> vec_v0ptv0_num = double_vector_mean(vec_sum_dpt_dn_pt, nBins); // v0(pT) numerator
@@ -383,12 +404,17 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         vec_v0ptv0_denom[i] = vec_mean_n_pt_AB[i]*mean_pt_ref;
         vec_v0ptv0[i] = 0.5*vec_v0ptv0_num[i]/vec_v0ptv0_denom[i];
         // Calculating the uncertainty of v0(pT)
+        vec_unc_v0ptv0_num[i] = StdPoissonBootstrap(transpose(vec_sum_dpt_dn_pt)[i], B); // Bootstraping numerator term
+        vec_unc_n_pt_AB[i] = StdPoissonBootstrap(transpose(vec_n_pt_AB)[i], B); // Bootstrapping <n(pT)>
+        vec_unc_v0ptv0[i] = (1/mean_pt_ref)*abs((vec_unc_v0ptv0_num[i]/vec_mean_n_pt_AB[i])-(vec_unc_n_pt_AB[i]*vec_v0ptv0_num[i])); // Uncertainty propagation (tot. corr.)
     }
 
     vector<float> vec_v0pt(nBins, 0.0);
+    vector<float> vec_unc_v0pt(nBins, 0.0);
     // Calculating v0(pT)
     for (int i=0; i<nBins; i++){
         vec_v0pt[i] = vec_v0ptv0[i]/v0;
+        vec_unc_v0pt[i] = abs((vec_unc_v0ptv0[i]/v0)-(vec_v0ptv0[i]*unc_v0));
     }
 
      // Calculating v0(pT) sum rules
@@ -410,8 +436,10 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
 
     // Calculating v0(pT)/v0
     vector<float> vec_sv0pt(nBins, 0.0);
+    vector<float> vec_unc_sv0pt(nBins, 0.0);
     for (int i=0; i<nBins; i++){
         vec_sv0pt[i] = vec_v0pt[i]/v0;
+        vec_unc_sv0pt[i] = abs((vec_unc_v0pt[i]/v0)-(vec_v0pt[i]*unc_v0));
     }
 
     // Calculating v0(pT)/v0 sum rules
@@ -432,37 +460,53 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
 
     TFile *save_file = new TFile(Savename, "UPDATE");
 
-    if (PlotType == "v0ptv0_ptref"){
+    if (PlotType == "obs_ptref"){
+        vector<float> vec_zeros(nBins, 0.0);
+        float x_cent[1];
+        TString cent_name = "";
+        if (HFSET_Max == 375.0){
+            cent_name += "_5060";
+        }
+        if (HFSET_Max == 210.0){
+            cent_name += "_6070";
+        }
+
+        // v0(pT)v0
         vector<float> vec_v0ptv0_plot(nBins, 0.0);
+        vector<float> vec_unc_v0ptv0_plot(nBins, 0.0);
         for (int i=0; i<nBins; i++){
             vec_v0ptv0_plot[i] = 1e3*vec_v0ptv0[i];
+            vec_unc_v0ptv0_plot[i] = 1e3*vec_unc_v0ptv0[i];
         }
-        TGraph* gr_v0ptv0_ptref = new TGraph(nBins, pT_axis.data(), vec_v0ptv0_plot.data());
-        TString gname = "v0ptv0_ptref_";
-        gname += Name;
-        gr_v0ptv0_ptref->SetName(gname);
+        TGraph* gr_v0ptv0_ptref = new TGraphErrors(nBins, pT_axis.data(), vec_v0ptv0_plot.data(), vec_zeros.data(), vec_unc_v0ptv0_plot.data());
+        TString v0ptv0_name = "v0ptv0_ptref_";
+        v0ptv0_name += Name + cent_name;
+        gr_v0ptv0_ptref->SetName(v0ptv0_name);
         gr_v0ptv0_ptref->Write();
-    }
 
-    if (PlotType == "v0pt_sv0pt"){
-        vector<float> vec_zeros(nBins, 0.0);
-        //TGraphErrors* gr_v0pt = new TGraphErrors(nBins, pT_axis.data(), vec_v0pt.data(), vec_zeros.data(), vec_unc_v0pt.data());
-        TGraph* gr_v0pt = new TGraph(nBins, pT_axis.data(), vec_v0pt.data());
-        TString v0pt_name = "v0pt_";
-        v0pt_name += Name;
+        // v0(pT)
+        TGraphErrors* gr_v0pt = new TGraphErrors(nBins, pT_axis.data(), vec_v0pt.data(), vec_zeros.data(), vec_unc_v0pt.data());
+        TString v0pt_name = "v0pt_ptref_";
+        v0pt_name += Name + cent_name;
         gr_v0pt->SetName(v0pt_name);
         gr_v0pt->Write();
-        TGraph* gr_sptv0 = new TGraph(nBins, pT_axis.data(), vec_sv0pt.data());
-        TString sptv0_name = "sptv0_";
-        sptv0_name += Name;
-        gr_sptv0->SetName(sptv0_name);
-        gr_sptv0->Write();
+
+        // v0(pT)/v0
+        TGraphErrors* gr_sv0pt = new TGraphErrors(nBins, pT_axis.data(), vec_sv0pt.data(), vec_zeros.data(), vec_unc_sv0pt.data());
+        TString sv0pt_name = "sv0pt_ptref_";
+        sv0pt_name += Name + cent_name;
+        gr_sv0pt->SetName(sv0pt_name);
+        gr_sv0pt->Write();
     }
 
     if (PlotType == "v0"){
-        float y_v0[1];
         float x_cent[1];
+        float y_v0[1];
+        float x_unc_zero[1];
+        float y_unc_v0[1];
+        x_unc_zero[0] = 0.0;
         y_v0[0] = v0;
+        y_unc_v0[0] = unc_v0;
         TString v0_name = "";
         if (HFSET_Max == 375.0){
             v0_name += "55_";
@@ -473,10 +517,10 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
             x_cent[0] = 65.0;
         }
         v0_name += Name;
-        TGraph* gr_v0 = new TGraph(1, x_cent, y_v0);
+        //TGraph* gr_v0 = new TGraph(1, x_cent, y_v0);
+        TGraphErrors* gr_v0 = new TGraphErrors(1, x_cent, y_v0, x_unc_zero, y_unc_v0);
         gr_v0->SetName(v0_name);
         gr_v0->Write();
     }
-
     save_file->Close();
 }
