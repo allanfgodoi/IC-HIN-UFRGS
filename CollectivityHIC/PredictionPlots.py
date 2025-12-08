@@ -140,11 +140,8 @@ def doPlot_ratio():
 
     g_5060_data_rescaled = f.Get("sv0pt_ptref_1_5060")
     RescaleX(g_5060_data_rescaled, mean_pt)
-    customize_TGraphErrors(g_5060_data_rescaled, " ; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 22.0, 20, 1, 1.0)
+    customize_TGraphErrors(g_5060_data_rescaled, " ; p_{T}/#bar{p}_{T}; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 22.0, 20, 1, 1.0)
     g_5060_data_rescaled.Draw("AP")
-
-    print(g_5060_data.GetX()[0])
-    print(g_5060_data_rescaled.GetX()[0])
 
     g_5060_predic_rescaled = root.TGraphErrors(N, ptlist/mean_pt, ratio["50-60%"], np.zeros(N), ratio_err["50-60%"])
     g_5060_predic_rescaled.SetFillStyle(1001)
