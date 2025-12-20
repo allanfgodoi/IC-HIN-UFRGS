@@ -87,15 +87,15 @@ void DoPlotRefsEta(){
     TGraphErrors *gr_v0_ATLAS_2 = (TGraphErrors*)f_v0_ATLAS->Get("Figure 2a/Graph1D_y2");
     TGraphErrors *gr_v0_ATLAS_3 = (TGraphErrors*)f_v0_ATLAS->Get("Figure 2a/Graph1D_y3");
 
-    customize_TGraphErrors(gr_v0_1, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 24, 2, 1.2);
-    customize_TGraphErrors(gr_v0_2, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 25, 4, 1.2);
-    customize_TGraphErrors(gr_v0_3, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 26, 6, 1.2);
-    customize_TGraphErrors(gr_v0_4, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 24, 2, 1.2);
-    customize_TGraphErrors(gr_v0_5, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 25, 4, 1.2);
-    customize_TGraphErrors(gr_v0_6, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 26, 6, 1.2);
-    customize_TGraphErrors(gr_v0_ATLAS_1, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 20, 2, 1.0);
-    customize_TGraphErrors(gr_v0_ATLAS_2, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 21, 4, 1.0);
-    customize_TGraphErrors(gr_v0_ATLAS_3, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 22, 6, 1.0);
+    customize_TGraphErrors(gr_v0_1, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 20, 2, 1.2);
+    customize_TGraphErrors(gr_v0_2, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 21, 4, 1.2);
+    customize_TGraphErrors(gr_v0_3, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 22, 6, 1.2);
+    customize_TGraphErrors(gr_v0_4, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 20, 2, 1.2);
+    customize_TGraphErrors(gr_v0_5, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 21, 4, 1.2);
+    customize_TGraphErrors(gr_v0_6, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 22, 6, 1.2);
+    customize_TGraphErrors(gr_v0_ATLAS_1, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 24, 2, 1.0);
+    customize_TGraphErrors(gr_v0_ATLAS_2, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 25, 4, 1.0);
+    customize_TGraphErrors(gr_v0_ATLAS_3, "; Centrality [%]; v_{0}", 50.0, 70.0, 8e-3, 4e-2, 26, 6, 1.0);
 
     auto leg_v0_title = new TLegend(0.02, 1.1, 0.5, 0.77);
     leg_v0_title->SetTextSize(0.06);
@@ -121,16 +121,16 @@ void DoPlotRefsEta(){
     leg_v0_label->SetFillStyle(0);
 
     c->cd(1);
-    gr_v0_1->Draw("AP");
+    gr_v0_ATLAS_1->Draw("AP");
+    gr_v0_ATLAS_2->Draw("P SAME");
+    gr_v0_ATLAS_3->Draw("P SAME");
+    gr_v0_1->Draw("P SAME");
     gr_v0_2->Draw("P SAME");
     gr_v0_3->Draw("P SAME");
     gr_v0_4->Draw("P SAME");
     gr_v0_5->Draw("P SAME");
     gr_v0_6->Draw("P SAME");
-    gr_v0_ATLAS_1->Draw("P SAME");
-    gr_v0_ATLAS_2->Draw("P SAME");
-    gr_v0_ATLAS_3->Draw("P SAME");
-
+    
     leg_v0_title->Draw();
     leg_v0_ptref->Draw();
     leg_v0_label->Draw();
@@ -150,9 +150,9 @@ void DoPlotRefsEta(){
     // pT-ref: [1.0, 5.0]
     TGraphErrors *gr_v0ptv0_ptref_3 = (TGraphErrors*)f_main->Get("v0ptv0_ptref_3_5060");
     // EDITING OUR DATA TGRAPH
-    customize_TGraphErrors(gr_v0ptv0_ptref_1, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 24, 2, 1.0);
-    customize_TGraphErrors(gr_v0ptv0_ptref_2, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 25, 4, 1.0);
-    customize_TGraphErrors(gr_v0ptv0_ptref_3, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 26, 6, 1.0);
+    customize_TGraphErrors(gr_v0ptv0_ptref_1, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 20, 2, 1.0);
+    customize_TGraphErrors(gr_v0ptv0_ptref_2, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 21, 4, 1.0);
+    customize_TGraphErrors(gr_v0ptv0_ptref_3, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 22, 6, 1.0);
 
     // READING TGRAPHS FILE FROM ATLAS DATA AND GETTING AND EDITING THEM
     TFile *f_v0ptv0_ptref_ATLAS = TFile::Open("./Data/Figures_ATLAS/v0ptv0_ptref_ATLAS.root");
@@ -163,9 +163,9 @@ void DoPlotRefsEta(){
     // pT-ref: [1.0, 5.0]
     TGraphAsymmErrors *gr_v0ptv0_ptref_ATLAS_3 = (TGraphAsymmErrors*)f_v0ptv0_ptref_ATLAS->Get("Figure 2c_lower panel/Graph1D_y3");
     // EDITING ATLAS DATA TGRAPH
-    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_1, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -5.0, 9.0, 20, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_2, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -5.0, 9.0, 21, 4, 1.0);
-    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_3, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -5.0, 9.0, 22, 6, 1.0);
+    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_1, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 24, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_2, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 25, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_3, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 26, 6, 1.0);
 
     // CONFIGURING TLEGENDS
     auto leg_v0ptv0_ptref_title = new TLegend(0.025, 0.98, 0.5, 0.825);
@@ -198,12 +198,12 @@ void DoPlotRefsEta(){
 
     // PLOTING IN IT CD
     c->cd(2);
-    gr_v0ptv0_ptref_1->Draw("AP");
-    gr_v0ptv0_ptref_2->Draw("P SAME");
-    gr_v0ptv0_ptref_3->Draw("P SAME");
+    gr_v0ptv0_ptref_ATLAS_2->Draw("AP");
     gr_v0ptv0_ptref_ATLAS_1->Draw("P SAME");
-    gr_v0ptv0_ptref_ATLAS_2->Draw("P SAME");
     gr_v0ptv0_ptref_ATLAS_3->Draw("P SAME");
+    gr_v0ptv0_ptref_2->Draw("P SAME");
+    gr_v0ptv0_ptref_1->Draw("P SAME");
+    gr_v0ptv0_ptref_3->Draw("P SAME");
     leg_v0ptv0_ptref_title->Draw();
     leg_v0ptv0_ptref->Draw();
     leg_v0ptv0_ptref2->Draw();
@@ -221,9 +221,9 @@ void DoPlotRefsEta(){
     // pT-ref: [1.0, 5.0]
     TGraphErrors *gr_v0pt_ptref_3 = (TGraphErrors*)f_main->Get("v0pt_ptref_3_5060");
     // EDITING OUR DATA TGRAPH
-    customize_TGraphErrors(gr_v0pt_ptref_1, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 24, 2, 1.0);
-    customize_TGraphErrors(gr_v0pt_ptref_2, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 25, 4, 1.0);
-    customize_TGraphErrors(gr_v0pt_ptref_3, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 26, 6, 1.0);
+    customize_TGraphErrors(gr_v0pt_ptref_1, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 20, 2, 1.0);
+    customize_TGraphErrors(gr_v0pt_ptref_2, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 21, 4, 1.0);
+    customize_TGraphErrors(gr_v0pt_ptref_3, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 22, 6, 1.0);
 
     // READING TGRAPHS FILE FROM ATLAS DATA AND GETTING AND EDITING THEM
     TFile *f_v0pt_ptref_ATLAS = TFile::Open("./Data/Figures_ATLAS/v0pt_ptref_ATLAS.root");
@@ -234,9 +234,9 @@ void DoPlotRefsEta(){
     // pT-ref: [1.0, 5.0]
     TGraphAsymmErrors *gr_v0pt_ptref_ATLAS_3 = (TGraphAsymmErrors*)f_v0pt_ptref_ATLAS->Get("Figure 2d_lower panel/Graph1D_y3");
     // EDITING ATLAS DATA TGRAPH
-    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_1, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -0.1, 0.5, 20, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_2, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -0.1, 0.5, 21, 4, 1.0);
-    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_3, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -0.1, 0.5, 22, 6, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_1, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -0.1, 0.5, 24, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_2, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -0.1, 0.5, 25, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_3, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -0.1, 0.5, 26, 6, 1.0);
 
     auto leg_v0pt_ptref_title = new TLegend(0.04, 0.98, 0.5, 0.825);
     leg_v0pt_ptref_title->SetTextSize(0.055);
@@ -262,12 +262,12 @@ void DoPlotRefsEta(){
     leg_v0pt_ptref2->SetFillStyle(0);
 
     c->cd(3);
-    gr_v0pt_ptref_1->Draw("AP");
-    gr_v0pt_ptref_2->Draw("P SAME");
-    gr_v0pt_ptref_3->Draw("P SAME");
+    gr_v0pt_ptref_ATLAS_2->Draw("AP");
     gr_v0pt_ptref_ATLAS_1->Draw("P SAME");
-    gr_v0pt_ptref_ATLAS_2->Draw("P SAME");
     gr_v0pt_ptref_ATLAS_3->Draw("P SAME");
+    gr_v0pt_ptref_2->Draw("P SAME");
+    gr_v0pt_ptref_1->Draw("P SAME");
+    gr_v0pt_ptref_3->Draw("P SAME");
     leg_v0pt_ptref_title->Draw();
     leg_v0pt_ptref->Draw();
     leg_v0pt_ptref2->Draw();
@@ -282,10 +282,10 @@ void DoPlotRefsEta(){
     TGraphErrors *gr_v0pt_eta1 = (TGraphErrors*)f_etas->Get("v0pt_ptref_eta1_5060");
     TGraphErrors *gr_v0pt_eta2 = (TGraphErrors*)f_etas->Get("v0pt_ptref_eta2_5060");
     TGraphErrors *gr_v0pt_eta3 = (TGraphErrors*)f_etas->Get("v0pt_ptref_eta3_5060");
-    customize_TGraphErrors(gr_v0pt_eta0, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 24, 2, 1.0);
-    customize_TGraphErrors(gr_v0pt_eta1, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 25, 4, 1.0);
-    customize_TGraphErrors(gr_v0pt_eta2, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 26, 6, 1.0);
-    customize_TGraphErrors(gr_v0pt_eta3, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 28, 1, 1.0);
+    customize_TGraphErrors(gr_v0pt_eta0, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 20, 2, 1.0);
+    customize_TGraphErrors(gr_v0pt_eta1, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 21, 4, 1.0);
+    customize_TGraphErrors(gr_v0pt_eta2, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 22, 6, 1.0);
+    customize_TGraphErrors(gr_v0pt_eta3, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 34, 3, 1.0);
 
     TFile *f_ATLAS_eta0 = TFile::Open("./Data/Figures_ATLAS/v0pt_ATLAS_eta0.root");
     TGraphAsymmErrors *gr_v0pt_ATLAS_eta0 = (TGraphAsymmErrors*)f_ATLAS_eta0->Get("Figure 3b_etagap0/Graph1D_y1");
@@ -295,10 +295,10 @@ void DoPlotRefsEta(){
     TGraphAsymmErrors *gr_v0pt_ATLAS_eta2 = (TGraphAsymmErrors*)f_ATLAS_eta2->Get("Figure 3b_etagap2/Graph1D_y1");
     TFile *f_ATLAS_eta3 = TFile::Open("./Data/Figures_ATLAS/v0pt_ATLAS_eta3.root");
     TGraphAsymmErrors *gr_v0pt_ATLAS_eta3 = (TGraphAsymmErrors*)f_ATLAS_eta3->Get("Figure 3b_etagap3/Graph1D_y1");
-    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_eta0, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 20, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_eta1, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 21, 4, 1.0);
-    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_eta2, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 22, 6, 1.0);
-    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_eta3, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 34, 1, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_eta0, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 24, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_eta1, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 25, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_eta2, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 26, 6, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_eta3, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 28, 3, 1.0);
 
     auto leg_v0pt_eta_title = new TLegend(0.035, 0.98, 0.5, 0.825);
     leg_v0pt_eta_title->SetTextSize(0.055);
@@ -326,14 +326,14 @@ void DoPlotRefsEta(){
     leg_v0pt_eta2->SetFillStyle(0);
 
     c->cd(4);
-    gr_v0pt_eta0->Draw("AP");
-    gr_v0pt_eta1->Draw("P SAME");
-    gr_v0pt_eta2->Draw("P SAME");
-    gr_v0pt_eta3->Draw("P SAME");
+    gr_v0pt_ATLAS_eta1->Draw("AP");
     gr_v0pt_ATLAS_eta0->Draw("P SAME");
-    gr_v0pt_ATLAS_eta1->Draw("P SAME");
-    gr_v0pt_ATLAS_eta2->Draw("P SAME");
     gr_v0pt_ATLAS_eta3->Draw("P SAME");
+    gr_v0pt_ATLAS_eta2->Draw("P SAME");
+    gr_v0pt_eta1->Draw("P SAME");
+    gr_v0pt_eta0->Draw("P SAME");
+    gr_v0pt_eta3->Draw("P SAME");
+    gr_v0pt_eta2->Draw("P SAME");
     leg_v0pt_eta_title->Draw();
     leg_v0pt_eta->Draw();
     leg_v0pt_eta2->Draw();
