@@ -1,3 +1,7 @@
+#include "/home/allanfgodoi/cnpy/cnpy.h"
+#include <iostream>
+#include <type_traits>
+
 // TGraph creator function
 TGraph* create_TGraph(int nPoints, const float* x, const float* y, const char* title, float xmin, int xmax, float ymin, float ymax, int style, int color, float size){
     TGraph* g = new TGraph(nPoints, x, y);
@@ -110,6 +114,12 @@ void DoPlotRefsEta(){
     leg_v0_ptref->SetBorderSize(0);
     leg_v0_ptref->SetFillStyle(0);
 
+    auto leg_v0_label = new TLegend(0.78, 0.9, 0.93, 0.93);
+    leg_v0_label->SetTextSize(0.055);
+    leg_v0_label->AddEntry((TObject*)0, "(a)", "");
+    leg_v0_label->SetBorderSize(0);
+    leg_v0_label->SetFillStyle(0);
+
     c->cd(1);
     gr_v0_1->Draw("AP");
     gr_v0_2->Draw("P SAME");
@@ -123,6 +133,7 @@ void DoPlotRefsEta(){
 
     leg_v0_title->Draw();
     leg_v0_ptref->Draw();
+    leg_v0_label->Draw();
     gPad->SetLogy();
     gPad->SetLeftMargin(0.12);
     gPad->SetTopMargin(0.01);
@@ -179,6 +190,12 @@ void DoPlotRefsEta(){
     leg_v0ptv0_ptref2->SetBorderSize(0);
     leg_v0ptv0_ptref2->SetFillStyle(0);
 
+    auto leg_v0ptv0_label = new TLegend(0.78, 0.9, 0.93, 0.93);
+    leg_v0ptv0_label->SetTextSize(0.055);
+    leg_v0ptv0_label->AddEntry((TObject*)0, "(b)", "");
+    leg_v0ptv0_label->SetBorderSize(0);
+    leg_v0ptv0_label->SetFillStyle(0);
+
     // PLOTING IN IT CD
     c->cd(2);
     gr_v0ptv0_ptref_1->Draw("AP");
@@ -190,6 +207,7 @@ void DoPlotRefsEta(){
     leg_v0ptv0_ptref_title->Draw();
     leg_v0ptv0_ptref->Draw();
     leg_v0ptv0_ptref2->Draw();
+    leg_v0ptv0_label->Draw();
     gPad->SetLeftMargin(0.1);
     gPad->SetTopMargin(0.01);
     gPad->SetLogx();
@@ -400,63 +418,6 @@ void DoPlotCorrection(){
     delete c;
 }
 
-void DoPlot3(TString filename){
-    TFile *f = TFile::Open(filename, "READ");
-    TGraph *gr0 = (TGraph*)f->Get("eta0");
-    TGraph *gr1 = (TGraph*)f->Get("eta1");
-    TGraph *gr2 = (TGraph*)f->Get("eta2");
-    TGraph *gr3 = (TGraph*)f->Get("eta3");
-
-    customize_TGraph(gr0, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 47, 52, 1.0);
-    customize_TGraph(gr1, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 34, 7, 1.0);
-    customize_TGraph(gr2, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 22, 95, 1.0);
-    customize_TGraph(gr3, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 33, 8, 1.0);
-
-    TGraph *grd0 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta0.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 20, 2, 1.0);
-    TGraph *grd1 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta1.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 21, 1, 1.0);
-    TGraph *grd2 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta2.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 23, 4, 1.0);
-    TGraph *grd3 = create_TGraphFromTxt("./Data/Fig3/ATLAS_eta3.txt", 29, "v_{0}(p_{T}) vs p_{T}; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.4, 0.5, 45, 6, 1.0);
-
-    auto c = new TCanvas("c", "c_v0pt_eta", 500, 500);
-
-    auto leg_title = new TLegend(0.025, 0.89, 0.5, 0.71);
-    leg_title->SetTextSize(0.0457);
-    leg_title->AddEntry((TObject*)0, "Pb+Pb", "");
-    leg_title->AddEntry((TObject*)0, "p_{T}^{ref}: 0.5-2 GeV", "");
-    leg_title->AddEntry((TObject*)0, "50-60% Centrality", "");
-    leg_title->SetBorderSize(0);
-    leg_title->SetFillStyle(0);
-
-    auto leg_etas = new TLegend(0.23, 0.125, 0.63, 0.43);
-    leg_etas->SetTextSize(0.023);
-    leg_etas->AddEntry(gr0, "CMS Open Data 2.76 TeV    #eta_{gap} = 0", "p");
-    leg_etas->AddEntry(gr1, "CMS Open Data 2.76 TeV    #eta_{gap} = 1", "p");
-    leg_etas->AddEntry(gr2, "CMS Open Data 2.76 TeV    #eta_{gap} = 2", "p");
-    leg_etas->AddEntry(gr3, "CMS Open Data 2.76 TeV    #eta_{gap} = 3", "p");
-    leg_etas->AddEntry(grd0, "ATLAS 5.02 TeV    #eta_{gap} = 0", "p");
-    leg_etas->AddEntry(grd1, "ATLAS 5.02 TeV    #eta_{gap} = 1", "p");
-    leg_etas->AddEntry(grd2, "ATLAS 5.02 TeV    #eta_{gap} = 2", "p");
-    leg_etas->AddEntry(grd3, "ATLAS 5.02 TeV    #eta_{gap} = 3", "p");
-    leg_etas->SetBorderSize(0);
-    leg_etas->SetFillStyle(0);
-
-    gr0->Draw("AP");
-    gr1->Draw("P SAME");
-    gr2->Draw("P SAME");
-    gr3->Draw("P SAME");
-    grd0->Draw("P SAME");
-    grd1->Draw("P SAME");
-    grd2->Draw("P SAME");
-    grd3->Draw("P SAME");
-    leg_title->Draw();
-    leg_etas->Draw();
-    gPad->SetLogx();
-
-    c->Update();
-    c->SaveAs("Plot3.pdf");
-    delete c;
-}
-
 void DoPlotMain(){
     TFile *f;
     f = TFile::Open("./Data/Figures/main.root", "READ");
@@ -470,11 +431,11 @@ void DoPlotMain(){
     TFile *f_v0pt_ATLAS_6070 = TFile::Open("./Data/Figures_ATLAS/v0pt_ATLAS_6070.root", "READ");
     TGraphAsymmErrors* gr_v0pt_ATLAS_6070 = (TGraphAsymmErrors*)f_v0pt_ATLAS_6070->Get("Figure 4a_cent8/Graph1D_y1");
 
-    customize_TGraph(gr_v0pt_5060, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 25, 2, 1.0);
-    customize_TGraph(gr_v0pt_6070, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 24, 4, 1.0);
+    customize_TGraph(gr_v0pt_5060, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 21, 2, 1.0);
+    customize_TGraph(gr_v0pt_6070, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 20, 4, 1.0);
 
-    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_5060, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 21, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_6070, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 20, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_5060, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 25, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ATLAS_6070, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 24, 4, 1.0);
 
     auto c = new TCanvas("c", "c", 1100, 500);
     c->Divide(2, 1);
@@ -496,6 +457,12 @@ void DoPlotMain(){
     legend_v0pt_cents->SetBorderSize(0);
     legend_v0pt_cents->SetFillStyle(0);
 
+    auto legend_v0pt_label = new TLegend(0.78, 0.9, 0.93, 0.93);
+    legend_v0pt_label->SetTextSize(0.055);
+    legend_v0pt_label->AddEntry((TObject*)0, "(a)", "");
+    legend_v0pt_label->SetBorderSize(0);
+    legend_v0pt_label->SetFillStyle(0);
+
     // Drawing v0(pT) plot
     c->cd(1);
     gr_v0pt_ATLAS_5060->Draw("AP");
@@ -504,6 +471,7 @@ void DoPlotMain(){
     gr_v0pt_6070->Draw("P SAME");
     legend_v0pt_text->Draw();
     legend_v0pt_cents->Draw();
+    legend_v0pt_label->Draw();
     gPad->SetLogx();
     gPad->SetTopMargin(0.01);
 
@@ -516,11 +484,11 @@ void DoPlotMain(){
     TFile *f_sv0pt_ATLAS_6070 = TFile::Open("./Data/Figures_ATLAS/sv0pt_ATLAS_6070.root", "READ");
     TGraphAsymmErrors* gr_sv0pt_ATLAS_6070 = (TGraphAsymmErrors*)f_sv0pt_ATLAS_6070->Get("Figure 4b_cent8/Graph1D_y1");
 
-    customize_TGraph(gr_sv0pt_5060, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 25, 2, 1.0);
-    customize_TGraph(gr_sv0pt_6070, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 24, 4, 1.0);
+    customize_TGraph(gr_sv0pt_5060, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 21, 2, 1.0);
+    customize_TGraph(gr_sv0pt_6070, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 20, 4, 1.0);
 
-    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_5060, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 21, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_6070, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -4.0, 28.0, 20, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_5060, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 25, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_6070, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 24, 4, 1.0);
 
     // v0(pT)/v0 legend
     auto legend_sv0pt_text = new TLegend(0.025, 0.98, 0.5, 0.82);
@@ -539,6 +507,11 @@ void DoPlotMain(){
     legend_sv0pt_cents->SetBorderSize(0);
     legend_sv0pt_cents->SetFillStyle(0);
 
+    auto legend_sv0pt_label = new TLegend(0.78, 0.9, 0.93, 0.93);
+    legend_sv0pt_label->SetTextSize(0.055);
+    legend_sv0pt_label->AddEntry((TObject*)0, "(b)", "");
+    legend_sv0pt_label->SetBorderSize(0);
+    legend_sv0pt_label->SetFillStyle(0);
    
     // Drawing v0(pT)/v0 plot
     c->cd(2);
@@ -548,6 +521,7 @@ void DoPlotMain(){
     gr_sv0pt_6070->Draw("P SAME");
     legend_sv0pt_text->Draw();
     legend_sv0pt_cents->Draw();
+    legend_sv0pt_label->Draw();
     gPad->SetLogx();
     gPad->SetTopMargin(0.01);
     // Saving canvas as pdf
