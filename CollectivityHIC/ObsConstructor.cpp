@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include "TMath.h"
+#include "ObsConstructor.h"
 using namespace std;
 
 // Function to load corrections file only once
@@ -110,7 +111,7 @@ struct Gathered_Data{
     float mean_pt;
 };
 
-Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, float ptr_min, float ptr_max, vector<float> Xaxis_del){
+Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, float centFluct, float ptr_min, float ptr_max, string correction, float corrFluct, vector<float> Xaxis_del, string trackSelec, float pvZ_cut){
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
     TFile *cFile(0);
@@ -178,6 +179,26 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     
     TProfile *PpT = new TProfile("PpT", "pT bins mean", nBins, Xaxis_del.data());
 
+    // Track selection
+    float DzSig_cut;
+    float DxySig_cut;
+    float PtRes_cut;
+    if (trackSelec == "Nominal"){
+        DzSig_cut = 3.0;
+        DxySig_cut = 3.0;
+        PtRes_cut = 0.1;
+    }
+    if (trackSelec == "Loose"){
+        DzSig_cut = 5.0;
+        DxySig_cut = 5.0;
+        PtRes_cut = 0.15; // No cut in trkPtRes
+    }
+    if (trackSelec == "Tight"){
+        DzSig_cut = 2.0;
+        DxySig_cut = 2.0;
+        PtRes_cut = 0.05;
+    }
+
     for (Long64_t ievt=0; ievt<nEvents; ievt++){ // Loop over the events
         vector<float> n_pt_A(nBins, 0.0); // Define vector to hold the fractions of pT in the event
         vector<float> n_pt_B(nBins, 0.0);
@@ -188,9 +209,9 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
             cout << "Processing event: " << ievt << endl;
 
         // Filters made in the events
-        if (HFsumET < HFSET_min || HFsumET > HFSET_max) // Applying 100 <= HFsumET <= 375 filter (related to centrality)
+        if (HFsumET < (HFSET_min + centFluct*HFSET_min) || HFsumET > (HFSET_max + centFluct*HFSET_max)) // Applying centrality cut
             continue;
-        if (pvZ < -15.0 || pvZ > 15.0) // Applying |pvZ| < 15 cm filter
+        if (abs(pvZ) < pvZ_cut) // Applying |pvZ| cut (nominal: 15.0)
             continue;
 
         // Track loop
@@ -198,11 +219,15 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
             // Getting subset A: [pT]_A
             if (trkEta[iTrk] >= -2.4 && trkEta[iTrk] <= -eta_gap/2 && 
                 trkPt[iTrk] >= 0.5 && trkPt[iTrk] <= 10.0 && 
-                trkDzSig[iTrk] > -3.0 && trkDzSig[iTrk] < 3.0 && 
-                trkDxySig[iTrk] > -3.0 && trkDxySig[iTrk] < 3.0 && 
-                trkPtRes[iTrk] < 0.1){
-                    float corrFac = getTrkCorrWeightCached(trkPt[iTrk], trkEta[iTrk]);
-                    //float corrFac = 1.0;
+                abs(trkDzSig[iTrk]) < DzSig_cut && 
+                abs(trkDxySig[iTrk]) < DxySig_cut && 
+                trkPtRes[iTrk] < PtRes_cut){
+                    float corrFac;
+                    if (correction == "Correc"){
+                        corrFac = getTrkCorrWeightCached(trkPt[iTrk], trkEta[iTrk]);
+                        corrFac = corrFac + corrFluct*corrFac;
+                    }
+                    if (correction == "noCorrec") corrFac = 1.0;
                     if (trkPt[iTrk] >= ptr_min && trkPt[iTrk] <= ptr_max){ // ARRUMAR
                         Vec_trkPt_A.push_back(trkPt[iTrk]);
                         Vec_trkW_A.push_back(corrFac);
@@ -219,11 +244,15 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
             // Getting subset B: [pT]_B
             if (trkEta[iTrk] >= eta_gap/2 && trkEta[iTrk] <= 2.4 && 
                 trkPt[iTrk] >= 0.5 && trkPt[iTrk] <= 10.0 && 
-                trkDzSig[iTrk] > -3.0 && trkDzSig[iTrk] < 3.0 && 
-                trkDxySig[iTrk] > -3.0 && trkDxySig[iTrk] < 3.0 && 
-                trkPtRes[iTrk] < 0.1){
-                    float corrFac = getTrkCorrWeightCached(trkPt[iTrk], trkEta[iTrk]);
-                    //float corrFac = 1.0;
+                abs(trkDzSig[iTrk]) < DzSig_cut && 
+                abs(trkDxySig[iTrk]) < DxySig_cut && 
+                trkPtRes[iTrk] < PtRes_cut){
+                    float corrFac;
+                    if (correction == "Correc"){
+                        corrFac = getTrkCorrWeightCached(trkPt[iTrk], trkEta[iTrk]);
+                        corrFac = corrFac + corrFluct*corrFac;
+                    }
+                    if (correction == "noCorrec") corrFac = 1.0;
                     if (trkPt[iTrk] >= ptr_min && trkPt[iTrk] <= ptr_max){ // ARRUMAR
                         Vec_trkPt_B.push_back(trkPt[iTrk]);
                         Vec_trkW_B.push_back(corrFac);
@@ -383,13 +412,12 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
 }
 
 // Thats the function we call to construct the observable
-void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_Min, float pTr_Max, TString Name, TString Savename, string PlotType){
+void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float CentFluct, float pTr_Min, float pTr_Max, string Correction, float CorrFluct, TString Name, TString Savename, string PlotType, string TrackSelec, float pvZ_Cut){
     int B = 100; // Number of Poisson bootstrap samples
     // Defining bins and plot's x axes
     vector<float> Xaxis_del = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 1.98, 2.2, 2.38, 2.98, 3.18, 6.0, 8.04, 10.0}; // Those are the END of each bin, not the middle
     int nBins = (Xaxis_del.size()-1);
-
-    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, pTr_Min, pTr_Max, Xaxis_del);
+    Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, CentFluct, pTr_Min, pTr_Max, Correction, CorrFluct, Xaxis_del, TrackSelec, pvZ_Cut);
     vector<float> pT_axis = gData.pT_axis;
     vector<float> vec_dPt_A = gData.vec_dPt_A;
     vector<float> vec_dPt_B = gData.vec_dPt_B;
@@ -404,6 +432,7 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
     int nEvents = vec_dPt_A.size();
 
     weightCache.clear(); // Clears the cache
+    cout << "Bootstrapping samples..." << endl;
 
     // v0
     vector<float> vec_dPt_ref_AB(nEvents, 0.0);
@@ -518,7 +547,29 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
 
     if (PlotType == "obs_ptref"){
         vector<float> vec_zeros(nBins, 0.0);
+
+        // v0
         float x_cent[1];
+        float y_v0[1];
+        float x_unc_zero[1];
+        float y_unc_v0[1];
+        x_unc_zero[0] = 0.0;
+        y_v0[0] = v0;
+        y_unc_v0[0] = unc_v0;
+        TString v0_name = "v0_";
+        if (HFSET_Max == 375.0){
+            v0_name += "55_";
+            x_cent[0] = 55.0;
+        }
+        if (HFSET_Max == 210.0){
+            v0_name += "65_";
+            x_cent[0] = 65.0;
+        }
+        v0_name += Name;
+        //TGraph* gr_v0 = new TGraph(1, x_cent, y_v0);
+        TGraphErrors* gr_v0 = new TGraphErrors(1, x_cent, y_v0, x_unc_zero, y_unc_v0);
+        gr_v0->SetName(v0_name);
+        gr_v0->Write();
 
         // v0(pT)v0
         vector<float> vec_v0ptv0_plot(nBins, 0.0);
@@ -546,30 +597,6 @@ void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float pTr_M
         sv0pt_name += Name + cent_name;
         gr_sv0pt->SetName(sv0pt_name);
         gr_sv0pt->Write();
-    }
-
-    if (PlotType == "v0"){
-        float x_cent[1];
-        float y_v0[1];
-        float x_unc_zero[1];
-        float y_unc_v0[1];
-        x_unc_zero[0] = 0.0;
-        y_v0[0] = v0;
-        y_unc_v0[0] = unc_v0;
-        TString v0_name = "";
-        if (HFSET_Max == 375.0){
-            v0_name += "55_";
-            x_cent[0] = 55.0;
-        }
-        if (HFSET_Max == 210.0){
-            v0_name += "65_";
-            x_cent[0] = 65.0;
-        }
-        v0_name += Name;
-        //TGraph* gr_v0 = new TGraph(1, x_cent, y_v0);
-        TGraphErrors* gr_v0 = new TGraphErrors(1, x_cent, y_v0, x_unc_zero, y_unc_v0);
-        gr_v0->SetName(v0_name);
-        gr_v0->Write();
     }
 
     cout << "mean_pt = " << mean_pt << endl;
