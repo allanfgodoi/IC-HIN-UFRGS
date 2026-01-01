@@ -7,6 +7,30 @@ double StatisticalUncertainties(double sigma_A, double sigma_B){
     return unc;
 }
 
+double QuadSum(vector<Double_t> x){
+    int N = x.size();
+    double acc = 0.0;
+    for (int i=0; i<N; i++) acc += pow(x[i], 2);
+    double result = sqrt(acc);
+    return result;
+}
+
+vector<Double_t> VecQuadSum(vector<vector<Double_t>> x){
+    int nVar = x.size();
+    int N = x[0].size();
+    vector<Double_t> v(N, 0.0);
+    Double_t acc;
+    
+    for (int j=0; j<N; j++){
+        acc = 0.0;
+        for (int i=0; i<nVar; i++){
+            acc += pow(x[i][j], 2);
+        }
+        v[j] = sqrt(acc);
+    }
+    return v;
+}
+
 void TrackSelection(){
     
     if (!filesystem::exists("./Data/Systematics/TrackSelectionData.root")){
@@ -159,7 +183,6 @@ void TrackSelection(){
             vec_y_sv0pt_6070_tight[i] = abs(y_sv0pt_6070_tight[i] - y_sv0pt_6070_nominal[i]);
             vec_y_unc_sv0pt_5060_loose[i] = StatisticalUncertainties(y_unc_sv0pt_5060_loose[i], y_unc_sv0pt_5060_nominal[i]);
             vec_y_unc_sv0pt_6070_loose[i] = StatisticalUncertainties(y_unc_sv0pt_6070_loose[i], y_unc_sv0pt_6070_nominal[i]);
-            cout << vec_y_unc_sv0pt_6070_loose[i] << endl;
             vec_y_unc_sv0pt_5060_tight[i] = StatisticalUncertainties(y_unc_sv0pt_5060_tight[i], y_unc_sv0pt_5060_nominal[i]);
             vec_y_unc_sv0pt_6070_tight[i] = StatisticalUncertainties(y_unc_sv0pt_6070_tight[i], y_unc_sv0pt_6070_nominal[i]);
         }
@@ -465,7 +488,7 @@ void CorrectionApplication(){
     f->Close();
 
     // Saving TGraphs
-    TFile *sf = new TFile("./Data/Systematics/CorrectionFluctuationUnc.root", "UPDATE");
+    TFile *sf = new TFile("./Data/Systematics/CorrectionApplicationUnc.root", "UPDATE");
 
     // v0
     gd_v0_nocorrec->SetName("gd_v0_nocorrec"); gd_v0_nocorrec->Write();
@@ -659,5 +682,540 @@ void ZvertexPosition(){
     gd_sv0pt_5060_pvZ_3_15->SetName("gd_sv0pt_5060_pvZ_3_15"); gd_sv0pt_5060_pvZ_3_15->Write();
     gd_sv0pt_6070_pvZ_3_15->SetName("gd_sv0pt_6070_pvZ_3_15"); gd_sv0pt_6070_pvZ_3_15->Write();
     
+    sf->Close();
+}
+
+void Evaluate_v0(){
+    int nVar = 4; // No. of different unc types
+    int N_v0 = 2; // No. of points
+
+    // Opening diff. files
+    TFile *f_corr = TFile::Open("./Data/Systematics/CorrectionApplicationUnc.root");
+    TFile *f_trk = TFile::Open("./Data/Systematics/TrackSelectionUnc.root");
+    TFile *f_cent = TFile::Open("./Data/Systematics/CentralityFluctuationUnc.root");
+    TFile *f_pvZ = TFile::Open("./Data/Systematics/ZvertexPositionUnc.root");
+
+    // Loading TGraphs from TFiles, each one has the two points
+    TGraph *gr_v0_correc = (TGraph*)f_corr->Get("gd_v0_nocorrec");
+    TGraphErrors *gr_v0_trk_loose = (TGraphErrors*)f_trk->Get("gd_v0_loose");
+    TGraphErrors *gr_v0_trk_tight = (TGraphErrors*)f_trk->Get("gd_v0_tight");
+    TGraphErrors *gr_v0_cent_positive = (TGraphErrors*)f_cent->Get("gd_v0_positive");
+    TGraphErrors *gr_v0_cent_negative = (TGraphErrors*)f_cent->Get("gd_v0_negative");
+    TGraphErrors *gr_v0_pvZ_3 = (TGraphErrors*)f_pvZ->Get("gd_v0_pvZ_3");
+    TGraphErrors *gr_v0_pvZ_3_15 = (TGraphErrors*)f_pvZ->Get("gd_v0_pvZ_3_15");
+
+    // Getting diff. values of each TGraph
+    Double_t *v0_corr = gr_v0_correc->GetY();
+    Double_t *v0_trk_loose = gr_v0_trk_loose->GetY();
+    Double_t *v0_trk_tight = gr_v0_trk_tight->GetY();
+    Double_t *v0_cent_positive = gr_v0_cent_positive->GetY();
+    Double_t *v0_cent_negative = gr_v0_cent_negative->GetY();
+    Double_t *v0_pvZ_3 = gr_v0_pvZ_3->GetY();
+    Double_t *v0_pvZ_3_15 = gr_v0_pvZ_3_15->GetY();
+
+    // Putting diff. values into vectors, I'll divide into 2 vectors, each containing one variation of each unc. type
+    // The strategy is comparing between them and select the greater value, putting into vector containing all uncs. of each point and from the containing each unc. type
+    // (Correction application is an exception, since it has only one option)
+    vector<vector<Double_t>> vec_uncs_v0_holder_one(nVar-1, vector<Double_t>(N_v0, 0.0)); // One: loose, positive, 3
+        vec_uncs_v0_holder_one[0].assign(v0_trk_loose, v0_trk_loose + N_v0);
+        vec_uncs_v0_holder_one[1].assign(v0_cent_positive, v0_cent_positive + N_v0);
+        vec_uncs_v0_holder_one[2].assign(v0_pvZ_3, v0_pvZ_3 + N_v0);
+    vector<vector<Double_t>> vec_uncs_v0_holder_two(nVar-1, vector<Double_t>(N_v0, 0.0)); // Two: tight, negative, 3_15
+        vec_uncs_v0_holder_two[0].assign(v0_trk_tight, v0_trk_tight + N_v0);
+        vec_uncs_v0_holder_two[1].assign(v0_cent_negative, v0_cent_negative + N_v0);
+        vec_uncs_v0_holder_two[2].assign(v0_pvZ_3_15, v0_pvZ_3_15 + N_v0);
+
+    // Putting correction application unc. in the first slot of the vectors of each point
+    vector<Double_t> vec_uncs_v0_55(nVar, 0.0);
+        vec_uncs_v0_55[0] = v0_corr[0];
+    vector<Double_t> vec_uncs_v0_65(nVar, 0.0);
+        vec_uncs_v0_65[0] = v0_corr[1];
+
+    // Vectors that will contain the greatest value from your unc. type of both points
+    vector<Double_t> vec_uncs_trk(N_v0, 0.0);
+    vector<Double_t> vec_uncs_cent(N_v0, 0.0);
+    vector<Double_t> vec_uncs_pvZ(N_v0, 0.0);
+    vector<Double_t> vec_uncs_corr(N_v0, 0.0);
+    vec_uncs_corr[0] = v0_corr[0]; vec_uncs_corr[1] = v0_corr[1];
+
+    // Taking greater value of each uncertainty type and including in the vector of each point
+    // and the in the vector of each unc. type
+    for (int i=0; i<nVar-1; i++){
+        // Centrality = 55%
+        if (vec_uncs_v0_holder_one[i][0] > vec_uncs_v0_holder_two[i][0]){
+            vec_uncs_v0_55[i+1] = vec_uncs_v0_holder_one[i][0];
+            if (i == 0) vec_uncs_trk[0] = vec_uncs_v0_holder_one[i][0];
+            if (i == 1) vec_uncs_cent[0] = vec_uncs_v0_holder_one[i][0];
+            if (i == 2) vec_uncs_pvZ[0] = vec_uncs_v0_holder_one[i][0];
+        } 
+        if (vec_uncs_v0_holder_one[i][0] < vec_uncs_v0_holder_two[i][0]){
+            vec_uncs_v0_55[i+1] = vec_uncs_v0_holder_two[i][0];
+            if (i == 0) vec_uncs_trk[0] = vec_uncs_v0_holder_two[i][0];
+            if (i == 1) vec_uncs_cent[0] = vec_uncs_v0_holder_two[i][0];
+            if (i == 2) vec_uncs_pvZ[0] = vec_uncs_v0_holder_two[i][0];
+        }
+        // Centrality = 65%
+        if (vec_uncs_v0_holder_one[i][1] > vec_uncs_v0_holder_two[i][1]){
+            vec_uncs_v0_65[i+1] = vec_uncs_v0_holder_one[i][1];
+            if (i == 0) vec_uncs_trk[1] = vec_uncs_v0_holder_one[i][1];
+            if (i == 1) vec_uncs_cent[1] = vec_uncs_v0_holder_one[i][1];
+            if (i == 2) vec_uncs_pvZ[1] = vec_uncs_v0_holder_one[i][1];
+        }
+        if (vec_uncs_v0_holder_one[i][1] < vec_uncs_v0_holder_two[i][1]){
+            vec_uncs_v0_65[i+1] = vec_uncs_v0_holder_two[i][1];
+            if (i == 0) vec_uncs_trk[1] = vec_uncs_v0_holder_two[i][1];
+            if (i == 1) vec_uncs_cent[1] = vec_uncs_v0_holder_two[i][1];
+            if (i == 2) vec_uncs_pvZ[1] = vec_uncs_v0_holder_two[i][1];
+        }
+    }
+
+    // Taking the value of total uncertainty by summing them as sqrt(unc1^2 + unc2^2)
+    double unc_v0_55 = QuadSum(vec_uncs_v0_55);
+    double unc_v0_65 = QuadSum(vec_uncs_v0_65);
+
+    // Putting the total uncertainty into a single vector containg both points
+    vector<double> vec_unc_v0(2, 0.0);
+    vec_unc_v0[0] = unc_v0_55; vec_unc_v0[1] = unc_v0_65;
+
+    f_corr->Close(); f_trk->Close(); f_cent->Close(); f_pvZ->Close();
+
+    TFile *f_main = TFile::Open("./Data/Figures/main.root");
+
+    // Opening main file to take the v0 values
+    TGraphErrors *gr_v0_55 = (TGraphErrors*)f_main->Get("v0_55_1");
+    TGraphErrors *gr_v0_65 = (TGraphErrors*)f_main->Get("v0_65_1");
+
+    Double_t *v0_55 = gr_v0_55->GetY();
+    Double_t *v0_65 = gr_v0_65->GetY();
+
+    vector<Double_t> vec_x_v0(N_v0, 0.0);
+    vector<Double_t> vec_v0(N_v0, 0.0);
+    vector<Double_t> vec_ex(N_v0, 0.0);
+
+    vec_v0[0] = v0_55[0]; vec_v0[1] = v0_65[0];
+    vec_x_v0[0] = 55.0; vec_x_v0[1] = 65.0;
+    vec_ex[0] = 0.1; vec_ex[1] = 0.1;
+
+    // Creating a new TGraphErrors containing v0 values from the main file and the systematic uncertainties in EY
+    TGraphErrors *gr_v0_total = new TGraphErrors(N_v0, vec_x_v0.data(), vec_v0.data(), vec_ex.data(), vec_unc_v0.data());
+    TGraphErrors *gr_v0_corr = new TGraphErrors(N_v0, vec_x_v0.data(), vec_v0.data(), vec_ex.data(), vec_uncs_corr.data());
+    TGraphErrors *gr_v0_trk = new TGraphErrors(N_v0, vec_x_v0.data(), vec_v0.data(), vec_ex.data(), vec_uncs_trk.data());
+    TGraphErrors *gr_v0_cent = new TGraphErrors(N_v0, vec_x_v0.data(), vec_v0.data(), vec_ex.data(), vec_uncs_cent.data());
+    TGraphErrors *gr_v0_pvZ = new TGraphErrors(N_v0, vec_x_v0.data(), vec_v0.data(), vec_ex.data(), vec_uncs_pvZ.data());
+
+    TFile *sf = new TFile("./Data/Systematics/SystUncs.root", "UPDATE");
+    gr_v0_total->SetName("gr_v0_total"); gr_v0_total->Write();
+    gr_v0_corr->SetName("gr_v0_corr"); gr_v0_corr->Write();
+    gr_v0_trk->SetName("gr_v0_trk"); gr_v0_trk->Write();
+    gr_v0_cent->SetName("gr_v0_cent"); gr_v0_cent->Write();
+    gr_v0_pvZ->SetName("gr_v0_pvZ"); gr_v0_pvZ->Write();
+    sf->Close();
+}
+
+void Evaluate_v0pT(){
+
+    // Opening diff. files
+    TFile *f_corr = TFile::Open("./Data/Systematics/CorrectionApplicationUnc.root");
+    TFile *f_trk = TFile::Open("./Data/Systematics/TrackSelectionUnc.root");
+    TFile *f_cent = TFile::Open("./Data/Systematics/CentralityFluctuationUnc.root");
+    TFile *f_pvZ = TFile::Open("./Data/Systematics/ZvertexPositionUnc.root");
+
+    // Loading TGraphs from TFiles, each one has N points
+    TGraph *gr_v0pt_5060_correc = (TGraph*)f_corr->Get("gd_v0pt_5060_nocorrec"); // 50-60%
+    TGraphErrors *gr_v0pt_5060_trk_loose = (TGraphErrors*)f_trk->Get("gd_v0pt_5060_loose");
+    TGraphErrors *gr_v0pt_5060_trk_tight = (TGraphErrors*)f_trk->Get("gd_v0pt_5060_tight");
+    TGraphErrors *gr_v0pt_5060_cent_positive = (TGraphErrors*)f_cent->Get("gd_v0pt_5060_positive");
+    TGraphErrors *gr_v0pt_5060_cent_negative = (TGraphErrors*)f_cent->Get("gd_v0pt_5060_negative");
+    TGraphErrors *gr_v0pt_5060_pvZ_3 = (TGraphErrors*)f_pvZ->Get("gd_v0pt_5060_pvZ_3");
+    TGraphErrors *gr_v0pt_5060_pvZ_3_15 = (TGraphErrors*)f_pvZ->Get("gd_v0pt_5060_pvZ_3_15");
+    TGraph *gr_v0pt_6070_correc = (TGraph*)f_corr->Get("gd_v0pt_6070_nocorrec"); // 60-70%
+    TGraphErrors *gr_v0pt_6070_trk_loose = (TGraphErrors*)f_trk->Get("gd_v0pt_6070_loose");
+    TGraphErrors *gr_v0pt_6070_trk_tight = (TGraphErrors*)f_trk->Get("gd_v0pt_6070_tight");
+    TGraphErrors *gr_v0pt_6070_cent_positive = (TGraphErrors*)f_cent->Get("gd_v0pt_6070_positive");
+    TGraphErrors *gr_v0pt_6070_cent_negative = (TGraphErrors*)f_cent->Get("gd_v0pt_6070_negative");
+    TGraphErrors *gr_v0pt_6070_pvZ_3 = (TGraphErrors*)f_pvZ->Get("gd_v0pt_6070_pvZ_3");
+    TGraphErrors *gr_v0pt_6070_pvZ_3_15 = (TGraphErrors*)f_pvZ->Get("gd_v0pt_6070_pvZ_3_15");
+
+    int N = gr_v0pt_5060_correc->GetN();
+    int nVar = 4;
+
+    // Fitting functions
+    gr_v0pt_5060_correc->Fit("pol1", "Q0"); // 50-60%
+    gr_v0pt_5060_trk_loose->Fit("pol1", "Q0");
+    gr_v0pt_5060_trk_tight->Fit("pol1", "Q0");
+    gr_v0pt_5060_cent_positive->Fit("pol1", "Q0");
+    gr_v0pt_5060_cent_negative->Fit("pol1", "Q0");
+    gr_v0pt_5060_pvZ_3->Fit("pol1", "Q0");
+    gr_v0pt_5060_pvZ_3_15->Fit("pol1", "Q0");
+    gr_v0pt_6070_correc->Fit("pol1", "Q0"); // 60-70%
+    gr_v0pt_6070_trk_loose->Fit("pol1", "Q0");
+    gr_v0pt_6070_trk_tight->Fit("pol1", "Q0");
+    gr_v0pt_6070_cent_positive->Fit("pol1", "Q0");
+    gr_v0pt_6070_cent_negative->Fit("pol1", "Q0");
+    gr_v0pt_6070_pvZ_3->Fit("pol1", "Q0");
+    gr_v0pt_6070_pvZ_3_15->Fit("pol1", "Q0");
+
+    // Getting fit parameters
+    TF1 *fit_v0pt_5060_correc = gr_v0pt_5060_correc->GetFunction("pol1"); // 50-60%
+        double p0_v0pt_5060_correc = fit_v0pt_5060_correc->GetParameter(0);
+        double p1_v0pt_5060_correc = fit_v0pt_5060_correc->GetParameter(1);
+    TF1 *fit_v0pt_5060_trk_loose = gr_v0pt_5060_trk_loose->GetFunction("pol1");
+        double p0_v0pt_5060_trk_loose = fit_v0pt_5060_trk_loose->GetParameter(0);
+        double p1_v0pt_5060_trk_loose = fit_v0pt_5060_trk_loose->GetParameter(1);
+    TF1 *fit_v0pt_5060_trk_tight = gr_v0pt_5060_trk_tight->GetFunction("pol1");
+        double p0_v0pt_5060_trk_tight = fit_v0pt_5060_trk_tight->GetParameter(0);
+        double p1_v0pt_5060_trk_tight = fit_v0pt_5060_trk_tight->GetParameter(1);
+    TF1 *fit_v0pt_5060_cent_positive = gr_v0pt_5060_cent_positive->GetFunction("pol1");
+        double p0_v0pt_5060_cent_positive = fit_v0pt_5060_cent_positive->GetParameter(0);
+        double p1_v0pt_5060_cent_positive = fit_v0pt_5060_cent_positive->GetParameter(1);
+    TF1 *fit_v0pt_5060_cent_negative = gr_v0pt_5060_cent_negative->GetFunction("pol1");
+        double p0_v0pt_5060_cent_negative = fit_v0pt_5060_cent_negative->GetParameter(0);
+        double p1_v0pt_5060_cent_negative = fit_v0pt_5060_cent_negative->GetParameter(1);
+    TF1 *fit_v0pt_5060_pvZ_3 = gr_v0pt_5060_pvZ_3->GetFunction("pol1");
+        double p0_v0pt_5060_pvZ_3 = fit_v0pt_5060_pvZ_3->GetParameter(0);
+        double p1_v0pt_5060_pvZ_3 = fit_v0pt_5060_pvZ_3->GetParameter(1);
+    TF1 *fit_v0pt_5060_pvZ_3_15 = gr_v0pt_5060_pvZ_3_15->GetFunction("pol1");
+        double p0_v0pt_5060_pvZ_3_15 = fit_v0pt_5060_pvZ_3_15->GetParameter(0);
+        double p1_v0pt_5060_pvZ_3_15 = fit_v0pt_5060_pvZ_3_15->GetParameter(1);
+    TF1 *fit_v0pt_6070_correc = gr_v0pt_6070_correc->GetFunction("pol1"); // 60-70%
+        double p0_v0pt_6070_correc = fit_v0pt_6070_correc->GetParameter(0);
+        double p1_v0pt_6070_correc = fit_v0pt_6070_correc->GetParameter(1);
+    TF1 *fit_v0pt_6070_trk_loose = gr_v0pt_6070_trk_loose->GetFunction("pol1");
+        double p0_v0pt_6070_trk_loose = fit_v0pt_6070_trk_loose->GetParameter(0);
+        double p1_v0pt_6070_trk_loose = fit_v0pt_6070_trk_loose->GetParameter(1);
+    TF1 *fit_v0pt_6070_trk_tight = gr_v0pt_6070_trk_tight->GetFunction("pol1");
+        double p0_v0pt_6070_trk_tight = fit_v0pt_6070_trk_tight->GetParameter(0);
+        double p1_v0pt_6070_trk_tight = fit_v0pt_6070_trk_tight->GetParameter(1);
+    TF1 *fit_v0pt_6070_cent_positive = gr_v0pt_6070_cent_positive->GetFunction("pol1");
+        double p0_v0pt_6070_cent_positive = fit_v0pt_6070_cent_positive->GetParameter(0);
+        double p1_v0pt_6070_cent_positive = fit_v0pt_6070_cent_positive->GetParameter(1);
+    TF1 *fit_v0pt_6070_cent_negative = gr_v0pt_6070_cent_negative->GetFunction("pol1");
+        double p0_v0pt_6070_cent_negative = fit_v0pt_6070_cent_negative->GetParameter(0);
+        double p1_v0pt_6070_cent_negative = fit_v0pt_6070_cent_negative->GetParameter(1);
+    TF1 *fit_v0pt_6070_pvZ_3 = gr_v0pt_6070_pvZ_3->GetFunction("pol1");
+        double p0_v0pt_6070_pvZ_3 = fit_v0pt_6070_pvZ_3->GetParameter(0);
+        double p1_v0pt_6070_pvZ_3 = fit_v0pt_6070_pvZ_3->GetParameter(1);
+    TF1 *fit_v0pt_6070_pvZ_3_15 = gr_v0pt_6070_pvZ_3_15->GetFunction("pol1");
+        double p0_v0pt_6070_pvZ_3_15 = fit_v0pt_6070_pvZ_3_15->GetParameter(0);
+        double p1_v0pt_6070_pvZ_3_15 = fit_v0pt_6070_pvZ_3_15->GetParameter(1);
+
+    // I will use the same strategy used to v0
+    vector<double> vec_p0_5060_one(nVar, 0.0); vector<double> vec_p0_5060_two(nVar, 0.0); // 50-60%
+        vec_p0_5060_one[0] = p0_v0pt_5060_correc; vec_p0_5060_two[0] = p0_v0pt_5060_correc;
+        vec_p0_5060_one[1] = p0_v0pt_5060_trk_loose; vec_p0_5060_two[1] = p0_v0pt_5060_trk_tight;
+        vec_p0_5060_one[2] = p0_v0pt_5060_cent_positive; vec_p0_5060_two[2] = p0_v0pt_5060_cent_negative;
+        vec_p0_5060_one[3] = p0_v0pt_5060_pvZ_3; vec_p0_5060_two[3] = p0_v0pt_5060_pvZ_3_15;
+    vector<double> vec_p1_5060_one(nVar, 0.0); vector<double> vec_p1_5060_two(nVar, 0.0);
+        vec_p1_5060_one[0] = p1_v0pt_5060_correc; vec_p1_5060_two[0] = p1_v0pt_5060_correc;
+        vec_p1_5060_one[1] = p1_v0pt_5060_trk_loose; vec_p1_5060_two[1] = p1_v0pt_5060_trk_tight;
+        vec_p1_5060_one[2] = p1_v0pt_5060_cent_positive; vec_p1_5060_two[2] = p1_v0pt_5060_cent_negative;
+        vec_p1_5060_one[3] = p1_v0pt_5060_pvZ_3; vec_p1_5060_two[3] = p1_v0pt_5060_pvZ_3_15;
+    vector<double> vec_p0_6070_one(nVar, 0.0); vector<double> vec_p0_6070_two(nVar, 0.0); // 60-70%
+        vec_p0_6070_one[0] = p0_v0pt_6070_correc; vec_p0_6070_two[0] = p0_v0pt_6070_correc;
+        vec_p0_6070_one[1] = p0_v0pt_6070_trk_loose; vec_p0_6070_two[1] = p0_v0pt_6070_trk_tight;
+        vec_p0_6070_one[2] = p0_v0pt_6070_cent_positive; vec_p0_6070_two[2] = p0_v0pt_6070_cent_negative;
+        vec_p0_6070_one[3] = p0_v0pt_6070_pvZ_3; vec_p0_6070_two[3] = p0_v0pt_6070_pvZ_3_15;
+    vector<double> vec_p1_6070_one(nVar, 0.0); vector<double> vec_p1_6070_two(nVar, 0.0);
+        vec_p1_6070_one[0] = p1_v0pt_6070_correc; vec_p1_6070_two[0] = p1_v0pt_6070_correc;
+        vec_p1_6070_one[1] = p1_v0pt_6070_trk_loose; vec_p1_6070_two[1] = p1_v0pt_6070_trk_tight;
+        vec_p1_6070_one[2] = p1_v0pt_6070_cent_positive; vec_p1_6070_two[2] = p1_v0pt_6070_cent_negative;
+        vec_p1_6070_one[3] = p1_v0pt_6070_pvZ_3; vec_p1_6070_two[3] = p1_v0pt_6070_pvZ_3_15;
+
+     // Getting diff. values of each TGraph
+    Double_t *v0pt_5060_corr = gr_v0pt_5060_correc->GetY(); // 50-60%
+    Double_t *v0pt_5060_trk_loose = gr_v0pt_5060_trk_loose->GetY();
+    Double_t *v0pt_5060_trk_tight = gr_v0pt_5060_trk_tight->GetY();
+    Double_t *v0pt_5060_cent_positive = gr_v0pt_5060_cent_positive->GetY();
+    Double_t *v0pt_5060_cent_negative = gr_v0pt_5060_cent_negative->GetY();
+    Double_t *v0pt_5060_pvZ_3 = gr_v0pt_5060_pvZ_3->GetY();
+    Double_t *v0pt_5060_pvZ_3_15 = gr_v0pt_5060_pvZ_3_15->GetY();
+    Double_t *v0pt_6070_corr = gr_v0pt_6070_correc->GetY(); // 60-70%
+    Double_t *v0pt_6070_trk_loose = gr_v0pt_6070_trk_loose->GetY();
+    Double_t *v0pt_6070_trk_tight = gr_v0pt_6070_trk_tight->GetY();
+    Double_t *v0pt_6070_cent_positive = gr_v0pt_6070_cent_positive->GetY();
+    Double_t *v0pt_6070_cent_negative = gr_v0pt_6070_cent_negative->GetY();
+    Double_t *v0pt_6070_pvZ_3 = gr_v0pt_6070_pvZ_3->GetY();
+    Double_t *v0pt_6070_pvZ_3_15 = gr_v0pt_6070_pvZ_3_15->GetY();
+    
+    vector<vector<Double_t>> vec_uncs_v0pt_5060_holder_one(nVar-1, vector<Double_t>(N, 0.0)); // One: loose, positive, 3 // 50-60%
+        vec_uncs_v0pt_5060_holder_one[0].assign(v0pt_5060_trk_loose, v0pt_5060_trk_loose + N);
+        vec_uncs_v0pt_5060_holder_one[1].assign(v0pt_5060_cent_positive, v0pt_5060_cent_positive + N);
+        vec_uncs_v0pt_5060_holder_one[2].assign(v0pt_5060_pvZ_3, v0pt_5060_pvZ_3 + N);
+    vector<vector<Double_t>> vec_uncs_v0pt_5060_holder_two(nVar-1, vector<Double_t>(N, 0.0)); // Two: tight, negative, 3_15
+        vec_uncs_v0pt_5060_holder_two[0].assign(v0pt_5060_trk_tight, v0pt_5060_trk_tight + N);
+        vec_uncs_v0pt_5060_holder_two[1].assign(v0pt_5060_cent_negative, v0pt_5060_cent_negative + N);
+        vec_uncs_v0pt_5060_holder_two[2].assign(v0pt_5060_pvZ_3_15, v0pt_5060_pvZ_3_15 + N);
+    vector<vector<Double_t>> vec_uncs_v0pt_6070_holder_one(nVar-1, vector<Double_t>(N, 0.0)); // One: loose, positive, 3 // 50-60%
+        vec_uncs_v0pt_6070_holder_one[0].assign(v0pt_6070_trk_loose, v0pt_6070_trk_loose + N);
+        vec_uncs_v0pt_6070_holder_one[1].assign(v0pt_6070_cent_positive, v0pt_6070_cent_positive + N);
+        vec_uncs_v0pt_6070_holder_one[2].assign(v0pt_6070_pvZ_3, v0pt_6070_pvZ_3 + N);
+    vector<vector<Double_t>> vec_uncs_v0pt_6070_holder_two(nVar-1, vector<Double_t>(N, 0.0)); // Two: tight, negative, 3_15
+        vec_uncs_v0pt_6070_holder_two[0].assign(v0pt_6070_trk_tight, v0pt_6070_trk_tight + N);
+        vec_uncs_v0pt_6070_holder_two[1].assign(v0pt_6070_cent_negative, v0pt_6070_cent_negative + N);
+        vec_uncs_v0pt_6070_holder_two[2].assign(v0pt_6070_pvZ_3_15, v0pt_6070_pvZ_3_15 + N);
+
+    
+    f_corr->Close(); f_trk->Close(); f_cent->Close(); f_pvZ->Close(); 
+
+    TFile *f_main = TFile::Open("./Data/Figures/main.root");
+    TGraphErrors *gr_v0pt_5060 = (TGraphErrors*)f_main->Get("v0pt_ptref_1_5060");
+    TGraphErrors *gr_v0pt_6070 = (TGraphErrors*)f_main->Get("v0pt_ptref_1_6070");
+
+    Double_t *x_v0pt = gr_v0pt_5060->GetX();
+    Double_t *y_v0pt_5060 = gr_v0pt_5060->GetY();
+    Double_t *y_v0pt_6070 = gr_v0pt_6070->GetY();
+
+    vector<Double_t> vec_x_v0pt(N, 0.0); vec_x_v0pt.assign(x_v0pt, x_v0pt + N);
+    vector<Double_t> vec_y_v0pt_5060(N, 0.0); vec_y_v0pt_5060.assign(y_v0pt_5060, y_v0pt_5060 + N);
+    vector<Double_t> vec_y_v0pt_6070(N, 0.0); vec_y_v0pt_6070.assign(y_v0pt_6070, y_v0pt_6070 + N);
+
+    // Creating v0pt vector to take the greater unc. type value of each point and putting correction application unc. in the first slot 
+    vector<vector<Double_t>> vec_uncs_v0pt_5060(nVar, vector<Double_t>(N, 0.0));
+    vector<vector<Double_t>> vec_uncs_v0pt_6070(nVar, vector<Double_t>(N, 0.0));
+
+    for (int i=0; i<nVar; i++){
+        for (int j=0; j<N; j++){
+            if (i==0){
+                vec_uncs_v0pt_5060[i][j] = vec_p0_5060_one[0] + vec_p1_5060_one[0]*vec_x_v0pt[j];
+                vec_uncs_v0pt_6070[i][j] = vec_p0_6070_one[0] + vec_p1_6070_one[0]*vec_x_v0pt[j];
+            } else{
+                if (vec_uncs_v0pt_5060_holder_one[i-1][j] > vec_uncs_v0pt_5060_holder_two[i-1][j]) vec_uncs_v0pt_5060[i][j] = vec_p0_5060_one[i] + vec_p1_5060_one[i]*vec_x_v0pt[j];
+                if (vec_uncs_v0pt_5060_holder_one[i-1][j] < vec_uncs_v0pt_5060_holder_two[i-1][j]) vec_uncs_v0pt_5060[i][j] = vec_p0_5060_two[i] + vec_p1_5060_two[i]*vec_x_v0pt[j];
+                if (vec_uncs_v0pt_6070_holder_one[i-1][j] > vec_uncs_v0pt_6070_holder_two[i-1][j]) vec_uncs_v0pt_6070[i][j] = vec_p0_6070_one[i] + vec_p1_6070_one[i]*vec_x_v0pt[j];
+                if (vec_uncs_v0pt_6070_holder_one[i-1][j] < vec_uncs_v0pt_6070_holder_two[i-1][j]) vec_uncs_v0pt_6070[i][j] = vec_p0_6070_two[i] + vec_p1_6070_two[i]*vec_x_v0pt[j];
+            }
+        }
+    }
+
+    vector<Double_t> vec_ex_v0pt(N, 0.04);
+    vector<Double_t> vec_unc_v0pt_5060_total = VecQuadSum(vec_uncs_v0pt_5060);
+    vector<Double_t> vec_unc_v0pt_6070_total = VecQuadSum(vec_uncs_v0pt_6070);
+
+    TGraphErrors *gr_v0pt_5060_total = new TGraphErrors(N, vec_x_v0pt.data(), vec_y_v0pt_5060.data(), vec_ex_v0pt.data(), vec_unc_v0pt_5060_total.data()); // 50-60%
+    TGraphErrors *gr_v0pt_5060_corr = new TGraphErrors(N, vec_x_v0pt.data(), vec_y_v0pt_5060.data(), vec_ex_v0pt.data(), vec_uncs_v0pt_5060[0].data());
+    TGraphErrors *gr_v0pt_5060_trk = new TGraphErrors(N, vec_x_v0pt.data(), vec_y_v0pt_5060.data(), vec_ex_v0pt.data(), vec_uncs_v0pt_5060[1].data());
+    TGraphErrors *gr_v0pt_5060_cent = new TGraphErrors(N, vec_x_v0pt.data(), vec_y_v0pt_5060.data(), vec_ex_v0pt.data(), vec_uncs_v0pt_5060[2].data());
+    TGraphErrors *gr_v0pt_5060_pvZ = new TGraphErrors(N, vec_x_v0pt.data(), vec_y_v0pt_5060.data(), vec_ex_v0pt.data(), vec_uncs_v0pt_5060[3].data());
+    TGraphErrors *gr_v0pt_6070_total = new TGraphErrors(N, vec_x_v0pt.data(), vec_y_v0pt_6070.data(), vec_ex_v0pt.data(), vec_unc_v0pt_6070_total.data()); // 60-70%
+    TGraphErrors *gr_v0pt_6070_corr = new TGraphErrors(N, vec_x_v0pt.data(), vec_y_v0pt_6070.data(), vec_ex_v0pt.data(), vec_uncs_v0pt_6070[0].data());
+    TGraphErrors *gr_v0pt_6070_trk = new TGraphErrors(N, vec_x_v0pt.data(), vec_y_v0pt_6070.data(), vec_ex_v0pt.data(), vec_uncs_v0pt_6070[1].data());
+    TGraphErrors *gr_v0pt_6070_cent = new TGraphErrors(N, vec_x_v0pt.data(), vec_y_v0pt_6070.data(), vec_ex_v0pt.data(), vec_uncs_v0pt_6070[2].data());
+    TGraphErrors *gr_v0pt_6070_pvZ = new TGraphErrors(N, vec_x_v0pt.data(), vec_y_v0pt_6070.data(), vec_ex_v0pt.data(), vec_uncs_v0pt_6070[3].data());
+
+    TFile *sf = new TFile("./Data/Systematics/SystUncs.root", "UPDATE");
+    gr_v0pt_5060_total->SetName("gr_v0pt_5060_total"); gr_v0pt_5060_total->Write(); // 50-60%
+    gr_v0pt_5060_corr->SetName("gr_v0pt_5060_corr"); gr_v0pt_5060_corr->Write();
+    gr_v0pt_5060_trk->SetName("gr_v0pt_5060_trk"); gr_v0pt_5060_trk->Write();
+    gr_v0pt_5060_cent->SetName("gr_v0pt_5060_cent"); gr_v0pt_5060_cent->Write();
+    gr_v0pt_5060_pvZ->SetName("gr_v0pt_5060_pvZ"); gr_v0pt_5060_pvZ->Write();
+    gr_v0pt_6070_total->SetName("gr_v0pt_6070_total"); gr_v0pt_6070_total->Write(); // 60-70%
+    gr_v0pt_6070_corr->SetName("gr_v0pt_6070_corr"); gr_v0pt_6070_corr->Write();
+    gr_v0pt_6070_trk->SetName("gr_v0pt_6070_trk"); gr_v0pt_6070_trk->Write();
+    gr_v0pt_6070_cent->SetName("gr_v0pt_6070_cent"); gr_v0pt_6070_cent->Write();
+    gr_v0pt_6070_pvZ->SetName("gr_v0pt_6070_pvZ"); gr_v0pt_6070_pvZ->Write();
+    sf->Close();
+}
+
+void Evaluate_sv0pT(){
+
+    // Opening diff. files
+    TFile *f_corr = TFile::Open("./Data/Systematics/CorrectionApplicationUnc.root");
+    TFile *f_trk = TFile::Open("./Data/Systematics/TrackSelectionUnc.root");
+    TFile *f_cent = TFile::Open("./Data/Systematics/CentralityFluctuationUnc.root");
+    TFile *f_pvZ = TFile::Open("./Data/Systematics/ZvertexPositionUnc.root");
+
+    // Loading TGraphs from TFiles, each one has N points
+    TGraph *gr_sv0pt_5060_correc = (TGraph*)f_corr->Get("gd_sv0pt_5060_nocorrec"); // 50-60%
+    TGraphErrors *gr_sv0pt_5060_trk_loose = (TGraphErrors*)f_trk->Get("gd_sv0pt_5060_loose");
+    TGraphErrors *gr_sv0pt_5060_trk_tight = (TGraphErrors*)f_trk->Get("gd_sv0pt_5060_tight");
+    TGraphErrors *gr_sv0pt_5060_cent_positive = (TGraphErrors*)f_cent->Get("gd_sv0pt_5060_positive");
+    TGraphErrors *gr_sv0pt_5060_cent_negative = (TGraphErrors*)f_cent->Get("gd_sv0pt_5060_negative");
+    TGraphErrors *gr_sv0pt_5060_pvZ_3 = (TGraphErrors*)f_pvZ->Get("gd_sv0pt_5060_pvZ_3");
+    TGraphErrors *gr_sv0pt_5060_pvZ_3_15 = (TGraphErrors*)f_pvZ->Get("gd_sv0pt_5060_pvZ_3_15");
+    TGraph *gr_sv0pt_6070_correc = (TGraph*)f_corr->Get("gd_sv0pt_6070_nocorrec"); // 60-70%
+    TGraphErrors *gr_sv0pt_6070_trk_loose = (TGraphErrors*)f_trk->Get("gd_sv0pt_6070_loose");
+    TGraphErrors *gr_sv0pt_6070_trk_tight = (TGraphErrors*)f_trk->Get("gd_sv0pt_6070_tight");
+    TGraphErrors *gr_sv0pt_6070_cent_positive = (TGraphErrors*)f_cent->Get("gd_sv0pt_6070_positive");
+    TGraphErrors *gr_sv0pt_6070_cent_negative = (TGraphErrors*)f_cent->Get("gd_sv0pt_6070_negative");
+    TGraphErrors *gr_sv0pt_6070_pvZ_3 = (TGraphErrors*)f_pvZ->Get("gd_sv0pt_6070_pvZ_3");
+    TGraphErrors *gr_sv0pt_6070_pvZ_3_15 = (TGraphErrors*)f_pvZ->Get("gd_sv0pt_6070_pvZ_3_15");
+
+    int N = gr_sv0pt_5060_correc->GetN();
+    int nVar = 4;
+
+    // Fitting functions
+    gr_sv0pt_5060_correc->Fit("pol1", "Q0"); // 50-60%
+    gr_sv0pt_5060_trk_loose->Fit("pol1", "Q0");
+    gr_sv0pt_5060_trk_tight->Fit("pol1", "Q0");
+    gr_sv0pt_5060_cent_positive->Fit("pol1", "Q0");
+    gr_sv0pt_5060_cent_negative->Fit("pol1", "Q0");
+    gr_sv0pt_5060_pvZ_3->Fit("pol1", "Q0");
+    gr_sv0pt_5060_pvZ_3_15->Fit("pol1", "Q0");
+    gr_sv0pt_6070_correc->Fit("pol1", "Q0"); // 60-70%
+    gr_sv0pt_6070_trk_loose->Fit("pol1", "Q0");
+    gr_sv0pt_6070_trk_tight->Fit("pol1", "Q0");
+    gr_sv0pt_6070_cent_positive->Fit("pol1", "Q0");
+    gr_sv0pt_6070_cent_negative->Fit("pol1", "Q0");
+    gr_sv0pt_6070_pvZ_3->Fit("pol1", "Q0");
+    gr_sv0pt_6070_pvZ_3_15->Fit("pol1", "Q0");
+
+    // Getting fit parameters
+    TF1 *fit_sv0pt_5060_correc = gr_sv0pt_5060_correc->GetFunction("pol1"); // 50-60%
+        double p0_sv0pt_5060_correc = fit_sv0pt_5060_correc->GetParameter(0);
+        double p1_sv0pt_5060_correc = fit_sv0pt_5060_correc->GetParameter(1);
+    TF1 *fit_sv0pt_5060_trk_loose = gr_sv0pt_5060_trk_loose->GetFunction("pol1");
+        double p0_sv0pt_5060_trk_loose = fit_sv0pt_5060_trk_loose->GetParameter(0);
+        double p1_sv0pt_5060_trk_loose = fit_sv0pt_5060_trk_loose->GetParameter(1);
+    TF1 *fit_sv0pt_5060_trk_tight = gr_sv0pt_5060_trk_tight->GetFunction("pol1");
+        double p0_sv0pt_5060_trk_tight = fit_sv0pt_5060_trk_tight->GetParameter(0);
+        double p1_sv0pt_5060_trk_tight = fit_sv0pt_5060_trk_tight->GetParameter(1);
+    TF1 *fit_sv0pt_5060_cent_positive = gr_sv0pt_5060_cent_positive->GetFunction("pol1");
+        double p0_sv0pt_5060_cent_positive = fit_sv0pt_5060_cent_positive->GetParameter(0);
+        double p1_sv0pt_5060_cent_positive = fit_sv0pt_5060_cent_positive->GetParameter(1);
+    TF1 *fit_sv0pt_5060_cent_negative = gr_sv0pt_5060_cent_negative->GetFunction("pol1");
+        double p0_sv0pt_5060_cent_negative = fit_sv0pt_5060_cent_negative->GetParameter(0);
+        double p1_sv0pt_5060_cent_negative = fit_sv0pt_5060_cent_negative->GetParameter(1);
+    TF1 *fit_sv0pt_5060_pvZ_3 = gr_sv0pt_5060_pvZ_3->GetFunction("pol1");
+        double p0_sv0pt_5060_pvZ_3 = fit_sv0pt_5060_pvZ_3->GetParameter(0);
+        double p1_sv0pt_5060_pvZ_3 = fit_sv0pt_5060_pvZ_3->GetParameter(1);
+    TF1 *fit_sv0pt_5060_pvZ_3_15 = gr_sv0pt_5060_pvZ_3_15->GetFunction("pol1");
+        double p0_sv0pt_5060_pvZ_3_15 = fit_sv0pt_5060_pvZ_3_15->GetParameter(0);
+        double p1_sv0pt_5060_pvZ_3_15 = fit_sv0pt_5060_pvZ_3_15->GetParameter(1);
+    TF1 *fit_sv0pt_6070_correc = gr_sv0pt_6070_correc->GetFunction("pol1"); // 60-70%
+        double p0_sv0pt_6070_correc = fit_sv0pt_6070_correc->GetParameter(0);
+        double p1_sv0pt_6070_correc = fit_sv0pt_6070_correc->GetParameter(1);
+    TF1 *fit_sv0pt_6070_trk_loose = gr_sv0pt_6070_trk_loose->GetFunction("pol1");
+        double p0_sv0pt_6070_trk_loose = fit_sv0pt_6070_trk_loose->GetParameter(0);
+        double p1_sv0pt_6070_trk_loose = fit_sv0pt_6070_trk_loose->GetParameter(1);
+    TF1 *fit_sv0pt_6070_trk_tight = gr_sv0pt_6070_trk_tight->GetFunction("pol1");
+        double p0_sv0pt_6070_trk_tight = fit_sv0pt_6070_trk_tight->GetParameter(0);
+        double p1_sv0pt_6070_trk_tight = fit_sv0pt_6070_trk_tight->GetParameter(1);
+    TF1 *fit_sv0pt_6070_cent_positive = gr_sv0pt_6070_cent_positive->GetFunction("pol1");
+        double p0_sv0pt_6070_cent_positive = fit_sv0pt_6070_cent_positive->GetParameter(0);
+        double p1_sv0pt_6070_cent_positive = fit_sv0pt_6070_cent_positive->GetParameter(1);
+    TF1 *fit_sv0pt_6070_cent_negative = gr_sv0pt_6070_cent_negative->GetFunction("pol1");
+        double p0_sv0pt_6070_cent_negative = fit_sv0pt_6070_cent_negative->GetParameter(0);
+        double p1_sv0pt_6070_cent_negative = fit_sv0pt_6070_cent_negative->GetParameter(1);
+    TF1 *fit_sv0pt_6070_pvZ_3 = gr_sv0pt_6070_pvZ_3->GetFunction("pol1");
+        double p0_sv0pt_6070_pvZ_3 = fit_sv0pt_6070_pvZ_3->GetParameter(0);
+        double p1_sv0pt_6070_pvZ_3 = fit_sv0pt_6070_pvZ_3->GetParameter(1);
+    TF1 *fit_sv0pt_6070_pvZ_3_15 = gr_sv0pt_6070_pvZ_3_15->GetFunction("pol1");
+        double p0_sv0pt_6070_pvZ_3_15 = fit_sv0pt_6070_pvZ_3_15->GetParameter(0);
+        double p1_sv0pt_6070_pvZ_3_15 = fit_sv0pt_6070_pvZ_3_15->GetParameter(1);
+
+    // I will use the same strategy used to v0
+    vector<double> vec_p0_5060_one(nVar, 0.0); vector<double> vec_p0_5060_two(nVar, 0.0); // 50-60%
+        vec_p0_5060_one[0] = p0_sv0pt_5060_correc; vec_p0_5060_two[0] = p0_sv0pt_5060_correc;
+        vec_p0_5060_one[1] = p0_sv0pt_5060_trk_loose; vec_p0_5060_two[1] = p0_sv0pt_5060_trk_tight;
+        vec_p0_5060_one[2] = p0_sv0pt_5060_cent_positive; vec_p0_5060_two[2] = p0_sv0pt_5060_cent_negative;
+        vec_p0_5060_one[3] = p0_sv0pt_5060_pvZ_3; vec_p0_5060_two[3] = p0_sv0pt_5060_pvZ_3_15;
+    vector<double> vec_p1_5060_one(nVar, 0.0); vector<double> vec_p1_5060_two(nVar, 0.0);
+        vec_p1_5060_one[0] = p1_sv0pt_5060_correc; vec_p1_5060_two[0] = p1_sv0pt_5060_correc;
+        vec_p1_5060_one[1] = p1_sv0pt_5060_trk_loose; vec_p1_5060_two[1] = p1_sv0pt_5060_trk_tight;
+        vec_p1_5060_one[2] = p1_sv0pt_5060_cent_positive; vec_p1_5060_two[2] = p1_sv0pt_5060_cent_negative;
+        vec_p1_5060_one[3] = p1_sv0pt_5060_pvZ_3; vec_p1_5060_two[3] = p1_sv0pt_5060_pvZ_3_15;
+    vector<double> vec_p0_6070_one(nVar, 0.0); vector<double> vec_p0_6070_two(nVar, 0.0); // 60-70%
+        vec_p0_6070_one[0] = p0_sv0pt_6070_correc; vec_p0_6070_two[0] = p0_sv0pt_6070_correc;
+        vec_p0_6070_one[1] = p0_sv0pt_6070_trk_loose; vec_p0_6070_two[1] = p0_sv0pt_6070_trk_tight;
+        vec_p0_6070_one[2] = p0_sv0pt_6070_cent_positive; vec_p0_6070_two[2] = p0_sv0pt_6070_cent_negative;
+        vec_p0_6070_one[3] = p0_sv0pt_6070_pvZ_3; vec_p0_6070_two[3] = p0_sv0pt_6070_pvZ_3_15;
+    vector<double> vec_p1_6070_one(nVar, 0.0); vector<double> vec_p1_6070_two(nVar, 0.0);
+        vec_p1_6070_one[0] = p1_sv0pt_6070_correc; vec_p1_6070_two[0] = p1_sv0pt_6070_correc;
+        vec_p1_6070_one[1] = p1_sv0pt_6070_trk_loose; vec_p1_6070_two[1] = p1_sv0pt_6070_trk_tight;
+        vec_p1_6070_one[2] = p1_sv0pt_6070_cent_positive; vec_p1_6070_two[2] = p1_sv0pt_6070_cent_negative;
+        vec_p1_6070_one[3] = p1_sv0pt_6070_pvZ_3; vec_p1_6070_two[3] = p1_sv0pt_6070_pvZ_3_15;
+
+     // Getting diff. values of each TGraph
+    Double_t *sv0pt_5060_corr = gr_sv0pt_5060_correc->GetY(); // 50-60%
+    Double_t *sv0pt_5060_trk_loose = gr_sv0pt_5060_trk_loose->GetY();
+    Double_t *sv0pt_5060_trk_tight = gr_sv0pt_5060_trk_tight->GetY();
+    Double_t *sv0pt_5060_cent_positive = gr_sv0pt_5060_cent_positive->GetY();
+    Double_t *sv0pt_5060_cent_negative = gr_sv0pt_5060_cent_negative->GetY();
+    Double_t *sv0pt_5060_pvZ_3 = gr_sv0pt_5060_pvZ_3->GetY();
+    Double_t *sv0pt_5060_pvZ_3_15 = gr_sv0pt_5060_pvZ_3_15->GetY();
+    Double_t *sv0pt_6070_corr = gr_sv0pt_6070_correc->GetY(); // 60-70%
+    Double_t *sv0pt_6070_trk_loose = gr_sv0pt_6070_trk_loose->GetY();
+    Double_t *sv0pt_6070_trk_tight = gr_sv0pt_6070_trk_tight->GetY();
+    Double_t *sv0pt_6070_cent_positive = gr_sv0pt_6070_cent_positive->GetY();
+    Double_t *sv0pt_6070_cent_negative = gr_sv0pt_6070_cent_negative->GetY();
+    Double_t *sv0pt_6070_pvZ_3 = gr_sv0pt_6070_pvZ_3->GetY();
+    Double_t *sv0pt_6070_pvZ_3_15 = gr_sv0pt_6070_pvZ_3_15->GetY();
+    
+    vector<vector<Double_t>> vec_uncs_sv0pt_5060_holder_one(nVar-1, vector<Double_t>(N, 0.0)); // One: loose, positive, 3 // 50-60%
+        vec_uncs_sv0pt_5060_holder_one[0].assign(sv0pt_5060_trk_loose, sv0pt_5060_trk_loose + N);
+        vec_uncs_sv0pt_5060_holder_one[1].assign(sv0pt_5060_cent_positive, sv0pt_5060_cent_positive + N);
+        vec_uncs_sv0pt_5060_holder_one[2].assign(sv0pt_5060_pvZ_3, sv0pt_5060_pvZ_3 + N);
+    vector<vector<Double_t>> vec_uncs_sv0pt_5060_holder_two(nVar-1, vector<Double_t>(N, 0.0)); // Two: tight, negative, 3_15
+        vec_uncs_sv0pt_5060_holder_two[0].assign(sv0pt_5060_trk_tight, sv0pt_5060_trk_tight + N);
+        vec_uncs_sv0pt_5060_holder_two[1].assign(sv0pt_5060_cent_negative, sv0pt_5060_cent_negative + N);
+        vec_uncs_sv0pt_5060_holder_two[2].assign(sv0pt_5060_pvZ_3_15, sv0pt_5060_pvZ_3_15 + N);
+    vector<vector<Double_t>> vec_uncs_sv0pt_6070_holder_one(nVar-1, vector<Double_t>(N, 0.0)); // One: loose, positive, 3 // 50-60%
+        vec_uncs_sv0pt_6070_holder_one[0].assign(sv0pt_6070_trk_loose, sv0pt_6070_trk_loose + N);
+        vec_uncs_sv0pt_6070_holder_one[1].assign(sv0pt_6070_cent_positive, sv0pt_6070_cent_positive + N);
+        vec_uncs_sv0pt_6070_holder_one[2].assign(sv0pt_6070_pvZ_3, sv0pt_6070_pvZ_3 + N);
+    vector<vector<Double_t>> vec_uncs_sv0pt_6070_holder_two(nVar-1, vector<Double_t>(N, 0.0)); // Two: tight, negative, 3_15
+        vec_uncs_sv0pt_6070_holder_two[0].assign(sv0pt_6070_trk_tight, sv0pt_6070_trk_tight + N);
+        vec_uncs_sv0pt_6070_holder_two[1].assign(sv0pt_6070_cent_negative, sv0pt_6070_cent_negative + N);
+        vec_uncs_sv0pt_6070_holder_two[2].assign(sv0pt_6070_pvZ_3_15, sv0pt_6070_pvZ_3_15 + N);
+
+    
+    f_corr->Close(); f_trk->Close(); f_cent->Close(); f_pvZ->Close(); 
+
+    TFile *f_main = TFile::Open("./Data/Figures/main.root");
+    TGraphErrors *gr_sv0pt_5060 = (TGraphErrors*)f_main->Get("sv0pt_ptref_1_5060");
+    TGraphErrors *gr_sv0pt_6070 = (TGraphErrors*)f_main->Get("sv0pt_ptref_1_6070");
+
+    Double_t *x_sv0pt = gr_sv0pt_5060->GetX();
+    Double_t *y_sv0pt_5060 = gr_sv0pt_5060->GetY();
+    Double_t *y_sv0pt_6070 = gr_sv0pt_6070->GetY();
+
+    vector<Double_t> vec_x_sv0pt(N, 0.0); vec_x_sv0pt.assign(x_sv0pt, x_sv0pt + N);
+    vector<Double_t> vec_y_sv0pt_5060(N, 0.0); vec_y_sv0pt_5060.assign(y_sv0pt_5060, y_sv0pt_5060 + N);
+    vector<Double_t> vec_y_sv0pt_6070(N, 0.0); vec_y_sv0pt_6070.assign(y_sv0pt_6070, y_sv0pt_6070 + N);
+
+    // Creating sv0pt vector to take the greater unc. type value of each point and putting correction application unc. in the first slot 
+    vector<vector<Double_t>> vec_uncs_sv0pt_5060(nVar, vector<Double_t>(N, 0.0));
+    vector<vector<Double_t>> vec_uncs_sv0pt_6070(nVar, vector<Double_t>(N, 0.0));
+
+    for (int i=0; i<nVar; i++){
+        for (int j=0; j<N; j++){
+            if (i==0){
+                vec_uncs_sv0pt_5060[i][j] = vec_p0_5060_one[0] + vec_p1_5060_one[0]*vec_x_sv0pt[j];
+                vec_uncs_sv0pt_6070[i][j] = vec_p0_6070_one[0] + vec_p1_6070_one[0]*vec_x_sv0pt[j];
+            } else{
+                if (vec_uncs_sv0pt_5060_holder_one[i-1][j] > vec_uncs_sv0pt_5060_holder_two[i-1][j]) vec_uncs_sv0pt_5060[i][j] = vec_p0_5060_one[i] + vec_p1_5060_one[i]*vec_x_sv0pt[j];
+                if (vec_uncs_sv0pt_5060_holder_one[i-1][j] < vec_uncs_sv0pt_5060_holder_two[i-1][j]) vec_uncs_sv0pt_5060[i][j] = vec_p0_5060_two[i] + vec_p1_5060_two[i]*vec_x_sv0pt[j];
+                if (vec_uncs_sv0pt_6070_holder_one[i-1][j] > vec_uncs_sv0pt_6070_holder_two[i-1][j]) vec_uncs_sv0pt_6070[i][j] = vec_p0_6070_one[i] + vec_p1_6070_one[i]*vec_x_sv0pt[j];
+                if (vec_uncs_sv0pt_6070_holder_one[i-1][j] < vec_uncs_sv0pt_6070_holder_two[i-1][j]) vec_uncs_sv0pt_6070[i][j] = vec_p0_6070_two[i] + vec_p1_6070_two[i]*vec_x_sv0pt[j];
+            }
+        }
+    }
+
+    vector<Double_t> vec_ex_sv0pt(N, 0.04);
+    vector<Double_t> vec_unc_sv0pt_5060_total = VecQuadSum(vec_uncs_sv0pt_5060);
+    vector<Double_t> vec_unc_sv0pt_6070_total = VecQuadSum(vec_uncs_sv0pt_6070);
+
+    TGraphErrors *gr_sv0pt_5060_total = new TGraphErrors(N, vec_x_sv0pt.data(), vec_y_sv0pt_5060.data(), vec_ex_sv0pt.data(), vec_unc_sv0pt_5060_total.data()); // 50-60%
+    TGraphErrors *gr_sv0pt_5060_corr = new TGraphErrors(N, vec_x_sv0pt.data(), vec_y_sv0pt_5060.data(), vec_ex_sv0pt.data(), vec_uncs_sv0pt_5060[0].data());
+    TGraphErrors *gr_sv0pt_5060_trk = new TGraphErrors(N, vec_x_sv0pt.data(), vec_y_sv0pt_5060.data(), vec_ex_sv0pt.data(), vec_uncs_sv0pt_5060[1].data());
+    TGraphErrors *gr_sv0pt_5060_cent = new TGraphErrors(N, vec_x_sv0pt.data(), vec_y_sv0pt_5060.data(), vec_ex_sv0pt.data(), vec_uncs_sv0pt_5060[2].data());
+    TGraphErrors *gr_sv0pt_5060_pvZ = new TGraphErrors(N, vec_x_sv0pt.data(), vec_y_sv0pt_5060.data(), vec_ex_sv0pt.data(), vec_uncs_sv0pt_5060[3].data());
+    TGraphErrors *gr_sv0pt_6070_total = new TGraphErrors(N, vec_x_sv0pt.data(), vec_y_sv0pt_6070.data(), vec_ex_sv0pt.data(), vec_unc_sv0pt_6070_total.data()); // 60-70%
+    TGraphErrors *gr_sv0pt_6070_corr = new TGraphErrors(N, vec_x_sv0pt.data(), vec_y_sv0pt_6070.data(), vec_ex_sv0pt.data(), vec_uncs_sv0pt_6070[0].data());
+    TGraphErrors *gr_sv0pt_6070_trk = new TGraphErrors(N, vec_x_sv0pt.data(), vec_y_sv0pt_6070.data(), vec_ex_sv0pt.data(), vec_uncs_sv0pt_6070[1].data());
+    TGraphErrors *gr_sv0pt_6070_cent = new TGraphErrors(N, vec_x_sv0pt.data(), vec_y_sv0pt_6070.data(), vec_ex_sv0pt.data(), vec_uncs_sv0pt_6070[2].data());
+    TGraphErrors *gr_sv0pt_6070_pvZ = new TGraphErrors(N, vec_x_sv0pt.data(), vec_y_sv0pt_6070.data(), vec_ex_sv0pt.data(), vec_uncs_sv0pt_6070[3].data());
+
+    TFile *sf = new TFile("./Data/Systematics/SystUncs.root", "UPDATE");
+    gr_sv0pt_5060_total->SetName("gr_sv0pt_5060_total"); gr_sv0pt_5060_total->Write(); // 50-60%
+    gr_sv0pt_5060_corr->SetName("gr_sv0pt_5060_corr"); gr_sv0pt_5060_corr->Write();
+    gr_sv0pt_5060_trk->SetName("gr_sv0pt_5060_trk"); gr_sv0pt_5060_trk->Write();
+    gr_sv0pt_5060_cent->SetName("gr_sv0pt_5060_cent"); gr_sv0pt_5060_cent->Write();
+    gr_sv0pt_5060_pvZ->SetName("gr_sv0pt_5060_pvZ"); gr_sv0pt_5060_pvZ->Write();
+    gr_sv0pt_6070_total->SetName("gr_sv0pt_6070_total"); gr_sv0pt_6070_total->Write(); // 60-70%
+    gr_sv0pt_6070_corr->SetName("gr_sv0pt_6070_corr"); gr_sv0pt_6070_corr->Write();
+    gr_sv0pt_6070_trk->SetName("gr_sv0pt_6070_trk"); gr_sv0pt_6070_trk->Write();
+    gr_sv0pt_6070_cent->SetName("gr_sv0pt_6070_cent"); gr_sv0pt_6070_cent->Write();
+    gr_sv0pt_6070_pvZ->SetName("gr_sv0pt_6070_pvZ"); gr_sv0pt_6070_pvZ->Write();
     sf->Close();
 }
