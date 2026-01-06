@@ -1,4 +1,3 @@
-#include "/home/allanfgodoi/cnpy/cnpy.h"
 #include <iostream>
 #include <type_traits>
 
@@ -407,12 +406,15 @@ void DoPlotCorrection(){
 }
 
 void DoPlotMain(){
-    TFile *f;
-    f = TFile::Open("./Data/Figures/main.root", "READ");
+    
+    TFile *f = TFile::Open("./Data/Figures/main.root", "READ");
+    TFile *f_unc = TFile::Open("./Data/Systematics/SystUncs.root", "READ");
 
     // v0(pT)
     TGraph *gr_v0pt_5060 = (TGraph*)f->Get("v0pt_ptref_1_5060");
     TGraph *gr_v0pt_6070 = (TGraph*)f->Get("v0pt_ptref_1_6070");
+    TGraphErrors *gr_v0pt_5060_unc = (TGraphErrors*)f_unc->Get("gr_v0pt_5060_total");
+    TGraphErrors *gr_v0pt_6070_unc = (TGraphErrors*)f_unc->Get("gr_v0pt_6070_total");
 
     TFile *f_v0pt_ATLAS_5060 = TFile::Open("./Data/Figures_ATLAS/v0pt_ATLAS_5060.root", "READ");
     TGraphAsymmErrors* gr_v0pt_ATLAS_5060 = (TGraphAsymmErrors*)f_v0pt_ATLAS_5060->Get("Figure 4a_cent7/Graph1D_y1");
@@ -421,7 +423,10 @@ void DoPlotMain(){
 
     customize_TGraph(gr_v0pt_5060, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 21, 2, 1.0);
     customize_TGraph(gr_v0pt_6070, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 20, 4, 1.0);
-
+    customize_TGraphErrors(gr_v0pt_5060_unc, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 21, 2, 1.0);
+        gr_v0pt_5060_unc->SetFillColorAlpha(2, 0.3); gr_v0pt_5060_unc->SetFillStyle(1001);
+    customize_TGraphErrors(gr_v0pt_6070_unc, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 20, 4, 1.0);
+        gr_v0pt_6070_unc->SetFillColorAlpha(4, 0.3); gr_v0pt_6070_unc->SetFillStyle(1001);
     customize_TGraphAsymmErrors(gr_v0pt_ATLAS_5060, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 25, 2, 1.0);
     customize_TGraphAsymmErrors(gr_v0pt_ATLAS_6070, "; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.46, 24, 4, 1.0);
 
@@ -440,8 +445,8 @@ void DoPlotMain(){
     legend_v0pt_cents->SetTextSize(0.034);
     legend_v0pt_cents->AddEntry(gr_v0pt_5060, "CMS OpenData 2.76 TeV (50-60%)", "p");
     legend_v0pt_cents->AddEntry(gr_v0pt_6070, "CMS OpenData 2.76 TeV (60-70%)", "p");
-    legend_v0pt_cents->AddEntry(gr_v0pt_ATLAS_5060, "ATLAS 5.02 TeV (50-60%)", "p");
-    legend_v0pt_cents->AddEntry(gr_v0pt_ATLAS_6070, "ATLAS 5.02 TeV (60-70%)", "p");
+    //legend_v0pt_cents->AddEntry(gr_v0pt_ATLAS_5060, "ATLAS 5.02 TeV (50-60%)", "p");
+    //legend_v0pt_cents->AddEntry(gr_v0pt_ATLAS_6070, "ATLAS 5.02 TeV (60-70%)", "p");
     legend_v0pt_cents->SetBorderSize(0);
     legend_v0pt_cents->SetFillStyle(0);
 
@@ -453,8 +458,10 @@ void DoPlotMain(){
 
     // Drawing v0(pT) plot
     c->cd(1);
-    gr_v0pt_ATLAS_5060->Draw("AP");
-    gr_v0pt_ATLAS_6070->Draw("P SAME");
+    //gr_v0pt_ATLAS_5060->Draw("AP");
+    //gr_v0pt_ATLAS_6070->Draw("P SAME");
+    gr_v0pt_5060_unc->Draw("A2");
+    gr_v0pt_6070_unc->Draw("2 SAME");
     gr_v0pt_5060->Draw("P SAME");
     gr_v0pt_6070->Draw("P SAME");
     legend_v0pt_text->Draw();
@@ -466,6 +473,8 @@ void DoPlotMain(){
     // v0(pT)/v0
     TGraph *gr_sv0pt_5060 = (TGraph*)f->Get("sv0pt_ptref_1_5060");
     TGraph *gr_sv0pt_6070 = (TGraph*)f->Get("sv0pt_ptref_1_6070");
+    TGraphErrors *gr_sv0pt_5060_unc = (TGraphErrors*)f_unc->Get("gr_sv0pt_5060_total");
+    TGraphErrors *gr_sv0pt_6070_unc = (TGraphErrors*)f_unc->Get("gr_sv0pt_6070_total");
 
     TFile *f_sv0pt_ATLAS_5060 = TFile::Open("./Data/Figures_ATLAS/sv0pt_ATLAS_5060.root", "READ");
     TGraphAsymmErrors* gr_sv0pt_ATLAS_5060 = (TGraphAsymmErrors*)f_sv0pt_ATLAS_5060->Get("Figure 4b_cent7/Graph1D_y1");
@@ -474,7 +483,10 @@ void DoPlotMain(){
 
     customize_TGraph(gr_sv0pt_5060, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 21, 2, 1.0);
     customize_TGraph(gr_sv0pt_6070, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 20, 4, 1.0);
-
+    customize_TGraphErrors(gr_sv0pt_5060_unc, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 21, 2, 1.0);
+        gr_sv0pt_5060_unc->SetFillColorAlpha(2, 0.3); gr_sv0pt_5060_unc->SetFillStyle(1001);
+    customize_TGraphErrors(gr_v0pt_6070_unc, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 20, 4, 1.0);
+        gr_sv0pt_6070_unc->SetFillColorAlpha(4, 0.3); gr_sv0pt_6070_unc->SetFillStyle(1001);
     customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_5060, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 25, 2, 1.0);
     customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_6070, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 24, 4, 1.0);
 
@@ -490,8 +502,8 @@ void DoPlotMain(){
     legend_sv0pt_cents->SetTextSize(0.034);
     legend_sv0pt_cents->AddEntry(gr_sv0pt_5060, "CMS OpenData 2.76 TeV (50-60%)", "p");
     legend_sv0pt_cents->AddEntry(gr_sv0pt_6070, "CMS OpenData 2.76 TeV (60-70%)", "p");
-    legend_sv0pt_cents->AddEntry(gr_sv0pt_ATLAS_5060, "ATLAS 5.02 TeV (50-60%)", "p");
-    legend_sv0pt_cents->AddEntry(gr_sv0pt_ATLAS_6070, "ATLAS 5.02 TeV (60-70%)", "p");
+    //legend_sv0pt_cents->AddEntry(gr_sv0pt_ATLAS_5060, "ATLAS 5.02 TeV (50-60%)", "p");
+    //legend_sv0pt_cents->AddEntry(gr_sv0pt_ATLAS_6070, "ATLAS 5.02 TeV (60-70%)", "p");
     legend_sv0pt_cents->SetBorderSize(0);
     legend_sv0pt_cents->SetFillStyle(0);
 
@@ -503,8 +515,10 @@ void DoPlotMain(){
    
     // Drawing v0(pT)/v0 plot
     c->cd(2);
-    gr_sv0pt_ATLAS_5060->Draw("AP");
-    gr_sv0pt_ATLAS_6070->Draw("P SAME");
+    //gr_sv0pt_ATLAS_5060->Draw("AP");
+    //gr_sv0pt_ATLAS_6070->Draw("P SAME");
+    gr_sv0pt_5060_unc->Draw("A2");
+    gr_sv0pt_6070_unc->Draw("2 SAME");
     gr_sv0pt_5060->Draw("P SAME");
     gr_sv0pt_6070->Draw("P SAME");
     legend_sv0pt_text->Draw();
@@ -552,10 +566,10 @@ void DoPlotTrkSelectSyst(){
         TGraphErrors* gd_v0pt_5060_tight = (TGraphErrors*)f->Get("gd_v0pt_5060_tight");
         TGraphErrors* gd_v0pt_6070_tight = (TGraphErrors*)f->Get("gd_v0pt_6070_tight");
 
-        customize_TGraphErrors(gd_v0pt_5060_loose, "Track Selection v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.008, 0.012, 20, 2, 1.0);
-        customize_TGraphErrors(gd_v0pt_6070_loose, "Track Selection v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.02, 0.02, 20, 2, 1.0);
-        customize_TGraphErrors(gd_v0pt_5060_tight, "Track Selection v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.008, 0.012, 21, 4, 1.0);
-        customize_TGraphErrors(gd_v0pt_6070_tight, "Track Selection v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.02, 0.02, 21, 4, 1.0);
+        customize_TGraphErrors(gd_v0pt_5060_loose, "Track Selection v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.008, 0.012, 20, 2, 1.0);
+        customize_TGraphErrors(gd_v0pt_6070_loose, "Track Selection v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.02, 0.02, 20, 2, 1.0);
+        customize_TGraphErrors(gd_v0pt_5060_tight, "Track Selection v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.008, 0.012, 21, 4, 1.0);
+        customize_TGraphErrors(gd_v0pt_6070_tight, "Track Selection v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.02, 0.02, 21, 4, 1.0);
 
         auto c_v0pt = new TCanvas("c_v0pt", "c_v0pt", 1100, 500);
         c_v0pt->Divide(2, 1);
@@ -571,6 +585,7 @@ void DoPlotTrkSelectSyst(){
         gd_v0pt_5060_loose->Draw("ALP");
         gd_v0pt_5060_tight->Draw("LP SAME");
         l_v0pt_5060->Draw();
+        gPad->SetLogx();
 
         c_v0pt->cd(2);
         auto l_v0pt_6070 = new TLegend(0.103, 0.81, 0.5, 0.61);
@@ -585,6 +600,7 @@ void DoPlotTrkSelectSyst(){
         gd_v0pt_6070_loose->Draw("ALP");
         gd_v0pt_6070_tight->Draw("LP SAME");
         l_v0pt_6070->Draw();
+        gPad->SetLogx();
 
         c_v0pt->Update();
         c_v0pt->SaveAs("./Plots/Systematics/trackselection_v0pt.pdf");
@@ -595,10 +611,10 @@ void DoPlotTrkSelectSyst(){
         TGraphErrors* gd_sv0pt_5060_tight = (TGraphErrors*)f->Get("gd_sv0pt_5060_tight");
         TGraphErrors* gd_sv0pt_6070_tight = (TGraphErrors*)f->Get("gd_sv0pt_6070_tight");
 
-        customize_TGraphErrors(gd_sv0pt_5060_loose, "Track Selection v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.5, 0.7, 20, 2, 1.0);
-        customize_TGraphErrors(gd_sv0pt_6070_loose, "Track Selection v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.8, 1.05, 20, 2, 1.0);
-        customize_TGraphErrors(gd_sv0pt_5060_tight, "Track Selection v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.5, 0.7, 21, 4, 1.0);
-        customize_TGraphErrors(gd_sv0pt_6070_tight, "Track Selection v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.8, 1.05, 21, 4, 1.0);
+        customize_TGraphErrors(gd_sv0pt_5060_loose, "Track Selection v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.5, 0.7, 20, 2, 1.0);
+        customize_TGraphErrors(gd_sv0pt_6070_loose, "Track Selection v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.8, 1.05, 20, 2, 1.0);
+        customize_TGraphErrors(gd_sv0pt_5060_tight, "Track Selection v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.5, 0.7, 21, 4, 1.0);
+        customize_TGraphErrors(gd_sv0pt_6070_tight, "Track Selection v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.8, 1.05, 21, 4, 1.0);
 
         auto c_sv0pt = new TCanvas("c_sv0pt", "c_sv0pt", 1100, 500);
         c_sv0pt->Divide(2, 1);
@@ -613,9 +629,8 @@ void DoPlotTrkSelectSyst(){
 
         gd_sv0pt_5060_loose->Draw("ALP");
         gd_sv0pt_5060_tight->Draw("LP SAME");
-        Double_t *e = gd_sv0pt_6070_loose->GetEY();
-        for (int i=0; i<17; i++) cout << e[i] << endl;
         l_sv0pt_5060->Draw();
+        gPad->SetLogx();
 
         c_sv0pt->cd(2);
         auto l_sv0pt_6070 = new TLegend(0.103, 0.81, 0.5, 0.61);
@@ -628,6 +643,7 @@ void DoPlotTrkSelectSyst(){
         gd_sv0pt_6070_loose->Draw("ALP");
         gd_sv0pt_6070_tight->Draw("LP SAME");
         l_sv0pt_6070->Draw();
+        gPad->SetLogx();
 
         c_sv0pt->Update();
         c_sv0pt->SaveAs("./Plots/Systematics/trackselection_sv0pt.pdf");
@@ -667,10 +683,10 @@ void DoPlotCentFluctSyst(){
         TGraphErrors* gd_v0pt_5060_negative = (TGraphErrors*)f->Get("gd_v0pt_5060_negative");
         TGraphErrors* gd_v0pt_6070_negative = (TGraphErrors*)f->Get("gd_v0pt_6070_negative");
 
-        customize_TGraph(gd_v0pt_5060_positive, "Centrality Fluctuation v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.007, 0.01, 20, 2, 1.0);
-        customize_TGraph(gd_v0pt_6070_positive, "Centrality Fluctuation v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.015, 0.0175, 20, 2, 1.0);
-        customize_TGraph(gd_v0pt_5060_negative, "Centrality Fluctuation v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.007, 0.01, 21, 4, 1.0);
-        customize_TGraph(gd_v0pt_6070_negative, "Centrality Fluctuation v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.015, 0.0175, 21, 4, 1.0);
+        customize_TGraph(gd_v0pt_5060_positive, "Centrality Fluctuation v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.007, 0.01, 20, 2, 1.0);
+        customize_TGraph(gd_v0pt_6070_positive, "Centrality Fluctuation v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.015, 0.0175, 20, 2, 1.0);
+        customize_TGraph(gd_v0pt_5060_negative, "Centrality Fluctuation v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.007, 0.01, 21, 4, 1.0);
+        customize_TGraph(gd_v0pt_6070_negative, "Centrality Fluctuation v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.015, 0.0175, 21, 4, 1.0);
 
         auto c_v0pt = new TCanvas("c_v0pt", "c_v0pt", 1100, 500);
         c_v0pt->Divide(2, 1);
@@ -686,6 +702,7 @@ void DoPlotCentFluctSyst(){
         gd_v0pt_5060_positive->Draw("ALP");
         gd_v0pt_5060_negative->Draw("LP SAME");
         l_v0pt_5060->Draw();
+        gPad->SetLogx();
 
         c_v0pt->cd(2);
         auto l_v0pt_6070 = new TLegend(0.103, 0.81, 0.5, 0.61);
@@ -698,6 +715,7 @@ void DoPlotCentFluctSyst(){
         gd_v0pt_6070_positive->Draw("ALP");
         gd_v0pt_6070_negative->Draw("LP SAME");
         l_v0pt_6070->Draw();
+        gPad->SetLogx();
 
         c_v0pt->Update();
         c_v0pt->SaveAs("./Plots/Systematics/centralityfluctuation_v0pt.pdf");
@@ -708,10 +726,10 @@ void DoPlotCentFluctSyst(){
         TGraphErrors* gd_sv0pt_5060_negative = (TGraphErrors*)f->Get("gd_sv0pt_5060_negative");
         TGraphErrors* gd_sv0pt_6070_negative = (TGraphErrors*)f->Get("gd_sv0pt_6070_negative");
 
-        customize_TGraphErrors(gd_sv0pt_5060_positive, "Centrality Fluctuation v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.425, 0.58, 20, 2, 1.0);
-        customize_TGraphErrors(gd_sv0pt_6070_positive, "Centrality Fluctuation v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.75, 1.0, 20, 2, 1.0);
-        customize_TGraphErrors(gd_sv0pt_5060_negative, "Centrality Fluctuation v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.425, 0.58, 21, 4, 1.0);
-        customize_TGraphErrors(gd_sv0pt_6070_negative, "Centrality Fluctuation v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.75, 1.0, 21, 4, 1.0);
+        customize_TGraphErrors(gd_sv0pt_5060_positive, "Centrality Fluctuation v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.425, 0.58, 20, 2, 1.0);
+        customize_TGraphErrors(gd_sv0pt_6070_positive, "Centrality Fluctuation v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.75, 1.0, 20, 2, 1.0);
+        customize_TGraphErrors(gd_sv0pt_5060_negative, "Centrality Fluctuation v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.425, 0.58, 21, 4, 1.0);
+        customize_TGraphErrors(gd_sv0pt_6070_negative, "Centrality Fluctuation v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.75, 1.0, 21, 4, 1.0);
 
         auto c_sv0pt = new TCanvas("c_sv0pt", "c_sv0pt", 1100, 500);
         c_sv0pt->Divide(2, 1);
@@ -727,6 +745,7 @@ void DoPlotCentFluctSyst(){
         gd_sv0pt_5060_positive->Draw("ALP");
         gd_sv0pt_5060_negative->Draw("LP SAME");
         l_sv0pt_5060->Draw();
+        gPad->SetLogx();
 
         c_sv0pt->cd(2);
         auto l_sv0pt_6070 = new TLegend(0.103, 0.81, 0.5, 0.61);
@@ -739,6 +758,7 @@ void DoPlotCentFluctSyst(){
         gd_sv0pt_6070_positive->Draw("ALP");
         gd_sv0pt_6070_negative->Draw("LP SAME");
         l_sv0pt_6070->Draw();
+        gPad->SetLogx();
 
         c_sv0pt->Update();
         c_sv0pt->SaveAs("./Plots/Systematics/centralityfluctuation_sv0pt.pdf");
@@ -764,17 +784,19 @@ void DoPlotCorrApplSyst(){
         TGraphErrors* gd_v0pt_5060_nocorrec = (TGraphErrors*)f->Get("gd_v0pt_5060_nocorrec");
         TGraphErrors* gd_v0pt_6070_nocorrec = (TGraphErrors*)f->Get("gd_v0pt_6070_nocorrec");
 
-        customize_TGraph(gd_v0pt_5060_nocorrec, "Correction Application v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, 0.0, 1.5e-3, 20, 2, 1.0);
-        customize_TGraph(gd_v0pt_6070_nocorrec, "Correction Application v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, 0.0, 1.6e-3, 20, 2, 1.0);
+        customize_TGraph(gd_v0pt_5060_nocorrec, "Correction Application v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, 0.0, 1.5e-3, 20, 2, 1.0);
+        customize_TGraph(gd_v0pt_6070_nocorrec, "Correction Application v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, 0.0, 1.6e-3, 20, 2, 1.0);
 
         auto c_v0pt = new TCanvas("c_v0pt", "c_v0pt", 1100, 500);
         c_v0pt->Divide(2, 1);
         
         c_v0pt->cd(1);
         gd_v0pt_5060_nocorrec->Draw("ALP");
+        gPad->SetLogx();
 
         c_v0pt->cd(2);
         gd_v0pt_6070_nocorrec->Draw("ALP");
+        gPad->SetLogx();
 
         c_v0pt->Update();
         c_v0pt->SaveAs("./Plots/Systematics/correctionapplication_v0pt.pdf");
@@ -783,17 +805,19 @@ void DoPlotCorrApplSyst(){
         TGraphErrors* gd_sv0pt_5060_nocorrec = (TGraphErrors*)f->Get("gd_sv0pt_5060_nocorrec");
         TGraphErrors* gd_sv0pt_6070_nocorrec = (TGraphErrors*)f->Get("gd_sv0pt_6070_nocorrec");
 
-        customize_TGraph(gd_sv0pt_5060_nocorrec, "Correction Application v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, 0.0, 0.06, 20, 2, 1.0);
-        customize_TGraph(gd_sv0pt_6070_nocorrec, "Correction Application v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, 0.0, 0.1, 20, 2, 1.0);
+        customize_TGraph(gd_sv0pt_5060_nocorrec, "Correction Application v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, 0.0, 0.06, 20, 2, 1.0);
+        customize_TGraph(gd_sv0pt_6070_nocorrec, "Correction Application v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, 0.0, 0.1, 20, 2, 1.0);
 
         auto c_sv0pt = new TCanvas("c_sv0pt", "c_sv0pt", 1100, 500);
         c_sv0pt->Divide(2, 1);
         
         c_sv0pt->cd(1);
         gd_sv0pt_5060_nocorrec->Draw("ALP");
+        gPad->SetLogx();
 
         c_sv0pt->cd(2);
         gd_sv0pt_6070_nocorrec->Draw("ALP");
+        gPad->SetLogx();
 
         c_sv0pt->Update();
         c_sv0pt->SaveAs("./Plots/Systematics/correctionapplication_sv0pt.pdf");
@@ -832,10 +856,10 @@ void DoPlotZvertexSyst(){
         TGraphErrors* gd_v0pt_5060_pvZ_3_15 = (TGraphErrors*)f->Get("gd_v0pt_5060_pvZ_3_15");
         TGraphErrors* gd_v0pt_6070_pvZ_3_15 = (TGraphErrors*)f->Get("gd_v0pt_6070_pvZ_3_15");
 
-        customize_TGraph(gd_v0pt_5060_pvZ_3, "Z Vertex Position v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.027, 0.027, 20, 2, 1.0);
-        customize_TGraph(gd_v0pt_6070_pvZ_3, "Z Vertex Position v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.046, 0.046, 20, 2, 1.0);
-        customize_TGraph(gd_v0pt_5060_pvZ_3_15, "Z Vertex Position v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.027, 0.027, 21, 4, 1.0);
-        customize_TGraph(gd_v0pt_6070_pvZ_3_15, "Z Vertex Position v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -0.046, 0.046, 21, 4, 1.0);
+        customize_TGraph(gd_v0pt_5060_pvZ_3, "Z Vertex Position v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.027, 0.027, 20, 2, 1.0);
+        customize_TGraph(gd_v0pt_6070_pvZ_3, "Z Vertex Position v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.046, 0.046, 20, 2, 1.0);
+        customize_TGraph(gd_v0pt_5060_pvZ_3_15, "Z Vertex Position v_{0}(p_{T}) 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.027, 0.027, 21, 4, 1.0);
+        customize_TGraph(gd_v0pt_6070_pvZ_3_15, "Z Vertex Position v_{0}(p_{T}) 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -0.046, 0.046, 21, 4, 1.0);
 
         auto c_v0pt = new TCanvas("c_v0pt", "c_v0pt", 1100, 500);
         c_v0pt->Divide(2, 1);
@@ -851,6 +875,7 @@ void DoPlotZvertexSyst(){
         gd_v0pt_5060_pvZ_3->Draw("ALP");
         gd_v0pt_5060_pvZ_3_15->Draw("LP SAME");
         l_v0pt_5060->Draw();
+        gPad->SetLogx();
 
         c_v0pt->cd(2);
         auto l_v0pt_6070 = new TLegend(0.103, 0.81, 0.5, 0.61);
@@ -863,6 +888,7 @@ void DoPlotZvertexSyst(){
         gd_v0pt_6070_pvZ_3->Draw("ALP");
         gd_v0pt_6070_pvZ_3_15->Draw("LP SAME");
         l_v0pt_6070->Draw();
+        gPad->SetLogx();
 
         c_v0pt->Update();
         c_v0pt->SaveAs("./Plots/Systematics/zvertexposition_v0pt.pdf");
@@ -874,10 +900,10 @@ void DoPlotZvertexSyst(){
         TGraphErrors* gd_sv0pt_6070_pvZ_3_15 = (TGraphErrors*)f->Get("gd_sv0pt_6070_pvZ_3_15");
 
 
-        customize_TGraph(gd_sv0pt_5060_pvZ_3, "Z Vertex Position v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -1.8, 1.8, 20, 2, 1.0);
-        customize_TGraph(gd_sv0pt_6070_pvZ_3, "Z Vertex Position v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -2.5, 2.5, 20, 2, 1.0);
-        customize_TGraph(gd_sv0pt_5060_pvZ_3_15, "Z Vertex Position v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 4.0, -1.8, 1.8, 21, 4, 1.0);
-        customize_TGraph(gd_sv0pt_6070_pvZ_3_15, "Z Vertex Position v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 4.0, -2.5, 2.5, 21, 4, 1.0);
+        customize_TGraph(gd_sv0pt_5060_pvZ_3, "Z Vertex Position v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -1.8, 1.8, 20, 2, 1.0);
+        customize_TGraph(gd_sv0pt_6070_pvZ_3, "Z Vertex Position v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -2.5, 2.5, 20, 2, 1.0);
+        customize_TGraph(gd_sv0pt_5060_pvZ_3_15, "Z Vertex Position v_{0}(p_{T})/v_{0} 50-60%; p_{T} [GeV]; Diff", 0.0, 10.0, -1.8, 1.8, 21, 4, 1.0);
+        customize_TGraph(gd_sv0pt_6070_pvZ_3_15, "Z Vertex Position v_{0}(p_{T})/v_{0} 60-70%; p_{T} [GeV]; Diff", 0.0, 10.0, -2.5, 2.5, 21, 4, 1.0);
 
         auto c_sv0pt = new TCanvas("c_sv0pt", "c_sv0pt", 1100, 500);
         c_sv0pt->Divide(2, 1);
@@ -893,6 +919,7 @@ void DoPlotZvertexSyst(){
         gd_sv0pt_5060_pvZ_3->Draw("ALP");
         gd_sv0pt_5060_pvZ_3_15->Draw("LP SAME");
         l_sv0pt_5060->Draw();
+        gPad->SetLogx();
 
         c_sv0pt->cd(2);
         auto l_sv0pt_6070 = new TLegend(0.103, 0.81, 0.5, 0.61);
@@ -905,174 +932,321 @@ void DoPlotZvertexSyst(){
         gd_sv0pt_6070_pvZ_3->Draw("ALP");
         gd_sv0pt_6070_pvZ_3_15->Draw("LP SAME");
         l_sv0pt_6070->Draw();
+        gPad->SetLogx();
 
         c_sv0pt->Update();
         c_sv0pt->SaveAs("./Plots/Systematics/zvertexposition_sv0pt.pdf");
 }
 
 void DoPlot_Syst_v0(){
+
+    int N_v0 = 2;
+    vector<Double_t> vec_x_v0(N_v0, 0.0);
+    vec_x_v0[0] = 55.0; vec_x_v0[1] = 65.0;
+
+    TFile *f_main = TFile::Open("./Data/Figures/main.root");
     TFile *f = TFile::Open("./Data/Systematics/SystUncs.root");
-    TGraphErrors *gr_v0_total = (TGraphErrors*)f->Get("gr_v0_total");
+
+    // Different types
+    auto c_v0_vars = new TCanvas("c_v0_vars", "c_v0_vars", 725, 600);
+
     TGraphErrors *gr_v0_corr = (TGraphErrors*)f->Get("gr_v0_corr");
     TGraphErrors *gr_v0_trk = (TGraphErrors*)f->Get("gr_v0_trk");
     TGraphErrors *gr_v0_cent = (TGraphErrors*)f->Get("gr_v0_cent");
     TGraphErrors *gr_v0_pvZ = (TGraphErrors*)f->Get("gr_v0_pvZ");
 
-    auto c1 = new TCanvas("v0_vars", "v0_vars", 1400, 1000);
-    c1->Divide(2, 2);
+    Double_t *ey_v0_corr = gr_v0_corr->GetEY();
+    Double_t *ey_v0_trk = gr_v0_trk->GetEY();
+    Double_t *ey_v0_cent = gr_v0_cent->GetEY();
+    Double_t *ey_v0_pvZ = gr_v0_pvZ->GetEY();
 
-    customize_TGraphErrors(gr_v0_total, "Total Uncertainties v_{0}; Centrality [%]; v_{0}", 50, 70, 15.0e-3, 19.8e-3, 20, 1, 1.0);
-        gr_v0_total->SetFillColorAlpha(1, 0.3);
-    customize_TGraphErrors(gr_v0_corr, "Correction Application v_{0}; Centrality [%]; v_{0}", 50, 70, 15.5e-3, 19.3e-3, 20, 1, 1.0);
-        gr_v0_corr->SetFillColorAlpha(1, 0.3);
-    customize_TGraphErrors(gr_v0_trk, "Track Selection v_{0}; Centrality [%]; v_{0}", 50, 70, 15.5e-3, 19.6e-3, 20, 1, 1.0);
-        gr_v0_trk->SetFillColorAlpha(1, 0.3);
-    customize_TGraphErrors(gr_v0_cent, "Centrality Fluctuation v_{0}; Centrality [%]; v_{0}", 50, 70, 15.5e-3, 19.6e-3, 20, 1, 1.0);
-        gr_v0_cent->SetFillColorAlpha(1, 0.3);
-    customize_TGraphErrors(gr_v0_pvZ, "Z Vertex Position v_{0}; Centrality [%]; v_{0}", 50, 70, 15.5e-3, 19.6e-3, 20, 1, 1.0);
-        gr_v0_pvZ->SetFillColorAlpha(1, 0.3);
-    gr_v0_total->SetFillStyle(1001); gr_v0_corr->SetFillStyle(1001); gr_v0_trk->SetFillStyle(1001); gr_v0_cent->SetFillStyle(1001); gr_v0_pvZ->SetFillStyle(1001);
+    vector<Double_t> vec_ey_v0_corr(N_v0, 0.0);
+    vector<Double_t> vec_ey_v0_trk(N_v0, 0.0);
+    vector<Double_t> vec_ey_v0_cent(N_v0, 0.0);
+    vector<Double_t> vec_ey_v0_pvZ(N_v0, 0.0);
 
-    c1->cd(1); gr_v0_corr->Draw("A2P"); gPad->SetLeftMargin(0.12);
-    c1->cd(2); gr_v0_trk->Draw("A2P"); gPad->SetLeftMargin(0.12);
-    c1->cd(3); gr_v0_cent->Draw("A2P"); gPad->SetLeftMargin(0.12);
-    c1->cd(4); gr_v0_pvZ->Draw("A2P"); gPad->SetLeftMargin(0.12);
+    vec_ey_v0_corr.assign(ey_v0_corr, ey_v0_corr + N_v0);
+    vec_ey_v0_trk.assign(ey_v0_trk, ey_v0_trk + N_v0);
+    vec_ey_v0_cent.assign(ey_v0_cent, ey_v0_cent + N_v0);
+    vec_ey_v0_pvZ.assign(ey_v0_pvZ, ey_v0_pvZ + N_v0);
 
-    c1->Update();
-    c1->SaveAs("./Plots/SystematicsErrors/v0_vars.pdf");
+    TGraph *gr_ey_v0_corr = new TGraph(N_v0, vec_x_v0.data(), vec_ey_v0_corr.data());
+    TGraph *gr_ey_v0_trk = new TGraph(N_v0, vec_x_v0.data(), vec_ey_v0_trk.data());
+    TGraph *gr_ey_v0_cent = new TGraph(N_v0, vec_x_v0.data(), vec_ey_v0_cent.data());
+    TGraph *gr_ey_v0_pvZ = new TGraph(N_v0, vec_x_v0.data(), vec_ey_v0_pvZ.data());
 
-    auto c2 = new TCanvas("v0_total", "v0_total", 650, 500);
-    gr_v0_total->Draw("A2P");
-    gPad->SetLeftMargin(0.12);
+    customize_TGraph(gr_ey_v0_corr, "All types; Centrality [%]; Uncertainty", 50, 70, 0, 1.8e-4, 20, 51, 1.0);
+    customize_TGraph(gr_ey_v0_trk, "All types; Centrality [%]; Uncertainty", 50, 70, 0, 1.8e-4, 20, 62, 1.0);
+    customize_TGraph(gr_ey_v0_cent, "All types; Centrality [%]; Uncertainty", 50, 70, 0, 1.8e-4, 20, 76, 1.0);
+    customize_TGraph(gr_ey_v0_pvZ, "All types; Centrality [%]; Uncertainty", 50, 70, 0, 1.8e-4, 20, 95, 1.0);
 
-    c2->Update();
-    c2->SaveAs("./Plots/SystematicsErrors/v0_total.pdf");
+    auto l_v0_vars = new TLegend(0.103, 0.81, 0.5, 0.61);
+    l_v0_vars->SetTextSize(0.034);
+    l_v0_vars->AddEntry(gr_ey_v0_corr, "Corrections", "lp");
+    l_v0_vars->AddEntry(gr_ey_v0_trk, "Track Select.", "lp");
+    l_v0_vars->AddEntry(gr_ey_v0_cent, "Centrality Fluct.", "lp");
+    l_v0_vars->AddEntry(gr_ey_v0_pvZ, "Z Vertex Pos.", "lp");
+    l_v0_vars->SetBorderSize(0);
+    l_v0_vars->SetFillStyle(0);
+
+    gr_ey_v0_corr->Draw("ALP");
+    gr_ey_v0_trk->Draw("LP");
+    gr_ey_v0_cent->Draw("LP");
+    gr_ey_v0_pvZ->Draw("LP");
+    l_v0_vars->Draw();
+
+    c_v0_vars->SaveAs("./Plots/SystematicsErrors/v0_vars.pdf");
 }
 
 void DoPlot_Syst_v0pt(){
+
+    TFile *f_main = TFile::Open("./Data/Figures/main.root");
     TFile *f = TFile::Open("./Data/Systematics/SystUncs.root");
-    TGraphErrors *gr_v0pt_5060_total = (TGraphErrors*)f->Get("gr_v0pt_5060_total"); // 50-60%
-    TGraphErrors *gr_v0pt_5060_corr = (TGraphErrors*)f->Get("gr_v0pt_5060_corr");
-    TGraphErrors *gr_v0pt_5060_trk = (TGraphErrors*)f->Get("gr_v0pt_5060_trk");
-    TGraphErrors *gr_v0pt_5060_cent = (TGraphErrors*)f->Get("gr_v0pt_5060_cent");
-    TGraphErrors *gr_v0pt_5060_pvZ = (TGraphErrors*)f->Get("gr_v0pt_5060_pvZ");
-    TGraphErrors *gr_v0pt_6070_total = (TGraphErrors*)f->Get("gr_v0pt_6070_total"); // 60-70%
-    TGraphErrors *gr_v0pt_6070_corr = (TGraphErrors*)f->Get("gr_v0pt_6070_corr");
-    TGraphErrors *gr_v0pt_6070_trk = (TGraphErrors*)f->Get("gr_v0pt_6070_trk");
-    TGraphErrors *gr_v0pt_6070_cent = (TGraphErrors*)f->Get("gr_v0pt_6070_cent");
-    TGraphErrors *gr_v0pt_6070_pvZ = (TGraphErrors*)f->Get("gr_v0pt_6070_pvZ");
 
-    auto c1 = new TCanvas("v0pt_vars", "v0pt_vars", 1400, 1000);
-    c1->Divide(2, 2);
+    // Different types
+    auto c_v0pt_vars = new TCanvas("c_v0pt_vars", "c_v0pt_vars", 1100, 500);
+    c_v0pt_vars->Divide(2,1);
 
-    customize_TGraphErrors(gr_v0pt_5060_total, "Total Uncertainties v_{0}(p_{T}); p_{T} [GeV]; v_{0}(p_{T})", 0, 10, -0.1, 0.38, 20, 2, 1.0); // 50-60%
-        gr_v0pt_5060_total->SetFillColorAlpha(2, 0.3);
-    customize_TGraphErrors(gr_v0pt_5060_corr, "Correction Application v_{0}(p_{T}); p_{T} [GeV]; v_{0}(p_{T})", 0, 10, -0.1, 0.38, 20, 2, 1.0);
-        gr_v0pt_5060_corr->SetFillColorAlpha(2, 0.3);
-    customize_TGraphErrors(gr_v0pt_5060_trk, "Track Selection v_{0}(p_{T}); p_{T} [GeV]; v_{0}(p_{T})", 0, 10, -0.1, 0.38, 20, 2, 1.0);
-        gr_v0pt_5060_trk->SetFillColorAlpha(2, 0.3);
-    customize_TGraphErrors(gr_v0pt_5060_cent, "Centrality Fluctuation v_{0}(p_{T}); p_{T} [GeV]; v_{0}(p_{T})", 0, 10, -0.1, 0.38, 20, 2, 1.0);
-        gr_v0pt_5060_cent->SetFillColorAlpha(2, 0.3);
-    customize_TGraphErrors(gr_v0pt_5060_pvZ, "Z Vertex Position v_{0}(p_{T}); p_{T} [GeV]; v_{0}(p_{T})", 0, 10, -0.1, 0.38, 20, 2, 1.0);
-        gr_v0pt_5060_pvZ->SetFillColorAlpha(2, 0.3);
-    customize_TGraphErrors(gr_v0pt_6070_total, "Total Uncertainties v_{0}(p_{T}); p_{T} [GeV]; v_{0}(p_{T})", 0, 10, -0.1, 0.38, 20, 4, 1.0); // 60-70%
-        gr_v0pt_6070_total->SetFillColorAlpha(4, 0.3);
-    customize_TGraphErrors(gr_v0pt_6070_corr, "Correction Application v_{0}(p_{T}); p_{T} [GeV]; v_{0}(p_{T})", 0, 10, -0.1, 0.38, 20, 4, 1.0);
-        gr_v0pt_6070_corr->SetFillColorAlpha(4, 0.3);
-    customize_TGraphErrors(gr_v0pt_6070_trk, "Track Selection v_{0}(p_{T}); p_{T} [GeV]; v_{0}(p_{T})", 0, 10, -0.1, 0.38, 20, 4, 1.0);
-        gr_v0pt_6070_trk->SetFillColorAlpha(4, 0.3);
-    customize_TGraphErrors(gr_v0pt_6070_cent, "Centrality Fluctuation v_{0}(p_{T}); p_{T} [GeV]; v_{0}(p_{T})", 0, 10, -0.1, 0.38, 20, 4, 1.0);
-        gr_v0pt_6070_cent->SetFillColorAlpha(4, 0.3);
-    customize_TGraphErrors(gr_v0pt_6070_pvZ, "Z Vertex Position v_{0}(p_{T}); p_{T} [GeV]; v_{0}(p_{T})", 0, 10, -0.1, 0.38, 20, 4, 1.0);
-        gr_v0pt_6070_pvZ->SetFillColorAlpha(4, 0.3);
-    gr_v0pt_5060_total->SetFillStyle(1001); gr_v0pt_5060_corr->SetFillStyle(1001); gr_v0pt_5060_trk->SetFillStyle(1001); gr_v0pt_5060_cent->SetFillStyle(1001); gr_v0pt_5060_pvZ->SetFillStyle(1001);
-    gr_v0pt_6070_total->SetFillStyle(1001); gr_v0pt_6070_corr->SetFillStyle(1001); gr_v0pt_6070_trk->SetFillStyle(1001); gr_v0pt_6070_cent->SetFillStyle(1001); gr_v0pt_6070_pvZ->SetFillStyle(1001);
+    c_v0pt_vars->cd(1);
+    TGraphAsymmErrors *gr_v0pt_5060_corr = (TGraphAsymmErrors*)f->Get("gr_v0pt_5060_corr");
+    TGraphAsymmErrors *gr_v0pt_5060_trk = (TGraphAsymmErrors*)f->Get("gr_v0pt_5060_trk");
+    TGraphAsymmErrors *gr_v0pt_5060_cent = (TGraphAsymmErrors*)f->Get("gr_v0pt_5060_cent");
+    TGraphAsymmErrors *gr_v0pt_5060_pvZ = (TGraphAsymmErrors*)f->Get("gr_v0pt_5060_pvZ");
 
-    auto l = new TLegend(0.103, 0.81, 0.5, 0.61);
-    l->SetTextSize(0.034);
-    l->AddEntry(gr_v0pt_5060_total, "50-60%", "p");
-    l->AddEntry(gr_v0pt_6070_total, "60-70%", "p");
-    l->SetBorderSize(0);
-    l->SetFillStyle(0);
+    Int_t N_v0pt_5060 = gr_v0pt_5060_corr->GetN();
+    Double_t *x_v0pt_5060 = gr_v0pt_5060_corr->GetX();
+    Double_t *ey_v0pt_5060_corr = gr_v0pt_5060_corr->GetEYlow();
+    Double_t *ey_v0pt_5060_trk = gr_v0pt_5060_trk->GetEYlow();
+    Double_t *ey_v0pt_5060_cent = gr_v0pt_5060_cent->GetEYlow();
+    Double_t *ey_v0pt_5060_pvZ = gr_v0pt_5060_pvZ->GetEYlow();
 
-    c1->cd(1); gr_v0pt_5060_corr->Draw("A2P"); gr_v0pt_6070_corr->Draw("2P SAME"); l->Draw(); gPad->SetLeftMargin(0.12);
-    c1->cd(2); gr_v0pt_5060_trk->Draw("A2P"); gr_v0pt_6070_trk->Draw("2P SAME"); l->Draw(); gPad->SetLeftMargin(0.12);
-    c1->cd(3); gr_v0pt_5060_cent->Draw("A2P"); gr_v0pt_6070_cent->Draw("2P SAME"); l->Draw(); gPad->SetLeftMargin(0.12);
-    c1->cd(4); gr_v0pt_5060_pvZ->Draw("A2P"); gr_v0pt_6070_pvZ->Draw("2P SAME"); l->Draw(); gPad->SetLeftMargin(0.12);
+    vector<Double_t> vec_x_v0pt_5060(N_v0pt_5060, 0.0);
+    vector<Double_t> vec_ey_v0pt_5060_corr(N_v0pt_5060, 0.0);
+    vector<Double_t> vec_ey_v0pt_5060_trk(N_v0pt_5060, 0.0);
+    vector<Double_t> vec_ey_v0pt_5060_cent(N_v0pt_5060, 0.0);
+    vector<Double_t> vec_ey_v0pt_5060_pvZ(N_v0pt_5060, 0.0);
 
-    c1->Update();
-    c1->SaveAs("./Plots/SystematicsErrors/v0pt_vars.pdf");
+    vec_x_v0pt_5060.assign(x_v0pt_5060, x_v0pt_5060 + N_v0pt_5060);
+    vec_ey_v0pt_5060_corr.assign(ey_v0pt_5060_corr, ey_v0pt_5060_corr + N_v0pt_5060);
+    vec_ey_v0pt_5060_trk.assign(ey_v0pt_5060_trk, ey_v0pt_5060_trk + N_v0pt_5060);
+    vec_ey_v0pt_5060_cent.assign(ey_v0pt_5060_cent, ey_v0pt_5060_cent + N_v0pt_5060);
+    vec_ey_v0pt_5060_pvZ.assign(ey_v0pt_5060_pvZ, ey_v0pt_5060_pvZ + N_v0pt_5060);
 
-    auto c2 = new TCanvas("v0pt_total", "v0pt_total", 650, 500);
-    gr_v0pt_5060_total->Draw("A2P");
-    gr_v0pt_6070_total->Draw("2P SAME");
-    l->Draw();
-    gPad->SetLeftMargin(0.12);
+    TGraph *gr_ey_v0pt_5060_corr = new TGraph(N_v0pt_5060, vec_x_v0pt_5060.data(), vec_ey_v0pt_5060_corr.data());
+    TGraph *gr_ey_v0pt_5060_trk = new TGraph(N_v0pt_5060, vec_x_v0pt_5060.data(), vec_ey_v0pt_5060_trk.data());
+    TGraph *gr_ey_v0pt_5060_cent = new TGraph(N_v0pt_5060, vec_x_v0pt_5060.data(), vec_ey_v0pt_5060_cent.data());
+    TGraph *gr_ey_v0pt_5060_pvZ = new TGraph(N_v0pt_5060, vec_x_v0pt_5060.data(), vec_ey_v0pt_5060_pvZ.data());
 
-    c2->Update();
-    c2->SaveAs("./Plots/SystematicsErrors/v0pt_total.pdf");
+    customize_TGraph(gr_ey_v0pt_5060_corr, "All types - 50-60%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.012, 20, 51, 1.0);
+    customize_TGraph(gr_ey_v0pt_5060_trk, "All types - 50-60%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.012, 20, 62, 1.0);
+    customize_TGraph(gr_ey_v0pt_5060_cent, "All types - 50-60%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.012, 20, 76, 1.0);
+    customize_TGraph(gr_ey_v0pt_5060_pvZ, "All types - 50-60%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.012, 20, 95, 1.0);
+
+    auto l_v0pt_5060_vars = new TLegend(0.103, 0.81, 0.5, 0.61);
+    l_v0pt_5060_vars->SetTextSize(0.034);
+    l_v0pt_5060_vars->AddEntry(gr_ey_v0pt_5060_corr, "Corrections", "lp");
+    l_v0pt_5060_vars->AddEntry(gr_ey_v0pt_5060_trk, "Track Select.", "lp");
+    l_v0pt_5060_vars->AddEntry(gr_ey_v0pt_5060_cent, "Centrality Fluct.", "lp");
+    l_v0pt_5060_vars->AddEntry(gr_ey_v0pt_5060_pvZ, "Z Vertex Pos.", "lp");
+    l_v0pt_5060_vars->SetBorderSize(0);
+    l_v0pt_5060_vars->SetFillStyle(0);
+
+    gr_ey_v0pt_5060_corr->Draw("ALP");
+    gr_ey_v0pt_5060_trk->Draw("LP");
+    gr_ey_v0pt_5060_cent->Draw("LP");
+    gr_ey_v0pt_5060_pvZ->Draw("LP");
+    l_v0pt_5060_vars->Draw();
+    gPad->SetLogx();
+
+    c_v0pt_vars->cd(2);
+    TGraphAsymmErrors *gr_v0pt_6070_corr = (TGraphAsymmErrors*)f->Get("gr_v0pt_6070_corr");
+    TGraphAsymmErrors *gr_v0pt_6070_trk = (TGraphAsymmErrors*)f->Get("gr_v0pt_6070_trk");
+    TGraphAsymmErrors *gr_v0pt_6070_cent = (TGraphAsymmErrors*)f->Get("gr_v0pt_6070_cent");
+    TGraphAsymmErrors *gr_v0pt_6070_pvZ = (TGraphAsymmErrors*)f->Get("gr_v0pt_6070_pvZ");
+
+    Int_t N_v0pt_6070 = gr_v0pt_6070_corr->GetN();
+    Double_t *x_v0pt_6070 = gr_v0pt_6070_corr->GetX();
+    Double_t *ey_v0pt_6070_corr = gr_v0pt_6070_corr->GetEYlow();
+    Double_t *ey_v0pt_6070_trk = gr_v0pt_6070_trk->GetEYlow();
+    Double_t *ey_v0pt_6070_cent = gr_v0pt_6070_cent->GetEYlow();
+    Double_t *ey_v0pt_6070_pvZ = gr_v0pt_6070_pvZ->GetEYlow();
+
+    vector<Double_t> vec_x_v0pt_6070(N_v0pt_6070, 0.0);
+    vector<Double_t> vec_ey_v0pt_6070_corr(N_v0pt_6070, 0.0);
+    vector<Double_t> vec_ey_v0pt_6070_trk(N_v0pt_6070, 0.0);
+    vector<Double_t> vec_ey_v0pt_6070_cent(N_v0pt_6070, 0.0);
+    vector<Double_t> vec_ey_v0pt_6070_pvZ(N_v0pt_6070, 0.0);
+
+    vec_x_v0pt_6070.assign(x_v0pt_6070, x_v0pt_6070 + N_v0pt_6070);
+    vec_ey_v0pt_6070_corr.assign(ey_v0pt_6070_corr, ey_v0pt_6070_corr + N_v0pt_6070);
+    vec_ey_v0pt_6070_trk.assign(ey_v0pt_6070_trk, ey_v0pt_6070_trk + N_v0pt_6070);
+    vec_ey_v0pt_6070_cent.assign(ey_v0pt_6070_cent, ey_v0pt_6070_cent + N_v0pt_6070);
+    vec_ey_v0pt_6070_pvZ.assign(ey_v0pt_6070_pvZ, ey_v0pt_6070_pvZ + N_v0pt_6070);
+
+    TGraph *gr_ey_v0pt_6070_corr = new TGraph(N_v0pt_6070, vec_x_v0pt_6070.data(), vec_ey_v0pt_6070_corr.data());
+    TGraph *gr_ey_v0pt_6070_trk = new TGraph(N_v0pt_6070, vec_x_v0pt_6070.data(), vec_ey_v0pt_6070_trk.data());
+    TGraph *gr_ey_v0pt_6070_cent = new TGraph(N_v0pt_6070, vec_x_v0pt_6070.data(), vec_ey_v0pt_6070_cent.data());
+    TGraph *gr_ey_v0pt_6070_pvZ = new TGraph(N_v0pt_6070, vec_x_v0pt_6070.data(), vec_ey_v0pt_6070_pvZ.data());
+
+    customize_TGraph(gr_ey_v0pt_6070_corr, "All types - 60-70%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.012, 20, 51, 1.0);
+    customize_TGraph(gr_ey_v0pt_6070_trk, "All types - 60-70%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.012, 20, 62, 1.0);
+    customize_TGraph(gr_ey_v0pt_6070_cent, "All types - 60-70%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.012, 20, 76, 1.0);
+    customize_TGraph(gr_ey_v0pt_6070_pvZ, "All types - 60-70%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.012, 20, 95, 1.0);
+
+    auto l_v0pt_6070_vars = new TLegend(0.103, 0.81, 0.5, 0.61);
+    l_v0pt_6070_vars->SetTextSize(0.034);
+    l_v0pt_6070_vars->AddEntry(gr_ey_v0pt_6070_corr, "Corrections", "lp");
+    l_v0pt_6070_vars->AddEntry(gr_ey_v0pt_6070_trk, "Track Select.", "lp");
+    l_v0pt_6070_vars->AddEntry(gr_ey_v0pt_6070_cent, "Centrality Fluct.", "lp");
+    l_v0pt_6070_vars->AddEntry(gr_ey_v0pt_6070_pvZ, "Z Vertex Pos.", "lp");
+    l_v0pt_6070_vars->SetBorderSize(0);
+    l_v0pt_6070_vars->SetFillStyle(0);
+
+    gr_ey_v0pt_6070_corr->Draw("ALP");
+    gr_ey_v0pt_6070_trk->Draw("LP");
+    gr_ey_v0pt_6070_cent->Draw("LP");
+    gr_ey_v0pt_6070_pvZ->Draw("LP");
+    l_v0pt_6070_vars->Draw();
+    gPad->SetLogx();
+
+    c_v0pt_vars->SaveAs("./Plots/SystematicsErrors/v0pt_vars.pdf");
 }
 
 void DoPlot_Syst_sv0pt(){
+
+    TFile *f_main = TFile::Open("./Data/Figures/main.root");
     TFile *f = TFile::Open("./Data/Systematics/SystUncs.root");
-    TGraphErrors *gr_sv0pt_5060_total = (TGraphErrors*)f->Get("gr_sv0pt_5060_total"); // 50-60%
-    TGraphErrors *gr_sv0pt_5060_corr = (TGraphErrors*)f->Get("gr_sv0pt_5060_corr");
-    TGraphErrors *gr_sv0pt_5060_trk = (TGraphErrors*)f->Get("gr_sv0pt_5060_trk");
-    TGraphErrors *gr_sv0pt_5060_cent = (TGraphErrors*)f->Get("gr_sv0pt_5060_cent");
-    TGraphErrors *gr_sv0pt_5060_pvZ = (TGraphErrors*)f->Get("gr_sv0pt_5060_pvZ");
-    TGraphErrors *gr_sv0pt_6070_total = (TGraphErrors*)f->Get("gr_sv0pt_6070_total"); // 60-70%
-    TGraphErrors *gr_sv0pt_6070_corr = (TGraphErrors*)f->Get("gr_sv0pt_6070_corr");
-    TGraphErrors *gr_sv0pt_6070_trk = (TGraphErrors*)f->Get("gr_sv0pt_6070_trk");
-    TGraphErrors *gr_sv0pt_6070_cent = (TGraphErrors*)f->Get("gr_sv0pt_6070_cent");
-    TGraphErrors *gr_sv0pt_6070_pvZ = (TGraphErrors*)f->Get("gr_sv0pt_6070_pvZ");
 
-    auto c1 = new TCanvas("sv0pt_vars", "sv0pt_vars", 1400, 1000);
-    c1->Divide(2, 2);
+    // Different types
+    auto c_sv0pt_vars = new TCanvas("c_sv0pt_vars", "c_sv0pt_vars", 1100, 500);
+    c_sv0pt_vars->Divide(2,1);
 
-    customize_TGraphErrors(gr_sv0pt_5060_total, "Total Uncertainties v_{0}(p_{T})/v_{0}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0, 10, -5.0, 20.0, 20, 2, 1.0); // 50-60%
-        gr_sv0pt_5060_total->SetFillColorAlpha(2, 0.3);
-    customize_TGraphErrors(gr_sv0pt_5060_corr, "Correction Application v_{0}(p_{T})/v_{0}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0, 10, -5.0, 20.0, 20, 2, 1.0);
-        gr_sv0pt_5060_corr->SetFillColorAlpha(2, 0.3);
-    customize_TGraphErrors(gr_sv0pt_5060_trk, "Track Selection v_{0}(p_{T})/v_{0}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0, 10, -5.0, 20.0, 20, 2, 1.0);
-        gr_sv0pt_5060_trk->SetFillColorAlpha(2, 0.3);
-    customize_TGraphErrors(gr_sv0pt_5060_cent, "Centrality Fluctuation v_{0}(p_{T})/v_{0}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0, 10, -5.0, 20.0, 20, 2, 1.0);
-        gr_sv0pt_5060_cent->SetFillColorAlpha(2, 0.3);
-    customize_TGraphErrors(gr_sv0pt_5060_pvZ, "Z Vertex Position v_{0}(p_{T})/v_{0}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0, 10, -5.0, 20.0, 20, 2, 1.0);
-        gr_sv0pt_5060_pvZ->SetFillColorAlpha(2, 0.3);
-    customize_TGraphErrors(gr_sv0pt_6070_total, "Total Uncertainties v_{0}(p_{T})/v_{0}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0, 10, -5.0, 20.0, 20, 4, 1.0); // 60-70%
-        gr_sv0pt_6070_total->SetFillColorAlpha(4, 0.3);
-    customize_TGraphErrors(gr_sv0pt_6070_corr, "Correction Application v_{0}(p_{T})/v_{0}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0, 10, -5.0, 20.0, 20, 4, 1.0);
-        gr_sv0pt_6070_corr->SetFillColorAlpha(4, 0.3);
-    customize_TGraphErrors(gr_sv0pt_6070_trk, "Track Selection v_{0}(p_{T})/v_{0}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0, 10, -5.0, 20.0, 20, 4, 1.0);
-        gr_sv0pt_6070_trk->SetFillColorAlpha(4, 0.3);
-    customize_TGraphErrors(gr_sv0pt_6070_cent, "Centrality Fluctuation v_{0}(p_{T})/v_{0}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0, 10, -5.0, 20.0, 20, 4, 1.0);
-        gr_sv0pt_6070_cent->SetFillColorAlpha(4, 0.3);
-    customize_TGraphErrors(gr_sv0pt_6070_pvZ, "Z Vertex Position v_{0}(p_{T})/v_{0}; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0, 10, -5.0, 20.0, 20, 4, 1.0);
-        gr_sv0pt_6070_pvZ->SetFillColorAlpha(4, 0.3);
-    gr_sv0pt_5060_total->SetFillStyle(1001); gr_sv0pt_5060_corr->SetFillStyle(1001); gr_sv0pt_5060_trk->SetFillStyle(1001); gr_sv0pt_5060_cent->SetFillStyle(1001); gr_sv0pt_5060_pvZ->SetFillStyle(1001);
-    gr_sv0pt_6070_total->SetFillStyle(1001); gr_sv0pt_6070_corr->SetFillStyle(1001); gr_sv0pt_6070_trk->SetFillStyle(1001); gr_sv0pt_6070_cent->SetFillStyle(1001); gr_sv0pt_6070_pvZ->SetFillStyle(1001);
+    c_sv0pt_vars->cd(1);
+    TGraphAsymmErrors *gr_sv0pt_5060_corr = (TGraphAsymmErrors*)f->Get("gr_sv0pt_5060_corr");
+    TGraphAsymmErrors *gr_sv0pt_5060_trk = (TGraphAsymmErrors*)f->Get("gr_sv0pt_5060_trk");
+    TGraphAsymmErrors *gr_sv0pt_5060_cent = (TGraphAsymmErrors*)f->Get("gr_sv0pt_5060_cent");
+    TGraphAsymmErrors *gr_sv0pt_5060_pvZ = (TGraphAsymmErrors*)f->Get("gr_sv0pt_5060_pvZ");
 
-    auto l = new TLegend(0.103, 0.81, 0.5, 0.61);
-    l->SetTextSize(0.034);
-    l->AddEntry(gr_sv0pt_5060_total, "50-60%", "p");
-    l->AddEntry(gr_sv0pt_6070_total, "60-70%", "p");
-    l->SetBorderSize(0);
-    l->SetFillStyle(0);
+    Int_t N_sv0pt_5060 = gr_sv0pt_5060_corr->GetN();
+    Double_t *x_sv0pt_5060 = gr_sv0pt_5060_corr->GetX();
+    Double_t *ey_sv0pt_5060_corr = gr_sv0pt_5060_corr->GetEYlow();
+    Double_t *ey_sv0pt_5060_trk = gr_sv0pt_5060_trk->GetEYlow();
+    Double_t *ey_sv0pt_5060_cent = gr_sv0pt_5060_cent->GetEYlow();
+    Double_t *ey_sv0pt_5060_pvZ = gr_sv0pt_5060_pvZ->GetEYlow();
 
-    c1->cd(1); gr_sv0pt_5060_corr->Draw("A2P"); gr_sv0pt_6070_corr->Draw("2P SAME"); l->Draw(); gPad->SetLeftMargin(0.12);
-    c1->cd(2); gr_sv0pt_5060_trk->Draw("A2P"); gr_sv0pt_6070_trk->Draw("2P SAME"); l->Draw(); gPad->SetLeftMargin(0.12);
-    c1->cd(3); gr_sv0pt_5060_cent->Draw("A2P"); gr_sv0pt_6070_cent->Draw("2P SAME"); l->Draw(); gPad->SetLeftMargin(0.12);
-    c1->cd(4); gr_sv0pt_5060_pvZ->Draw("A2P"); gr_sv0pt_6070_pvZ->Draw("2P SAME"); l->Draw(); gPad->SetLeftMargin(0.12);
+    vector<Double_t> vec_x_sv0pt_5060(N_sv0pt_5060, 0.0);
+    vector<Double_t> vec_ey_sv0pt_5060_corr(N_sv0pt_5060, 0.0);
+    vector<Double_t> vec_ey_sv0pt_5060_trk(N_sv0pt_5060, 0.0);
+    vector<Double_t> vec_ey_sv0pt_5060_cent(N_sv0pt_5060, 0.0);
+    vector<Double_t> vec_ey_sv0pt_5060_pvZ(N_sv0pt_5060, 0.0);
 
-    c1->Update();
-    c1->SaveAs("./Plots/SystematicsErrors/sv0pt_vars.pdf");
+    vec_x_sv0pt_5060.assign(x_sv0pt_5060, x_sv0pt_5060 + N_sv0pt_5060);
+    vec_ey_sv0pt_5060_corr.assign(ey_sv0pt_5060_corr, ey_sv0pt_5060_corr + N_sv0pt_5060);
+    vec_ey_sv0pt_5060_trk.assign(ey_sv0pt_5060_trk, ey_sv0pt_5060_trk + N_sv0pt_5060);
+    vec_ey_sv0pt_5060_cent.assign(ey_sv0pt_5060_cent, ey_sv0pt_5060_cent + N_sv0pt_5060);
+    vec_ey_sv0pt_5060_pvZ.assign(ey_sv0pt_5060_pvZ, ey_sv0pt_5060_pvZ + N_sv0pt_5060);
 
-    auto c2 = new TCanvas("sv0pt_total", "sv0pt_total", 650, 500);
-    gr_sv0pt_5060_total->Draw("A2P");
-    gr_sv0pt_6070_total->Draw("2P SAME");
-    l->Draw();
+    TGraph *gr_ey_sv0pt_5060_corr = new TGraph(N_sv0pt_5060, vec_x_sv0pt_5060.data(), vec_ey_sv0pt_5060_corr.data());
+    TGraph *gr_ey_sv0pt_5060_trk = new TGraph(N_sv0pt_5060, vec_x_sv0pt_5060.data(), vec_ey_sv0pt_5060_trk.data());
+    TGraph *gr_ey_sv0pt_5060_cent = new TGraph(N_sv0pt_5060, vec_x_sv0pt_5060.data(), vec_ey_sv0pt_5060_cent.data());
+    TGraph *gr_ey_sv0pt_5060_pvZ = new TGraph(N_sv0pt_5060, vec_x_sv0pt_5060.data(), vec_ey_sv0pt_5060_pvZ.data());
+
+    customize_TGraph(gr_ey_sv0pt_5060_corr, "All types - 50-60%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.6, 20, 51, 1.0);
+    customize_TGraph(gr_ey_sv0pt_5060_trk, "All types - 50-60%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.6, 20, 62, 1.0);
+    customize_TGraph(gr_ey_sv0pt_5060_cent, "All types - 50-60%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.6, 20, 76, 1.0);
+    customize_TGraph(gr_ey_sv0pt_5060_pvZ, "All types - 50-60%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.6, 20, 95, 1.0);
+
+    auto l_sv0pt_5060_vars = new TLegend(0.103, 0.81, 0.5, 0.61);
+    l_sv0pt_5060_vars->SetTextSize(0.034);
+    l_sv0pt_5060_vars->AddEntry(gr_ey_sv0pt_5060_corr, "Corrections", "lp");
+    l_sv0pt_5060_vars->AddEntry(gr_ey_sv0pt_5060_trk, "Track Select.", "lp");
+    l_sv0pt_5060_vars->AddEntry(gr_ey_sv0pt_5060_cent, "Centrality Fluct.", "lp");
+    l_sv0pt_5060_vars->AddEntry(gr_ey_sv0pt_5060_pvZ, "Z Vertex Pos.", "lp");
+    l_sv0pt_5060_vars->SetBorderSize(0);
+    l_sv0pt_5060_vars->SetFillStyle(0);
+
+    gr_ey_sv0pt_5060_corr->Draw("ALP");
+    gr_ey_sv0pt_5060_trk->Draw("LP");
+    gr_ey_sv0pt_5060_cent->Draw("LP");
+    gr_ey_sv0pt_5060_pvZ->Draw("LP");
+    l_sv0pt_5060_vars->Draw();
+    gPad->SetLogx();
+
+    c_sv0pt_vars->cd(2);
+    TGraphAsymmErrors *gr_sv0pt_6070_corr = (TGraphAsymmErrors*)f->Get("gr_sv0pt_6070_corr");
+    TGraphAsymmErrors *gr_sv0pt_6070_trk = (TGraphAsymmErrors*)f->Get("gr_sv0pt_6070_trk");
+    TGraphAsymmErrors *gr_sv0pt_6070_cent = (TGraphAsymmErrors*)f->Get("gr_sv0pt_6070_cent");
+    TGraphAsymmErrors *gr_sv0pt_6070_pvZ = (TGraphAsymmErrors*)f->Get("gr_sv0pt_6070_pvZ");
+
+    Int_t N_sv0pt_6070 = gr_sv0pt_6070_corr->GetN();
+    Double_t *x_sv0pt_6070 = gr_sv0pt_6070_corr->GetX();
+    Double_t *ey_sv0pt_6070_corr = gr_sv0pt_6070_corr->GetEYlow();
+    Double_t *ey_sv0pt_6070_trk = gr_sv0pt_6070_trk->GetEYlow();
+    Double_t *ey_sv0pt_6070_cent = gr_sv0pt_6070_cent->GetEYlow();
+    Double_t *ey_sv0pt_6070_pvZ = gr_sv0pt_6070_pvZ->GetEYlow();
+
+    vector<Double_t> vec_x_sv0pt_6070(N_sv0pt_6070, 0.0);
+    vector<Double_t> vec_ey_sv0pt_6070_corr(N_sv0pt_6070, 0.0);
+    vector<Double_t> vec_ey_sv0pt_6070_trk(N_sv0pt_6070, 0.0);
+    vector<Double_t> vec_ey_sv0pt_6070_cent(N_sv0pt_6070, 0.0);
+    vector<Double_t> vec_ey_sv0pt_6070_pvZ(N_sv0pt_6070, 0.0);
+
+    vec_x_sv0pt_6070.assign(x_sv0pt_6070, x_sv0pt_6070 + N_sv0pt_6070);
+    vec_ey_sv0pt_6070_corr.assign(ey_sv0pt_6070_corr, ey_sv0pt_6070_corr + N_sv0pt_6070);
+    vec_ey_sv0pt_6070_trk.assign(ey_sv0pt_6070_trk, ey_sv0pt_6070_trk + N_sv0pt_6070);
+    vec_ey_sv0pt_6070_cent.assign(ey_sv0pt_6070_cent, ey_sv0pt_6070_cent + N_sv0pt_6070);
+    vec_ey_sv0pt_6070_pvZ.assign(ey_sv0pt_6070_pvZ, ey_sv0pt_6070_pvZ + N_sv0pt_6070);
+
+    TGraph *gr_ey_sv0pt_6070_corr = new TGraph(N_sv0pt_6070, vec_x_sv0pt_6070.data(), vec_ey_sv0pt_6070_corr.data());
+    TGraph *gr_ey_sv0pt_6070_trk = new TGraph(N_sv0pt_6070, vec_x_sv0pt_6070.data(), vec_ey_sv0pt_6070_trk.data());
+    TGraph *gr_ey_sv0pt_6070_cent = new TGraph(N_sv0pt_6070, vec_x_sv0pt_6070.data(), vec_ey_sv0pt_6070_cent.data());
+    TGraph *gr_ey_sv0pt_6070_pvZ = new TGraph(N_sv0pt_6070, vec_x_sv0pt_6070.data(), vec_ey_sv0pt_6070_pvZ.data());
+
+    customize_TGraph(gr_ey_sv0pt_6070_corr, "All types - 60-70%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.6, 20, 51, 1.0);
+    customize_TGraph(gr_ey_sv0pt_6070_trk, "All types - 60-70%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.6, 20, 62, 1.0);
+    customize_TGraph(gr_ey_sv0pt_6070_cent, "All types - 60-70%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.6, 20, 76, 1.0);
+    customize_TGraph(gr_ey_sv0pt_6070_pvZ, "All types - 60-70%; Centrality [%]; Uncertainty", 0.0, 10.0, 0, 0.6, 20, 95, 1.0);
+
+    auto l_sv0pt_6070_vars = new TLegend(0.103, 0.81, 0.5, 0.61);
+    l_sv0pt_6070_vars->SetTextSize(0.034);
+    l_sv0pt_6070_vars->AddEntry(gr_ey_sv0pt_6070_corr, "Corrections", "lp");
+    l_sv0pt_6070_vars->AddEntry(gr_ey_sv0pt_6070_trk, "Track Select.", "lp");
+    l_sv0pt_6070_vars->AddEntry(gr_ey_sv0pt_6070_cent, "Centrality Fluct.", "lp");
+    l_sv0pt_6070_vars->AddEntry(gr_ey_sv0pt_6070_pvZ, "Z Vertex Pos.", "lp");
+    l_sv0pt_6070_vars->SetBorderSize(0);
+    l_sv0pt_6070_vars->SetFillStyle(0);
+
+    gr_ey_sv0pt_6070_corr->Draw("ALP");
+    gr_ey_sv0pt_6070_trk->Draw("LP");
+    gr_ey_sv0pt_6070_cent->Draw("LP");
+    gr_ey_sv0pt_6070_pvZ->Draw("LP");
+    l_sv0pt_6070_vars->Draw();
+    gPad->SetLogx();
+
+    c_sv0pt_vars->SaveAs("./Plots/SystematicsErrors/sv0pt_vars.pdf");
+}
+
+void DoPlot_v0_only(){
+
+    TFile *f_v0 = TFile::Open("./Data/Figures/main.root", "READ");
+    TGraphErrors *gr_v0_55 = (TGraphErrors*)f_v0->Get("v0_55_1");
+    TGraphErrors *gr_v0_65 = (TGraphErrors*)f_v0->Get("v0_65_1");
+
+    TFile *f_unc = TFile::Open("./Data/Systematics/SystUncs.root", "READ");
+    TGraphErrors *gr_v0_unc = (TGraphErrors*)f_unc->Get("gr_v0_total");
+
+    customize_TGraphErrors(gr_v0_unc, "; Centrality [%]; v_{0}", 50.0, 70.0, 0.013, 0.022, 20, 1, 1.2);
+    gr_v0_unc->SetFillColorAlpha(1, 0.3); gr_v0_unc->SetFillStyle(1001);
+    customize_TGraphErrors(gr_v0_55, "; Centrality [%]; v_{0}", 50.0, 70.0, 0.013, 0.022, 20, 1, 1.2);
+    customize_TGraphErrors(gr_v0_65, "; Centrality [%]; v_{0}", 50.0, 70.0, 0.013, 0.022, 20, 1, 1.2);
+
+    auto c_v0 = new TCanvas("c_v0", "c_v0", 725, 600);
+
+    gr_v0_unc->Draw("A2");
+    gr_v0_55->Draw("P SAME");
+    gr_v0_65->Draw("P SAME");
     gPad->SetLeftMargin(0.12);
+    gPad->SetTopMargin(0.01);
 
-    c2->Update();
-    c2->SaveAs("./Plots/SystematicsErrors/sv0pt_total.pdf");
+    c_v0->SaveAs("./Plots/SystematicsErrors/v0.pdf");
 }

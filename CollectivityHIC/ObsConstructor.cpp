@@ -115,7 +115,6 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
     // Open CMS OpenData 2.76 TeV 50-70% centrality ROOT file
     TFile *file(0);
     TFile *cFile(0);
-    //TString filename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/HiForestAOD_DATA2011_MB_ppReReco_part2_03102024.root";
     TString filename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/HiForestAOD_DATA2011_MB_ppReReco.root";
     TString cFilename = "/home/allanfgodoi/Desktop/IC-HIN-UFRGS/CollectivityHIC/Data/TrackCorrections_HIJING_538_OFFICIAL_Mar24.root";
 
@@ -414,7 +413,7 @@ Gathered_Data DataGathering(float eta_gap, float HFSET_min, float HFSET_max, flo
 void ObsConstructor(float Eta_gap, float HFSET_Min, float HFSET_Max, float CentFluct, float pTr_Min, float pTr_Max, string Correction, TString Name, TString Savename, string TrackSelec, float pvZ_Selec){
     int B = 100; // Number of Poisson bootstrap samples
     // Defining bins and plot's x axes
-    vector<float> Xaxis_del = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 1.98, 2.2, 2.38, 2.98, 3.18, 6.0, 8.04, 10.0}; // Those are the END of each bin, not the middle
+    vector<float> Xaxis_del = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 1.98, 2.2, 2.38, 2.98, 3.8, 4.5, 6.0, 8.0, 10.0}; // Those are the END of each bin, not the middle
     int nBins = (Xaxis_del.size()-1);
     Gathered_Data gData = DataGathering(Eta_gap, HFSET_Min, HFSET_Max, CentFluct, pTr_Min, pTr_Max, Correction, Xaxis_del, TrackSelec, pvZ_Selec);
     vector<float> pT_axis = gData.pT_axis;
