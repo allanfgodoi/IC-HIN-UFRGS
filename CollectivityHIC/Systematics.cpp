@@ -880,60 +880,35 @@ void Evaluate_v0pT(){
     delete c_6070;
 
     // Getting fit parameters
-    TF1 *fit_v0pt_5060_trk_loose = gr_v0pt_5060_trk_loose->GetFunction("pol1");
-        double p0_v0pt_5060_trk_loose = fit_v0pt_5060_trk_loose->GetParameter(0);
-        double p1_v0pt_5060_trk_loose = fit_v0pt_5060_trk_loose->GetParameter(1);
+    TF1 *fit_v0pt_5060_trk_loose = gr_v0pt_5060_trk_loose->GetFunction("pol1"); // 50-60%
     TF1 *fit_v0pt_5060_trk_tight = gr_v0pt_5060_trk_tight->GetFunction("pol1");
-        double p0_v0pt_5060_trk_tight = fit_v0pt_5060_trk_tight->GetParameter(0);
-        double p1_v0pt_5060_trk_tight = fit_v0pt_5060_trk_tight->GetParameter(1);
     TF1 *fit_v0pt_5060_cent_positive = gr_v0pt_5060_cent_positive->GetFunction("pol1");
-        double p0_v0pt_5060_cent_positive = fit_v0pt_5060_cent_positive->GetParameter(0);
-        double p1_v0pt_5060_cent_positive = fit_v0pt_5060_cent_positive->GetParameter(1);
     TF1 *fit_v0pt_5060_cent_negative = gr_v0pt_5060_cent_negative->GetFunction("pol1");
-        double p0_v0pt_5060_cent_negative = fit_v0pt_5060_cent_negative->GetParameter(0);
-        double p1_v0pt_5060_cent_negative = fit_v0pt_5060_cent_negative->GetParameter(1);
     TF1 *fit_v0pt_5060_pvZ_3 = gr_v0pt_5060_pvZ_3->GetFunction("pol1");
-        double p0_v0pt_5060_pvZ_3 = fit_v0pt_5060_pvZ_3->GetParameter(0);
-        double p1_v0pt_5060_pvZ_3 = fit_v0pt_5060_pvZ_3->GetParameter(1);
     TF1 *fit_v0pt_5060_pvZ_3_15 = gr_v0pt_5060_pvZ_3_15->GetFunction("pol1");
-        double p0_v0pt_5060_pvZ_3_15 = fit_v0pt_5060_pvZ_3_15->GetParameter(0);
-        double p1_v0pt_5060_pvZ_3_15 = fit_v0pt_5060_pvZ_3_15->GetParameter(1);
-    TF1 *fit_v0pt_6070_trk_loose = gr_v0pt_6070_trk_loose->GetFunction("pol1");
-        double p0_v0pt_6070_trk_loose = fit_v0pt_6070_trk_loose->GetParameter(0);
-        double p1_v0pt_6070_trk_loose = fit_v0pt_6070_trk_loose->GetParameter(1);
+    TF1 *fit_v0pt_6070_trk_loose = gr_v0pt_6070_trk_loose->GetFunction("pol1"); // 60-70%
     TF1 *fit_v0pt_6070_trk_tight = gr_v0pt_6070_trk_tight->GetFunction("pol1");
-        double p0_v0pt_6070_trk_tight = fit_v0pt_6070_trk_tight->GetParameter(0);
-        double p1_v0pt_6070_trk_tight = fit_v0pt_6070_trk_tight->GetParameter(1);
     TF1 *fit_v0pt_6070_cent_positive = gr_v0pt_6070_cent_positive->GetFunction("pol1");
-        double p0_v0pt_6070_cent_positive = fit_v0pt_6070_cent_positive->GetParameter(0);
-        double p1_v0pt_6070_cent_positive = fit_v0pt_6070_cent_positive->GetParameter(1);
     TF1 *fit_v0pt_6070_cent_negative = gr_v0pt_6070_cent_negative->GetFunction("pol1");
-        double p0_v0pt_6070_cent_negative = fit_v0pt_6070_cent_negative->GetParameter(0);
-        double p1_v0pt_6070_cent_negative = fit_v0pt_6070_cent_negative->GetParameter(1);
     TF1 *fit_v0pt_6070_pvZ_3 = gr_v0pt_6070_pvZ_3->GetFunction("pol1");
-        double p0_v0pt_6070_pvZ_3 = fit_v0pt_6070_pvZ_3->GetParameter(0);
-        double p1_v0pt_6070_pvZ_3 = fit_v0pt_6070_pvZ_3->GetParameter(1);
     TF1 *fit_v0pt_6070_pvZ_3_15 = gr_v0pt_6070_pvZ_3_15->GetFunction("pol1");
-        double p0_v0pt_6070_pvZ_3_15 = fit_v0pt_6070_pvZ_3_15->GetParameter(0);
-        double p1_v0pt_6070_pvZ_3_15 = fit_v0pt_6070_pvZ_3_15->GetParameter(1);
 
-    // I will use the same strategy used to v0
-    vector<double> vec_p0_5060_one(nVar-1, 0.0); vector<double> vec_p0_5060_two(nVar-1, 0.0); // 50-60%
-        vec_p0_5060_one[0] = p0_v0pt_5060_trk_loose; vec_p0_5060_two[0] = p0_v0pt_5060_trk_tight;
-        vec_p0_5060_one[1] = p0_v0pt_5060_cent_positive; vec_p0_5060_two[1] = p0_v0pt_5060_cent_negative;
-        vec_p0_5060_one[2] = p0_v0pt_5060_pvZ_3; vec_p0_5060_two[2] = p0_v0pt_5060_pvZ_3_15;
-    vector<double> vec_p1_5060_one(nVar-1, 0.0); vector<double> vec_p1_5060_two(nVar-1, 0.0);
-        vec_p1_5060_one[0] = p1_v0pt_5060_trk_loose; vec_p1_5060_two[0] = p1_v0pt_5060_trk_tight;
-        vec_p1_5060_one[1] = p1_v0pt_5060_cent_positive; vec_p1_5060_two[1] = p1_v0pt_5060_cent_negative;
-        vec_p1_5060_one[2] = p1_v0pt_5060_pvZ_3; vec_p1_5060_two[2] = p1_v0pt_5060_pvZ_3_15;
-    vector<double> vec_p0_6070_one(nVar-1, 0.0); vector<double> vec_p0_6070_two(nVar-1, 0.0); // 60-70%
-        vec_p0_6070_one[0] = p0_v0pt_6070_trk_loose; vec_p0_6070_two[0] = p0_v0pt_6070_trk_tight;
-        vec_p0_6070_one[1] = p0_v0pt_6070_cent_positive; vec_p0_6070_two[1] = p0_v0pt_6070_cent_negative;
-        vec_p0_6070_one[2] = p0_v0pt_6070_pvZ_3; vec_p0_6070_two[2] = p0_v0pt_6070_pvZ_3_15;
-    vector<double> vec_p1_6070_one(nVar-1, 0.0); vector<double> vec_p1_6070_two(nVar-1, 0.0);
-        vec_p1_6070_one[0] = p1_v0pt_6070_trk_loose; vec_p1_6070_two[0] = p1_v0pt_6070_trk_tight;
-        vec_p1_6070_one[1] = p1_v0pt_6070_cent_positive; vec_p1_6070_two[1] = p1_v0pt_6070_cent_negative;
-        vec_p1_6070_one[2] = p1_v0pt_6070_pvZ_3; vec_p1_6070_two[2] = p1_v0pt_6070_pvZ_3_15;
+    vector<TF1*> vec_fits_5060_one(nVar-1, nullptr); // One: loose, positive, 3
+        vec_fits_5060_one[0] = fit_v0pt_5060_trk_loose;
+        vec_fits_5060_one[1] = fit_v0pt_5060_cent_positive;
+        vec_fits_5060_one[2] = fit_v0pt_5060_pvZ_3;
+    vector<TF1*> vec_fits_5060_two(nVar-1, nullptr); // Two: tight, negative, 3_15
+        vec_fits_5060_two[0] = fit_v0pt_5060_trk_tight;
+        vec_fits_5060_two[1] = fit_v0pt_5060_cent_negative;
+        vec_fits_5060_two[2] = fit_v0pt_5060_pvZ_3_15;
+    vector<TF1*> vec_fits_6070_one(nVar-1, nullptr); // One: loose, positive, 3
+        vec_fits_6070_one[0] = fit_v0pt_6070_trk_loose;
+        vec_fits_6070_one[1] = fit_v0pt_6070_cent_positive;
+        vec_fits_6070_one[2] = fit_v0pt_6070_pvZ_3;
+    vector<TF1*> vec_fits_6070_two(nVar-1, nullptr); // Two: tight, negative, 3_15
+        vec_fits_6070_two[0] = fit_v0pt_6070_trk_tight;
+        vec_fits_6070_two[1] = fit_v0pt_6070_cent_negative;
+        vec_fits_6070_two[2] = fit_v0pt_6070_pvZ_3_15;
 
      // Getting diff. values of each TGraph
     Double_t *v0pt_5060_corr = gr_v0pt_5060_correc->GetY(); // 50-60%
@@ -950,28 +925,11 @@ void Evaluate_v0pT(){
     Double_t *v0pt_6070_cent_negative = gr_v0pt_6070_cent_negative->GetY();
     Double_t *v0pt_6070_pvZ_3 = gr_v0pt_6070_pvZ_3->GetY();
     Double_t *v0pt_6070_pvZ_3_15 = gr_v0pt_6070_pvZ_3_15->GetY();
-
+    
     vector<Double_t> vec_unc_v0pt_5060_corr(N, 0.0); // 50-60%
         vec_unc_v0pt_5060_corr.assign(v0pt_5060_corr, v0pt_5060_corr + N);
-    vector<vector<Double_t>> vec_uncs_v0pt_5060_holder_one(nVar-1, vector<Double_t>(N, 0.0)); // One: loose, positive, 3 
-        vec_uncs_v0pt_5060_holder_one[0].assign(v0pt_5060_trk_loose, v0pt_5060_trk_loose + N);
-        vec_uncs_v0pt_5060_holder_one[1].assign(v0pt_5060_cent_positive, v0pt_5060_cent_positive + N);
-        vec_uncs_v0pt_5060_holder_one[2].assign(v0pt_5060_pvZ_3, v0pt_5060_pvZ_3 + N);
-    vector<vector<Double_t>> vec_uncs_v0pt_5060_holder_two(nVar-1, vector<Double_t>(N, 0.0)); // Two: tight, negative, 3_15
-        vec_uncs_v0pt_5060_holder_two[0].assign(v0pt_5060_trk_tight, v0pt_5060_trk_tight + N);
-        vec_uncs_v0pt_5060_holder_two[1].assign(v0pt_5060_cent_negative, v0pt_5060_cent_negative + N);
-        vec_uncs_v0pt_5060_holder_two[2].assign(v0pt_5060_pvZ_3_15, v0pt_5060_pvZ_3_15 + N);
     vector<Double_t> vec_unc_v0pt_6070_corr(N, 0.0); // 60-70%
         vec_unc_v0pt_6070_corr.assign(v0pt_6070_corr, v0pt_6070_corr + N);
-    vector<vector<Double_t>> vec_uncs_v0pt_6070_holder_one(nVar-1, vector<Double_t>(N, 0.0)); // One: loose, positive, 3
-        vec_uncs_v0pt_6070_holder_one[0].assign(v0pt_6070_trk_loose, v0pt_6070_trk_loose + N);
-        vec_uncs_v0pt_6070_holder_one[1].assign(v0pt_6070_cent_positive, v0pt_6070_cent_positive + N);
-        vec_uncs_v0pt_6070_holder_one[2].assign(v0pt_6070_pvZ_3, v0pt_6070_pvZ_3 + N);
-    vector<vector<Double_t>> vec_uncs_v0pt_6070_holder_two(nVar-1, vector<Double_t>(N, 0.0)); // Two: tight, negative, 3_15
-        vec_uncs_v0pt_6070_holder_two[0].assign(v0pt_6070_trk_tight, v0pt_6070_trk_tight + N);
-        vec_uncs_v0pt_6070_holder_two[1].assign(v0pt_6070_cent_negative, v0pt_6070_cent_negative + N);
-        vec_uncs_v0pt_6070_holder_two[2].assign(v0pt_6070_pvZ_3_15, v0pt_6070_pvZ_3_15 + N);
-
     
     f_corr->Close(); f_trk->Close(); f_cent->Close(); f_pvZ->Close(); 
 
@@ -997,10 +955,10 @@ void Evaluate_v0pT(){
                 vec_uncs_v0pt_5060[i][j] = vec_unc_v0pt_5060_corr[j];
                 vec_uncs_v0pt_6070[i][j] = vec_unc_v0pt_6070_corr[j];
             } else{
-                if (vec_uncs_v0pt_5060_holder_one[i-1][j] > vec_uncs_v0pt_5060_holder_two[i-1][j]) vec_uncs_v0pt_5060[i][j] = vec_p0_5060_one[i-1] + vec_p1_5060_one[i-1]*vec_x_v0pt[j];
-                if (vec_uncs_v0pt_5060_holder_one[i-1][j] < vec_uncs_v0pt_5060_holder_two[i-1][j]) vec_uncs_v0pt_5060[i][j] = vec_p0_5060_two[i-1] + vec_p1_5060_two[i-1]*vec_x_v0pt[j];
-                if (vec_uncs_v0pt_6070_holder_one[i-1][j] > vec_uncs_v0pt_6070_holder_two[i-1][j]) vec_uncs_v0pt_6070[i][j] = vec_p0_6070_one[i-1] + vec_p1_6070_one[i-1]*vec_x_v0pt[j];
-                if (vec_uncs_v0pt_6070_holder_one[i-1][j] < vec_uncs_v0pt_6070_holder_two[i-1][j]) vec_uncs_v0pt_6070[i][j] = vec_p0_6070_two[i-1] + vec_p1_6070_two[i-1]*vec_x_v0pt[j];
+                if (vec_fits_5060_one[i-1]->Eval(vec_x_v0pt[j]) > vec_fits_5060_two[i-1]->Eval(vec_x_v0pt[j])) vec_uncs_v0pt_5060[i][j] = vec_fits_5060_one[i-1]->Eval(vec_x_v0pt[j]);
+                if (vec_fits_5060_one[i-1]->Eval(vec_x_v0pt[j]) < vec_fits_5060_two[i-1]->Eval(vec_x_v0pt[j])) vec_uncs_v0pt_5060[i][j] = vec_fits_5060_two[i-1]->Eval(vec_x_v0pt[j]);
+                if (vec_fits_6070_one[i-1]->Eval(vec_x_v0pt[j]) > vec_fits_6070_two[i-1]->Eval(vec_x_v0pt[j])) vec_uncs_v0pt_6070[i][j] = vec_fits_6070_one[i-1]->Eval(vec_x_v0pt[j]);
+                if (vec_fits_6070_one[i-1]->Eval(vec_x_v0pt[j]) < vec_fits_6070_two[i-1]->Eval(vec_x_v0pt[j])) vec_uncs_v0pt_6070[i][j] = vec_fits_6070_two[i-1]->Eval(vec_x_v0pt[j]);
             }
         }
     }
@@ -1103,59 +1061,34 @@ void Evaluate_sv0pT(){
 
     // Getting fit parameters
     TF1 *fit_sv0pt_5060_trk_loose = gr_sv0pt_5060_trk_loose->GetFunction("pol1"); // 50-60%
-        double p0_sv0pt_5060_trk_loose = fit_sv0pt_5060_trk_loose->GetParameter(0);
-        double p1_sv0pt_5060_trk_loose = fit_sv0pt_5060_trk_loose->GetParameter(1);
     TF1 *fit_sv0pt_5060_trk_tight = gr_sv0pt_5060_trk_tight->GetFunction("pol1");
-        double p0_sv0pt_5060_trk_tight = fit_sv0pt_5060_trk_tight->GetParameter(0);
-        double p1_sv0pt_5060_trk_tight = fit_sv0pt_5060_trk_tight->GetParameter(1);
     TF1 *fit_sv0pt_5060_cent_positive = gr_sv0pt_5060_cent_positive->GetFunction("pol1");
-        double p0_sv0pt_5060_cent_positive = fit_sv0pt_5060_cent_positive->GetParameter(0);
-        double p1_sv0pt_5060_cent_positive = fit_sv0pt_5060_cent_positive->GetParameter(1);
     TF1 *fit_sv0pt_5060_cent_negative = gr_sv0pt_5060_cent_negative->GetFunction("pol1");
-        double p0_sv0pt_5060_cent_negative = fit_sv0pt_5060_cent_negative->GetParameter(0);
-        double p1_sv0pt_5060_cent_negative = fit_sv0pt_5060_cent_negative->GetParameter(1);
     TF1 *fit_sv0pt_5060_pvZ_3 = gr_sv0pt_5060_pvZ_3->GetFunction("pol1");
-        double p0_sv0pt_5060_pvZ_3 = fit_sv0pt_5060_pvZ_3->GetParameter(0);
-        double p1_sv0pt_5060_pvZ_3 = fit_sv0pt_5060_pvZ_3->GetParameter(1);
     TF1 *fit_sv0pt_5060_pvZ_3_15 = gr_sv0pt_5060_pvZ_3_15->GetFunction("pol1");
-        double p0_sv0pt_5060_pvZ_3_15 = fit_sv0pt_5060_pvZ_3_15->GetParameter(0);
-        double p1_sv0pt_5060_pvZ_3_15 = fit_sv0pt_5060_pvZ_3_15->GetParameter(1);
     TF1 *fit_sv0pt_6070_trk_loose = gr_sv0pt_6070_trk_loose->GetFunction("pol1"); // 60-70%
-        double p0_sv0pt_6070_trk_loose = fit_sv0pt_6070_trk_loose->GetParameter(0);
-        double p1_sv0pt_6070_trk_loose = fit_sv0pt_6070_trk_loose->GetParameter(1);
     TF1 *fit_sv0pt_6070_trk_tight = gr_sv0pt_6070_trk_tight->GetFunction("pol1");
-        double p0_sv0pt_6070_trk_tight = fit_sv0pt_6070_trk_tight->GetParameter(0);
-        double p1_sv0pt_6070_trk_tight = fit_sv0pt_6070_trk_tight->GetParameter(1);
     TF1 *fit_sv0pt_6070_cent_positive = gr_sv0pt_6070_cent_positive->GetFunction("pol1");
-        double p0_sv0pt_6070_cent_positive = fit_sv0pt_6070_cent_positive->GetParameter(0);
-        double p1_sv0pt_6070_cent_positive = fit_sv0pt_6070_cent_positive->GetParameter(1);
     TF1 *fit_sv0pt_6070_cent_negative = gr_sv0pt_6070_cent_negative->GetFunction("pol1");
-        double p0_sv0pt_6070_cent_negative = fit_sv0pt_6070_cent_negative->GetParameter(0);
-        double p1_sv0pt_6070_cent_negative = fit_sv0pt_6070_cent_negative->GetParameter(1);
     TF1 *fit_sv0pt_6070_pvZ_3 = gr_sv0pt_6070_pvZ_3->GetFunction("pol1");
-        double p0_sv0pt_6070_pvZ_3 = fit_sv0pt_6070_pvZ_3->GetParameter(0);
-        double p1_sv0pt_6070_pvZ_3 = fit_sv0pt_6070_pvZ_3->GetParameter(1);
     TF1 *fit_sv0pt_6070_pvZ_3_15 = gr_sv0pt_6070_pvZ_3_15->GetFunction("pol1");
-        double p0_sv0pt_6070_pvZ_3_15 = fit_sv0pt_6070_pvZ_3_15->GetParameter(0);
-        double p1_sv0pt_6070_pvZ_3_15 = fit_sv0pt_6070_pvZ_3_15->GetParameter(1);
 
-    // I will use the same strategy used to v0
-    vector<double> vec_p0_5060_one(nVar-1, 0.0); vector<double> vec_p0_5060_two(nVar-1, 0.0); // 50-60%
-        vec_p0_5060_one[0] = p0_sv0pt_5060_trk_loose; vec_p0_5060_two[0] = p0_sv0pt_5060_trk_tight;
-        vec_p0_5060_one[1] = p0_sv0pt_5060_cent_positive; vec_p0_5060_two[1] = p0_sv0pt_5060_cent_negative;
-        vec_p0_5060_one[2] = p0_sv0pt_5060_pvZ_3; vec_p0_5060_two[2] = p0_sv0pt_5060_pvZ_3_15;
-    vector<double> vec_p1_5060_one(nVar-1, 0.0); vector<double> vec_p1_5060_two(nVar-1, 0.0);
-        vec_p1_5060_one[0] = p1_sv0pt_5060_trk_loose; vec_p1_5060_two[0] = p1_sv0pt_5060_trk_tight;
-        vec_p1_5060_one[1] = p1_sv0pt_5060_cent_positive; vec_p1_5060_two[1] = p1_sv0pt_5060_cent_negative;
-        vec_p1_5060_one[2] = p1_sv0pt_5060_pvZ_3; vec_p1_5060_two[2] = p1_sv0pt_5060_pvZ_3_15;
-    vector<double> vec_p0_6070_one(nVar-1, 0.0); vector<double> vec_p0_6070_two(nVar-1, 0.0); // 60-70%
-        vec_p0_6070_one[0] = p0_sv0pt_6070_trk_loose; vec_p0_6070_two[0] = p0_sv0pt_6070_trk_tight;
-        vec_p0_6070_one[1] = p0_sv0pt_6070_cent_positive; vec_p0_6070_two[1] = p0_sv0pt_6070_cent_negative;
-        vec_p0_6070_one[2] = p0_sv0pt_6070_pvZ_3; vec_p0_6070_two[2] = p0_sv0pt_6070_pvZ_3_15;
-    vector<double> vec_p1_6070_one(nVar-1, 0.0); vector<double> vec_p1_6070_two(nVar-1, 0.0);
-        vec_p1_6070_one[0] = p1_sv0pt_6070_trk_loose; vec_p1_6070_two[0] = p1_sv0pt_6070_trk_tight;
-        vec_p1_6070_one[1] = p1_sv0pt_6070_cent_positive; vec_p1_6070_two[1] = p1_sv0pt_6070_cent_negative;
-        vec_p1_6070_one[2] = p1_sv0pt_6070_pvZ_3; vec_p1_6070_two[2] = p1_sv0pt_6070_pvZ_3_15;
+    vector<TF1*> vec_fits_5060_one(nVar-1, nullptr); // One: loose, positive, 3
+        vec_fits_5060_one[0] = fit_sv0pt_5060_trk_loose;
+        vec_fits_5060_one[1] = fit_sv0pt_5060_cent_positive;
+        vec_fits_5060_one[2] = fit_sv0pt_5060_pvZ_3;
+    vector<TF1*> vec_fits_5060_two(nVar-1, nullptr); // Two: tight, negative, 3_15
+        vec_fits_5060_two[0] = fit_sv0pt_5060_trk_tight;
+        vec_fits_5060_two[1] = fit_sv0pt_5060_cent_negative;
+        vec_fits_5060_two[2] = fit_sv0pt_5060_pvZ_3_15;
+    vector<TF1*> vec_fits_6070_one(nVar-1, nullptr); // One: loose, positive, 3
+        vec_fits_6070_one[0] = fit_sv0pt_6070_trk_loose;
+        vec_fits_6070_one[1] = fit_sv0pt_6070_cent_positive;
+        vec_fits_6070_one[2] = fit_sv0pt_6070_pvZ_3;
+    vector<TF1*> vec_fits_6070_two(nVar-1, nullptr); // Two: tight, negative, 3_15
+        vec_fits_6070_two[0] = fit_sv0pt_6070_trk_tight;
+        vec_fits_6070_two[1] = fit_sv0pt_6070_cent_negative;
+        vec_fits_6070_two[2] = fit_sv0pt_6070_pvZ_3_15;
 
      // Getting diff. values of each TGraph
     Double_t *sv0pt_5060_corr = gr_sv0pt_5060_correc->GetY(); // 50-60%
@@ -1175,25 +1108,8 @@ void Evaluate_sv0pT(){
     
     vector<Double_t> vec_unc_sv0pt_5060_corr(N, 0.0); // 50-60%
         vec_unc_sv0pt_5060_corr.assign(sv0pt_5060_corr, sv0pt_5060_corr + N);
-    vector<vector<Double_t>> vec_uncs_sv0pt_5060_holder_one(nVar-1, vector<Double_t>(N, 0.0)); // One: loose, positive, 3
-        vec_uncs_sv0pt_5060_holder_one[0].assign(sv0pt_5060_trk_loose, sv0pt_5060_trk_loose + N);
-        vec_uncs_sv0pt_5060_holder_one[1].assign(sv0pt_5060_cent_positive, sv0pt_5060_cent_positive + N);
-        vec_uncs_sv0pt_5060_holder_one[2].assign(sv0pt_5060_pvZ_3, sv0pt_5060_pvZ_3 + N);
-    vector<vector<Double_t>> vec_uncs_sv0pt_5060_holder_two(nVar-1, vector<Double_t>(N, 0.0)); // Two: tight, negative, 3_15
-        vec_uncs_sv0pt_5060_holder_two[0].assign(sv0pt_5060_trk_tight, sv0pt_5060_trk_tight + N);
-        vec_uncs_sv0pt_5060_holder_two[1].assign(sv0pt_5060_cent_negative, sv0pt_5060_cent_negative + N);
-        vec_uncs_sv0pt_5060_holder_two[2].assign(sv0pt_5060_pvZ_3_15, sv0pt_5060_pvZ_3_15 + N);
     vector<Double_t> vec_unc_sv0pt_6070_corr(N, 0.0); // 60-70%
         vec_unc_sv0pt_6070_corr.assign(sv0pt_6070_corr, sv0pt_6070_corr + N);
-    vector<vector<Double_t>> vec_uncs_sv0pt_6070_holder_one(nVar-1, vector<Double_t>(N, 0.0)); // One: loose, positive, 3
-        vec_uncs_sv0pt_6070_holder_one[0].assign(sv0pt_6070_trk_loose, sv0pt_6070_trk_loose + N);
-        vec_uncs_sv0pt_6070_holder_one[1].assign(sv0pt_6070_cent_positive, sv0pt_6070_cent_positive + N);
-        vec_uncs_sv0pt_6070_holder_one[2].assign(sv0pt_6070_pvZ_3, sv0pt_6070_pvZ_3 + N);
-    vector<vector<Double_t>> vec_uncs_sv0pt_6070_holder_two(nVar-1, vector<Double_t>(N, 0.0)); // Two: tight, negative, 3_15
-        vec_uncs_sv0pt_6070_holder_two[0].assign(sv0pt_6070_trk_tight, sv0pt_6070_trk_tight + N);
-        vec_uncs_sv0pt_6070_holder_two[1].assign(sv0pt_6070_cent_negative, sv0pt_6070_cent_negative + N);
-        vec_uncs_sv0pt_6070_holder_two[2].assign(sv0pt_6070_pvZ_3_15, sv0pt_6070_pvZ_3_15 + N);
-
     
     f_corr->Close(); f_trk->Close(); f_cent->Close(); f_pvZ->Close(); 
 
@@ -1219,10 +1135,10 @@ void Evaluate_sv0pT(){
                 vec_uncs_sv0pt_5060[i][j] = vec_unc_sv0pt_5060_corr[j];
                 vec_uncs_sv0pt_6070[i][j] = vec_unc_sv0pt_6070_corr[j];
             } else{
-                if (vec_uncs_sv0pt_5060_holder_one[i-1][j] > vec_uncs_sv0pt_5060_holder_two[i-1][j]) vec_uncs_sv0pt_5060[i][j] = vec_p0_5060_one[i-1] + vec_p1_5060_one[i-1]*vec_x_sv0pt[j];
-                if (vec_uncs_sv0pt_5060_holder_one[i-1][j] < vec_uncs_sv0pt_5060_holder_two[i-1][j]) vec_uncs_sv0pt_5060[i][j] = vec_p0_5060_two[i-1] + vec_p1_5060_two[i-1]*vec_x_sv0pt[j];
-                if (vec_uncs_sv0pt_6070_holder_one[i-1][j] > vec_uncs_sv0pt_6070_holder_two[i-1][j]) vec_uncs_sv0pt_6070[i][j] = vec_p0_6070_one[i-1] + vec_p1_6070_one[i-1]*vec_x_sv0pt[j];
-                if (vec_uncs_sv0pt_6070_holder_one[i-1][j] < vec_uncs_sv0pt_6070_holder_two[i-1][j]) vec_uncs_sv0pt_6070[i][j] = vec_p0_6070_two[i-1] + vec_p1_6070_two[i-1]*vec_x_sv0pt[j];
+                if (vec_fits_5060_one[i-1]->Eval(vec_x_sv0pt[j]) > vec_fits_5060_two[i-1]->Eval(vec_x_sv0pt[j])) vec_uncs_sv0pt_5060[i][j] = vec_fits_5060_one[i-1]->Eval(vec_x_sv0pt[j]);
+                if (vec_fits_5060_one[i-1]->Eval(vec_x_sv0pt[j]) < vec_fits_5060_two[i-1]->Eval(vec_x_sv0pt[j])) vec_uncs_sv0pt_5060[i][j] = vec_fits_5060_two[i-1]->Eval(vec_x_sv0pt[j]);
+                if (vec_fits_6070_one[i-1]->Eval(vec_x_sv0pt[j]) > vec_fits_6070_two[i-1]->Eval(vec_x_sv0pt[j])) vec_uncs_sv0pt_6070[i][j] = vec_fits_6070_one[i-1]->Eval(vec_x_sv0pt[j]);
+                if (vec_fits_6070_one[i-1]->Eval(vec_x_sv0pt[j]) < vec_fits_6070_two[i-1]->Eval(vec_x_sv0pt[j])) vec_uncs_sv0pt_6070[i][j] = vec_fits_6070_two[i-1]->Eval(vec_x_sv0pt[j]);
             }
         }
     }
