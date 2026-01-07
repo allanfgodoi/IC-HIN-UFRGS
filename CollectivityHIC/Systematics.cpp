@@ -1075,7 +1075,7 @@ void Evaluate_sv0pT(){
         g->Draw("AP");
     };
 
-    TCanvas *cs_5060 = new TCanvas("cs_5060", "Sistematicos sv0pT 50-60%", 1200, 800);
+    TCanvas *cs_5060 = new TCanvas("cs_5060", "Sistematics sv0pT 50-60%", 1200, 800);
     cs_5060->Divide(3, 2); 
 
     PlotAndFitS(cs_5060, 1, gr_sv0pt_5060_trk_loose,    "sv0pT 50-60% Trk Loose");
@@ -1088,7 +1088,7 @@ void Evaluate_sv0pT(){
     cs_5060->SaveAs("./Plots/Systematics/Systematics_Fits_sv0pT_5060.pdf");
     delete cs_5060;
 
-    TCanvas *cs_6070 = new TCanvas("cs_6070", "Sistematicos sv0pT 60-70%", 1200, 800);
+    TCanvas *cs_6070 = new TCanvas("cs_6070", "Sistematics sv0pT 60-70%", 1200, 800);
     cs_6070->Divide(3, 2);
 
     PlotAndFitS(cs_6070, 1, gr_sv0pt_6070_trk_loose,    "sv0pT 60-70% Trk Loose");
@@ -1219,10 +1219,10 @@ void Evaluate_sv0pT(){
                 vec_uncs_sv0pt_5060[i][j] = vec_unc_sv0pt_5060_corr[j];
                 vec_uncs_sv0pt_6070[i][j] = vec_unc_sv0pt_6070_corr[j];
             } else{
-                if (vec_uncs_sv0pt_5060_holder_one[i-1][j] > vec_uncs_sv0pt_5060_holder_two[i-1][j]) vec_uncs_sv0pt_5060[i][j] = vec_p0_5060_one[i] + vec_p1_5060_one[i]*vec_x_sv0pt[j];
-                if (vec_uncs_sv0pt_5060_holder_one[i-1][j] < vec_uncs_sv0pt_5060_holder_two[i-1][j]) vec_uncs_sv0pt_5060[i][j] = vec_p0_5060_two[i] + vec_p1_5060_two[i]*vec_x_sv0pt[j];
-                if (vec_uncs_sv0pt_6070_holder_one[i-1][j] > vec_uncs_sv0pt_6070_holder_two[i-1][j]) vec_uncs_sv0pt_6070[i][j] = vec_p0_6070_one[i] + vec_p1_6070_one[i]*vec_x_sv0pt[j];
-                if (vec_uncs_sv0pt_6070_holder_one[i-1][j] < vec_uncs_sv0pt_6070_holder_two[i-1][j]) vec_uncs_sv0pt_6070[i][j] = vec_p0_6070_two[i] + vec_p1_6070_two[i]*vec_x_sv0pt[j];
+                if (vec_uncs_sv0pt_5060_holder_one[i-1][j] > vec_uncs_sv0pt_5060_holder_two[i-1][j]) vec_uncs_sv0pt_5060[i][j] = vec_p0_5060_one[i-1] + vec_p1_5060_one[i-1]*vec_x_sv0pt[j];
+                if (vec_uncs_sv0pt_5060_holder_one[i-1][j] < vec_uncs_sv0pt_5060_holder_two[i-1][j]) vec_uncs_sv0pt_5060[i][j] = vec_p0_5060_two[i-1] + vec_p1_5060_two[i-1]*vec_x_sv0pt[j];
+                if (vec_uncs_sv0pt_6070_holder_one[i-1][j] > vec_uncs_sv0pt_6070_holder_two[i-1][j]) vec_uncs_sv0pt_6070[i][j] = vec_p0_6070_one[i-1] + vec_p1_6070_one[i-1]*vec_x_sv0pt[j];
+                if (vec_uncs_sv0pt_6070_holder_one[i-1][j] < vec_uncs_sv0pt_6070_holder_two[i-1][j]) vec_uncs_sv0pt_6070[i][j] = vec_p0_6070_two[i-1] + vec_p1_6070_two[i-1]*vec_x_sv0pt[j];
             }
         }
     }
