@@ -192,6 +192,38 @@ void TrackSelection(){
         TGraph* gd_sv0pt_5060_tight = new TGraphErrors(N_sv0pt, vec_x_v0pt.data(), vec_y_sv0pt_5060_tight.data(), vec_x_unc_sv0pt.data(), vec_y_unc_sv0pt_5060_tight.data());
         TGraph* gd_sv0pt_6070_tight = new TGraphErrors(N_sv0pt, vec_x_v0pt.data(), vec_y_sv0pt_6070_tight.data(), vec_x_unc_sv0pt.data(), vec_y_unc_sv0pt_6070_tight.data());
 
+    // Calculating v0(pT)v0 difference
+        TGraphErrors *g_v0ptv0_5060_nominal = (TGraphErrors*)f->Get("v0ptv0_ptref_nominal_5060");
+        TGraphErrors *g_v0ptv0_5060_loose = (TGraphErrors*)f->Get("v0ptv0_ptref_loose_5060");
+        TGraphErrors *g_v0ptv0_5060_tight = (TGraphErrors*)f->Get("v0ptv0_ptref_tight_5060");
+
+        Int_t N_v0ptv0 = g_v0ptv0_5060_nominal->GetN();
+        Double_t *x_v0ptv0 = g_v0ptv0_5060_nominal->GetX();
+        Double_t *y_v0ptv0_5060_nominal = g_v0ptv0_5060_nominal->GetY();
+        Double_t *y_v0ptv0_5060_loose = g_v0ptv0_5060_loose->GetY();
+        Double_t *y_v0ptv0_5060_tight = g_v0ptv0_5060_tight->GetY();
+        Double_t *y_unc_v0ptv0_5060_nominal = g_v0ptv0_5060_nominal->GetEY();
+        Double_t *y_unc_v0ptv0_5060_loose = g_v0ptv0_5060_loose->GetEY();
+        Double_t *y_unc_v0ptv0_5060_tight = g_v0ptv0_5060_tight->GetEY();
+
+        vector<Double_t> vec_x_v0ptv0(N_v0ptv0, 0.0);
+        vector<Double_t> vec_x_unc_v0ptv0(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_v0ptv0_5060_loose(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_v0ptv0_5060_tight(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_unc_v0ptv0_5060_loose(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_unc_v0ptv0_5060_tight(N_v0ptv0, 0.0);
+
+        for (int i=0; i<N_v0ptv0; i++){
+            vec_x_v0ptv0[i] = x_v0ptv0[i];
+            vec_y_v0ptv0_5060_loose[i] = abs(y_v0ptv0_5060_loose[i] - y_v0ptv0_5060_nominal[i]);
+            vec_y_v0ptv0_5060_tight[i] = abs(y_v0ptv0_5060_tight[i] - y_v0ptv0_5060_nominal[i]);
+            vec_y_unc_v0ptv0_5060_loose[i] = StatisticalUncertainties(y_unc_v0ptv0_5060_loose[i], y_unc_v0ptv0_5060_nominal[i]);
+            vec_y_unc_v0ptv0_5060_tight[i] = StatisticalUncertainties(y_unc_v0ptv0_5060_tight[i], y_unc_v0ptv0_5060_nominal[i]);
+        }
+
+        TGraph* gd_v0ptv0_5060_loose = new TGraphErrors(N_v0ptv0, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060_loose.data(), vec_x_unc_v0ptv0.data(), vec_y_unc_v0ptv0_5060_loose.data());
+        TGraph* gd_v0ptv0_5060_tight = new TGraphErrors(N_v0ptv0, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060_tight.data(), vec_x_unc_v0ptv0.data(), vec_y_unc_v0ptv0_5060_tight.data());
+
     f->Close();
 
     // Saving TGraphs
@@ -210,6 +242,9 @@ void TrackSelection(){
     gd_sv0pt_6070_loose->SetName("gd_sv0pt_6070_loose"); gd_sv0pt_6070_loose->Write();
     gd_sv0pt_5060_tight->SetName("gd_sv0pt_5060_tight"); gd_sv0pt_5060_tight->Write();
     gd_sv0pt_6070_tight->SetName("gd_sv0pt_6070_tight"); gd_sv0pt_6070_tight->Write();
+    // v0(pT)v0
+    gd_v0ptv0_5060_loose->SetName("gd_v0ptv0_5060_loose"); gd_v0ptv0_5060_loose->Write();
+    gd_v0ptv0_5060_tight->SetName("gd_v0ptv0_5060_tight"); gd_v0ptv0_5060_tight->Write();
     
     sf->Close();
 }
@@ -217,10 +252,6 @@ void TrackSelection(){
 void CentralityFluctuations(){
 
     if (!filesystem::exists("./Data/Systematics/CentralityFluctuationData.root")){
-        cout << "Evaluating zero fluctuation 50-60%" << endl; 
-        ObsConstructor(1.0, 210.0, 375.0, 0.0, 0.5, 2.0, "Correc", "zero", "./Data/Systematics/CentralityFluctuationData.root", "Nominal", 15.0);
-        cout << "Evaluating zero fluctuation 60-70%" << endl; 
-        ObsConstructor(1.0, 100.0, 210.0, 0.0, 0.5, 2.0, "Correc", "zero", "./Data/Systematics/CentralityFluctuationData.root", "Nominal", 15.0);
 
         cout << "Evaluating positive fluctuation 50-60%" << endl; 
         ObsConstructor(1.0, 210.0, 375.0, 0.01, 0.5, 2.0, "Correc", "positive", "./Data/Systematics/CentralityFluctuationData.root", "Nominal", 15.0);
@@ -231,6 +262,18 @@ void CentralityFluctuations(){
         ObsConstructor(1.0, 210.0, 375.0, -0.01, 0.5, 2.0, "Correc", "negative", "./Data/Systematics/CentralityFluctuationData.root", "Nominal", 15.0);
         cout << "Evaluating negative fluctuation 60-70%" << endl;
         ObsConstructor(1.0, 100.0, 210.0, -0.01, 0.5, 2.0, "Correc", "negative", "./Data/Systematics/CentralityFluctuationData.root", "Nominal", 15.0);
+
+        // Zero fluctuation is the same as one calculated in main
+        TFile *f_main = TFile::Open("./Data/Figures/main.root", "READ");
+        TFile *f_target = TFile::Open("./Data/Systematics/CentralityFluctuationData.root", "UPDATE");
+        f_target->cd();
+        f_main->Get("v0_55_1")->Write("v0_55_zero");
+        f_main->Get("v0_65_1")->Write("v0_65_zero");
+        f_main->Get("v0pt_ptref_1_5060")->Write("v0pt_ptref_zero_5060");
+        f_main->Get("v0pt_ptref_1_6070")->Write("v0pt_ptref_zero_6070");
+        f_main->Get("sv0pt_ptref_1_5060")->Write("sv0pt_ptref_zero_5060");
+        f_main->Get("sv0pt_ptref_1_6070")->Write("sv0pt_ptref_zero_6070");
+        f_main->Close(); f_target->Close();
     }
 
     TFile *f = TFile::Open("./Data/Systematics/CentralityFluctuationData.root", "READ");
@@ -375,6 +418,38 @@ void CentralityFluctuations(){
         TGraph* gd_sv0pt_5060_negative = new TGraphErrors(N_sv0pt, vec_x_v0pt.data(), vec_y_sv0pt_5060_negative.data(), vec_x_unc_sv0pt.data(), vec_y_unc_sv0pt_5060_negative.data());
         TGraph* gd_sv0pt_6070_negative = new TGraphErrors(N_sv0pt, vec_x_v0pt.data(), vec_y_sv0pt_6070_negative.data(), vec_x_unc_sv0pt.data(), vec_y_unc_sv0pt_6070_negative.data());
 
+    // Calculating v0(pT)v0 difference
+        TGraphErrors *g_v0ptv0_5060_zero = (TGraphErrors*)f->Get("v0ptv0_ptref_zero_5060");
+        TGraphErrors *g_v0ptv0_5060_positive = (TGraphErrors*)f->Get("v0ptv0_ptref_positive_5060");
+        TGraphErrors *g_v0ptv0_5060_negative = (TGraphErrors*)f->Get("v0ptv0_ptref_negative_5060");
+
+        Int_t N_v0ptv0 = g_v0ptv0_5060_zero->GetN();
+        Double_t *x_v0ptv0 = g_v0ptv0_5060_zero->GetX();
+        Double_t *y_v0ptv0_5060_zero = g_v0ptv0_5060_zero->GetY();
+        Double_t *y_v0ptv0_5060_positive = g_v0ptv0_5060_positive->GetY();
+        Double_t *y_v0ptv0_5060_negative = g_v0ptv0_5060_negative->GetY();
+        Double_t *y_unc_v0ptv0_5060_zero = g_v0ptv0_5060_zero->GetEY();
+        Double_t *y_unc_v0ptv0_5060_positive = g_v0ptv0_5060_positive->GetEY();
+        Double_t *y_unc_v0ptv0_5060_negative = g_v0ptv0_5060_negative->GetEY();
+
+        vector<Double_t> vec_x_v0ptv0(N_v0ptv0, 0.0);
+        vector<Double_t> vec_x_unc_v0ptv0(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_v0ptv0_5060_positive(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_v0ptv0_5060_negative(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_unc_v0ptv0_5060_positive(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_unc_v0ptv0_5060_negative(N_v0ptv0, 0.0);
+
+        for (int i=0; i<N_v0ptv0; i++){
+            vec_x_v0ptv0[i] = x_v0ptv0[i];
+            vec_y_v0ptv0_5060_positive[i] = abs(y_v0ptv0_5060_positive[i] - y_v0ptv0_5060_zero[i]);
+            vec_y_v0ptv0_5060_negative[i] = abs(y_v0ptv0_5060_negative[i] - y_v0ptv0_5060_zero[i]);
+            vec_y_unc_v0ptv0_5060_positive[i] = StatisticalUncertainties(y_unc_v0ptv0_5060_positive[i], y_unc_v0ptv0_5060_zero[i]);
+            vec_y_unc_v0ptv0_5060_negative[i] = StatisticalUncertainties(y_unc_v0ptv0_5060_negative[i], y_unc_v0ptv0_5060_zero[i]);
+        }
+
+        TGraph* gd_v0ptv0_5060_positive = new TGraphErrors(N_v0ptv0, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060_positive.data(), vec_x_unc_v0ptv0.data(), vec_y_unc_v0ptv0_5060_positive.data());
+        TGraph* gd_v0ptv0_5060_negative = new TGraphErrors(N_v0ptv0, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060_negative.data(), vec_x_unc_v0ptv0.data(), vec_y_unc_v0ptv0_5060_negative.data());
+
     f->Close();
 
     // Saving TGraphs
@@ -393,22 +468,34 @@ void CentralityFluctuations(){
     gd_sv0pt_6070_positive->SetName("gd_sv0pt_6070_positive"); gd_sv0pt_6070_positive->Write();
     gd_sv0pt_5060_negative->SetName("gd_sv0pt_5060_negative"); gd_sv0pt_5060_negative->Write();
     gd_sv0pt_6070_negative->SetName("gd_sv0pt_6070_negative"); gd_sv0pt_6070_negative->Write();
+    // v0(pT)v0
+    gd_v0ptv0_5060_positive->SetName("gd_v0ptv0_5060_positive"); gd_v0ptv0_5060_positive->Write();
+    gd_v0ptv0_5060_negative->SetName("gd_v0ptv0_5060_negative"); gd_v0ptv0_5060_negative->Write();
     
     sf->Close();
 }
 
 void CorrectionApplication(){
 
+    // Already calculated in main and TrackSelection (must have called this func before)
     if (!filesystem::exists("./Data/Systematics/CorrectionApplicationData.root")){
-        cout << "Evaluating with correction 50-60%" << endl; 
-        ObsConstructor(1.0, 210.0, 375.0, 0.0, 0.5, 2.0, "Correc", "correc", "./Data/Systematics/CorrectionApplicationData.root", "Nominal", 15.0);
-        cout << "Evaluating with correction 60-70%" << endl; // Calculating nominal 60-70%
-        ObsConstructor(1.0, 100.0, 210.0, 0.0, 0.5, 2.0, "Correc", "correc", "./Data/Systematics/CorrectionApplicationData.root", "Nominal", 15.0);
-
-        cout << "Evaluating without correction 50-60%" << endl; 
-        ObsConstructor(1.0, 210.0, 375.0, 0.0, 0.5, 2.0, "noCorrec", "nocorrec", "./Data/Systematics/CorrectionApplicationData.root", "Nominal", 15.0);
-        cout << "Evaluating without correction 60-70%" << endl;
-        ObsConstructor(1.0, 100.0, 210.0, 0.0, 0.5, 2.0, "noCorrec", "nocorrec", "./Data/Systematics/CorrectionApplicationData.root", "Nominal", 15.0);
+        TFile *f_trk = TFile::Open("./Data/Systematics/TrackSelectionData.root", "READ"); // Without corrections
+        TFile *f_main = TFile::Open("./Data/Figures/main.root", "READ"); // With corrections
+        TFile *f_target = new TFile("./Data/Systematics/CorrectionApplicationData.root", "UPDATE");
+        f_target->cd();
+        f_main->Get("v0_55_1")->Write("v0_55_correc");
+        f_main->Get("v0_65_1")->Write("v0_65_correc");
+        f_main->Get("v0pt_ptr1_5060")->Write("v0pt_ptref_correc_5060");
+        f_main->Get("v0pt_ptref_1_6070")->Write("v0pt_ptref_correc_6070");
+        f_main->Get("sv0pt_ptref_1_5060")->Write("sv0pt_ptref_correc_5060");
+        f_main->Get("sv0pt_ptref_1_6070")->Write("sv0pt_ptref_correc_6070");
+        f_trk->Get("v0_55_nominal")->Write("v0_55_nocorrec");
+        f_trk->Get("v0_65_nominal")->Write("v0_65_nocorrec");
+        f_trk->Get("v0pt_ptref_nominal_5060")->Write("v0pt_ptref_nocorrec_5060");
+        f_trk->Get("v0pt_ptref_nominal_6070")->Write("v0pt_ptref_nocorrec_6070");
+        f_trk->Get("sv0pt_ptref_nominal_5060")->Write("sv0pt_ptref_nocorrec_5060");
+        f_trk->Get("sv0pt_ptref_nominal_6070")->Write("sv0pt_ptref_nocorrec_6070");
+        f_main->Close(); f_trk->Close(); f_target->Close();
     }
 
     TFile *f = TFile::Open("./Data/Systematics/CorrectionApplicationData.root", "READ");
@@ -485,6 +572,25 @@ void CorrectionApplication(){
         TGraph* gd_sv0pt_5060_nocorrec = new TGraph(N_sv0pt, vec_x_v0pt.data(), vec_y_sv0pt_5060_nocorrec.data());
         TGraph* gd_sv0pt_6070_nocorrec = new TGraph(N_sv0pt, vec_x_v0pt.data(), vec_y_sv0pt_6070_nocorrec.data());
 
+    // Calculating v0(pT)v0 difference
+        TGraphErrors *g_v0ptv0_5060_correc = (TGraphErrors*)f->Get("v0ptv0_ptref_correc_5060");
+        TGraphErrors *g_v0ptv0_5060_nocorrec = (TGraphErrors*)f->Get("v0ptv0_ptref_nocorrec_5060");
+
+        Int_t N_v0ptv0 = g_v0ptv0_5060_correc->GetN();
+        Double_t *x_v0ptv0 = g_v0ptv0_5060_correc->GetX();
+        Double_t *y_v0ptv0_5060_correc = g_v0ptv0_5060_correc->GetY();
+        Double_t *y_v0ptv0_5060_nocorrec = g_v0ptv0_5060_nocorrec->GetY();
+
+        vector<Double_t> vec_x_v0ptv0(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_v0ptv0_5060_nocorrec(N_v0ptv0, 0.0);
+
+        for (int i=0; i<N_v0ptv0; i++){
+            vec_x_v0ptv0[i] = x_v0ptv0[i];
+            vec_y_v0ptv0_5060_nocorrec[i] = abs(y_v0ptv0_5060_nocorrec[i] - y_v0ptv0_5060_correc[i]);
+        }
+
+        TGraph* gd_v0ptv0_5060_nocorrec = new TGraph(N_v0ptv0, vec_x_v0pt.data(), vec_y_v0ptv0_5060_nocorrec.data());
+
     f->Close();
 
     // Saving TGraphs
@@ -498,6 +604,8 @@ void CorrectionApplication(){
     // v0(pT)/v0
     gd_sv0pt_5060_nocorrec->SetName("gd_sv0pt_5060_nocorrec"); gd_sv0pt_5060_nocorrec->Write();
     gd_sv0pt_6070_nocorrec->SetName("gd_sv0pt_6070_nocorrec"); gd_sv0pt_6070_nocorrec->Write();
+    // v0(pT)v0
+    gd_v0ptv0_5060_nocorrec->SetName("gd_v0ptv0_5060_nocorrec"); gd_v0ptv0_5060_nocorrec->Write();
     
     sf->Close();
 }
@@ -505,11 +613,7 @@ void CorrectionApplication(){
 void ZvertexPosition(){
 
     if (!filesystem::exists("./Data/Systematics/ZvertexPositionData.root")){
-        cout << "Evaluating |pvZ| < 15 cm 50-60%" << endl; // default
-        ObsConstructor(1.0, 210.0, 375.0, 0.0, 0.5, 2.0, "noCorrec", "pvZ_15", "./Data/Systematics/ZvertexPositionData.root", "Nominal", 15.0);
-        cout << "Evaluating |pvZ| < 15 cm 60-70%" << endl; // default
-        ObsConstructor(1.0, 100.0, 210.0, 0.0, 0.5, 2.0, "noCorrec", "pvZ_15", "./Data/Systematics/ZvertexPositionData.root", "Nominal", 15.0);
-
+        
         cout << "Evaluating |pvZ| < 3 cm 50-60%" << endl;
         ObsConstructor(1.0, 210.0, 375.0, 0.0, 0.5, 2.0, "noCorrec", "pvZ_3", "./Data/Systematics/ZvertexPositionData.root", "Nominal", 3.0);
         cout << "Evaluating |pvZ| < 3 cm 60-70%" << endl;
@@ -519,6 +623,18 @@ void ZvertexPosition(){
         ObsConstructor(1.0, 210.0, 375.0, 0.0, 0.5, 2.0, "noCorrec", "pvZ_3_15", "./Data/Systematics/ZvertexPositionData.root", "Nominal", 3.15);
         cout << "Evaluating 3 <|pvZ| < 15 cm 60-70%" << endl;
         ObsConstructor(1.0, 100.0, 210.0, 0.0, 0.5, 2.0, "noCorrec", "pvZ_3_15", "./Data/Systematics/ZvertexPositionData.root", "Nominal", 3.15);
+
+        // Already calculated |pvZ| < 15 cm without corrections in TrackSelection (must have called this func before)
+        TFile *f_trk = TFile::Open("./Data/Systematics/TrackSelectionData.root", "READ");
+        TFile *f_target = TFile::Open("./Data/Systematics/ZvertexPositionData.root", "UPDATE");
+        f_target->cd();
+        f_trk->Get("v0_55_nominal")->Write("v0_55_pvZ_15");
+        f_trk->Get("v0_65_nominal")->Write("v0_65_pvZ_15");
+        f_trk->Get("v0pt_ptref_nominal_5060")->Write("v0pt_ptref_pvZ_15_5060");
+        f_trk->Get("v0pt_ptref_nominal_6070")->Write("v0pt_ptref_pvZ_15_6070");
+        f_trk->Get("sv0pt_ptref_nominal_5060")->Write("sv0pt_ptref_pvZ_15_5060");
+        f_trk->Get("sv0pt_ptref_nominal_6070")->Write("sv0pt_ptref_pvZ_15_6070");
+        f_trk->Close(); f_target->Close();
     }
 
     TFile *f = TFile::Open("./Data/Systematics/ZvertexPositionData.root", "READ");
@@ -663,6 +779,38 @@ void ZvertexPosition(){
         TGraph* gd_sv0pt_5060_pvZ_3_15 = new TGraphErrors(N_sv0pt, vec_x_v0pt.data(), vec_y_sv0pt_5060_pvZ_3_15.data(), vec_x_unc_sv0pt.data(), vec_y_unc_sv0pt_5060_pvZ_3_15.data());
         TGraph* gd_sv0pt_6070_pvZ_3_15 = new TGraphErrors(N_sv0pt, vec_x_v0pt.data(), vec_y_sv0pt_6070_pvZ_3_15.data(), vec_x_unc_sv0pt.data(), vec_y_unc_sv0pt_6070_pvZ_3_15.data());
 
+    // Calculating v0(pT)v0 difference
+        TGraphErrors *g_v0ptv0_5060_pvZ_15 = (TGraphErrors*)f->Get("v0ptv0_ptref_pvZ_15_5060");
+        TGraphErrors *g_v0ptv0_5060_pvZ_3 = (TGraphErrors*)f->Get("v0ptv0_ptref_pvZ_3_5060");
+        TGraphErrors *g_v0ptv0_5060_pvZ_3_15 = (TGraphErrors*)f->Get("v0ptv0_ptref_pvZ_3_15_5060");
+
+        Int_t N_v0ptv0 = g_v0ptv0_5060_pvZ_15->GetN();
+        Double_t *x_v0ptv0 = g_v0ptv0_5060_pvZ_15->GetX();
+        Double_t *y_v0ptv0_5060_pvZ_15 = g_v0ptv0_5060_pvZ_15->GetY();
+        Double_t *y_v0ptv0_5060_pvZ_3 = g_v0ptv0_5060_pvZ_3->GetY();
+        Double_t *y_v0ptv0_5060_pvZ_3_15 = g_v0ptv0_5060_pvZ_3_15->GetY();
+        Double_t *y_unc_v0ptv0_5060_pvZ_15 = g_v0ptv0_5060_pvZ_15->GetEY();
+        Double_t *y_unc_v0ptv0_5060_pvZ_3 = g_v0ptv0_5060_pvZ_3->GetEY();
+        Double_t *y_unc_v0ptv0_5060_pvZ_3_15 = g_v0ptv0_5060_pvZ_3_15->GetEY();
+
+        vector<Double_t> vec_x_v0ptv0(N_v0ptv0, 0.0);
+        vector<Double_t> vec_x_unc_v0ptv0(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_v0ptv0_5060_pvZ_3(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_v0ptv0_5060_pvZ_3_15(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_unc_v0ptv0_5060_pvZ_3(N_v0ptv0, 0.0);
+        vector<Double_t> vec_y_unc_v0ptv0_5060_pvZ_3_15(N_v0ptv0, 0.0);
+
+        for (int i=0; i<N_v0ptv0; i++){
+            vec_x_v0ptv0[i] = x_v0ptv0[i];
+            vec_y_v0ptv0_5060_pvZ_3[i] = abs(y_v0ptv0_5060_pvZ_3[i] - y_v0ptv0_5060_pvZ_15[i]);
+            vec_y_v0ptv0_5060_pvZ_3_15[i] = abs(y_v0ptv0_5060_pvZ_3_15[i] - y_v0ptv0_5060_pvZ_15[i]);
+            vec_y_unc_v0ptv0_5060_pvZ_3[i] = StatisticalUncertainties(y_unc_v0ptv0_5060_pvZ_3[i], y_unc_v0ptv0_5060_pvZ_15[i]);
+            vec_y_unc_v0ptv0_5060_pvZ_3_15[i] = StatisticalUncertainties(y_unc_v0ptv0_5060_pvZ_3_15[i], y_unc_v0ptv0_5060_pvZ_15[i]);
+        }
+
+        TGraph* gd_v0ptv0_5060_pvZ_3 = new TGraphErrors(N_v0ptv0, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060_pvZ_3.data(), vec_x_unc_v0ptv0.data(), vec_y_unc_v0ptv0_5060_pvZ_3.data());
+        TGraph* gd_v0ptv0_5060_pvZ_3_15 = new TGraphErrors(N_v0ptv0, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060_pvZ_3_15.data(), vec_x_unc_v0ptv0.data(), vec_y_unc_v0ptv0_5060_pvZ_3_15.data());
+
     f->Close();
 
     // Saving TGraphs
@@ -681,6 +829,9 @@ void ZvertexPosition(){
     gd_sv0pt_6070_pvZ_3->SetName("gd_sv0pt_6070_pvZ_3"); gd_sv0pt_6070_pvZ_3->Write();
     gd_sv0pt_5060_pvZ_3_15->SetName("gd_sv0pt_5060_pvZ_3_15"); gd_sv0pt_5060_pvZ_3_15->Write();
     gd_sv0pt_6070_pvZ_3_15->SetName("gd_sv0pt_6070_pvZ_3_15"); gd_sv0pt_6070_pvZ_3_15->Write();
+    // v0(pT)v0
+    gd_v0ptv0_5060_pvZ_3->SetName("gd_v0ptv0_5060_pvZ_3"); gd_v0ptv0_5060_pvZ_3->Write();
+    gd_v0ptv0_5060_pvZ_3_15->SetName("gd_v0ptv0_5060_pvZ_3_15"); gd_v0ptv0_5060_pvZ_3_15->Write();
     
     sf->Close();
 }
@@ -738,35 +889,20 @@ void Evaluate_v0(){
     vector<Double_t> vec_uncs_corr(N_v0, 0.0);
     vec_uncs_corr[0] = v0_corr[0]; vec_uncs_corr[1] = v0_corr[1];
 
+    
     // Taking greater value of each uncertainty type and including in the vector of each point
-    // and the in the vector of each unc. type
+    // and the in the vector of each unc. type  
     for (int i=0; i<nVar-1; i++){
         // Centrality = 55%
-        if (vec_uncs_v0_holder_one[i][0] > vec_uncs_v0_holder_two[i][0]){
-            vec_uncs_v0_55[i+1] = vec_uncs_v0_holder_one[i][0];
-            if (i == 0) vec_uncs_trk[0] = vec_uncs_v0_holder_one[i][0];
-            if (i == 1) vec_uncs_cent[0] = vec_uncs_v0_holder_one[i][0];
-            if (i == 2) vec_uncs_pvZ[0] = vec_uncs_v0_holder_one[i][0];
-        } 
-        if (vec_uncs_v0_holder_one[i][0] < vec_uncs_v0_holder_two[i][0]){
-            vec_uncs_v0_55[i+1] = vec_uncs_v0_holder_two[i][0];
-            if (i == 0) vec_uncs_trk[0] = vec_uncs_v0_holder_two[i][0];
-            if (i == 1) vec_uncs_cent[0] = vec_uncs_v0_holder_two[i][0];
-            if (i == 2) vec_uncs_pvZ[0] = vec_uncs_v0_holder_two[i][0];
-        }
+        vec_uncs_v0_55[i+1] = 0.5*(vec_uncs_v0_holder_one[i][0] + vec_uncs_v0_holder_two[i][0]);
+        if (i == 0) vec_uncs_trk[0] = 0.5*(vec_uncs_v0_holder_one[i][0] + vec_uncs_v0_holder_two[i][0]);
+        if (i == 1) vec_uncs_cent[0] = 0.5*(vec_uncs_v0_holder_one[i][0] + vec_uncs_v0_holder_two[i][0]);
+        if (i == 2) vec_uncs_pvZ[0] = 0.5*(vec_uncs_v0_holder_one[i][0] + vec_uncs_v0_holder_two[i][0]);
         // Centrality = 65%
-        if (vec_uncs_v0_holder_one[i][1] > vec_uncs_v0_holder_two[i][1]){
-            vec_uncs_v0_65[i+1] = vec_uncs_v0_holder_one[i][1];
-            if (i == 0) vec_uncs_trk[1] = vec_uncs_v0_holder_one[i][1];
-            if (i == 1) vec_uncs_cent[1] = vec_uncs_v0_holder_one[i][1];
-            if (i == 2) vec_uncs_pvZ[1] = vec_uncs_v0_holder_one[i][1];
-        }
-        if (vec_uncs_v0_holder_one[i][1] < vec_uncs_v0_holder_two[i][1]){
-            vec_uncs_v0_65[i+1] = vec_uncs_v0_holder_two[i][1];
-            if (i == 0) vec_uncs_trk[1] = vec_uncs_v0_holder_two[i][1];
-            if (i == 1) vec_uncs_cent[1] = vec_uncs_v0_holder_two[i][1];
-            if (i == 2) vec_uncs_pvZ[1] = vec_uncs_v0_holder_two[i][1];
-        }
+        vec_uncs_v0_65[i+1] = 0.5*(vec_uncs_v0_holder_one[i][1] + vec_uncs_v0_holder_two[i][1]);
+        if (i == 0) vec_uncs_trk[1] = 0.5*(vec_uncs_v0_holder_one[i][1] + vec_uncs_v0_holder_two[i][1]);
+        if (i == 1) vec_uncs_cent[1] = 0.5*(vec_uncs_v0_holder_one[i][1] + vec_uncs_v0_holder_two[i][1]);
+        if (i == 2) vec_uncs_pvZ[1] = 0.5*(vec_uncs_v0_holder_one[i][1] + vec_uncs_v0_holder_two[i][1]);
     }
 
     // Taking the value of total uncertainty by summing them as sqrt(unc1^2 + unc2^2)
@@ -794,7 +930,7 @@ void Evaluate_v0(){
 
     vec_v0[0] = v0_55[0]; vec_v0[1] = v0_65[0];
     vec_x_v0[0] = 55.0; vec_x_v0[1] = 65.0;
-    vec_ex[0] = 0.1; vec_ex[1] = 0.1;
+    vec_ex[0] = 0.3; vec_ex[1] = 0.3;
 
     // Creating a new TGraphErrors containing v0 values from the main file and the systematic uncertainties in EY
     TGraphErrors *gr_v0_total = new TGraphErrors(N_v0, vec_x_v0.data(), vec_v0.data(), vec_ex.data(), vec_unc_v0.data());
@@ -848,7 +984,7 @@ void Evaluate_v0pT(){
         g->SetTitle(title);
         g->SetMarkerStyle(20);
         g->SetMarkerSize(0.8);
-        g->Fit("pol1", "Q");
+        g->Fit("pol2", "Q");
         g->Draw("AP");
     };
 
@@ -880,18 +1016,18 @@ void Evaluate_v0pT(){
     delete c_6070;
 
     // Getting fit parameters
-    TF1 *fit_v0pt_5060_trk_loose = gr_v0pt_5060_trk_loose->GetFunction("pol1"); // 50-60%
-    TF1 *fit_v0pt_5060_trk_tight = gr_v0pt_5060_trk_tight->GetFunction("pol1");
-    TF1 *fit_v0pt_5060_cent_positive = gr_v0pt_5060_cent_positive->GetFunction("pol1");
-    TF1 *fit_v0pt_5060_cent_negative = gr_v0pt_5060_cent_negative->GetFunction("pol1");
-    TF1 *fit_v0pt_5060_pvZ_3 = gr_v0pt_5060_pvZ_3->GetFunction("pol1");
-    TF1 *fit_v0pt_5060_pvZ_3_15 = gr_v0pt_5060_pvZ_3_15->GetFunction("pol1");
-    TF1 *fit_v0pt_6070_trk_loose = gr_v0pt_6070_trk_loose->GetFunction("pol1"); // 60-70%
-    TF1 *fit_v0pt_6070_trk_tight = gr_v0pt_6070_trk_tight->GetFunction("pol1");
-    TF1 *fit_v0pt_6070_cent_positive = gr_v0pt_6070_cent_positive->GetFunction("pol1");
-    TF1 *fit_v0pt_6070_cent_negative = gr_v0pt_6070_cent_negative->GetFunction("pol1");
-    TF1 *fit_v0pt_6070_pvZ_3 = gr_v0pt_6070_pvZ_3->GetFunction("pol1");
-    TF1 *fit_v0pt_6070_pvZ_3_15 = gr_v0pt_6070_pvZ_3_15->GetFunction("pol1");
+    TF1 *fit_v0pt_5060_trk_loose = gr_v0pt_5060_trk_loose->GetFunction("pol2"); // 50-60%
+    TF1 *fit_v0pt_5060_trk_tight = gr_v0pt_5060_trk_tight->GetFunction("pol2");
+    TF1 *fit_v0pt_5060_cent_positive = gr_v0pt_5060_cent_positive->GetFunction("pol2");
+    TF1 *fit_v0pt_5060_cent_negative = gr_v0pt_5060_cent_negative->GetFunction("pol2");
+    TF1 *fit_v0pt_5060_pvZ_3 = gr_v0pt_5060_pvZ_3->GetFunction("pol2");
+    TF1 *fit_v0pt_5060_pvZ_3_15 = gr_v0pt_5060_pvZ_3_15->GetFunction("pol2");
+    TF1 *fit_v0pt_6070_trk_loose = gr_v0pt_6070_trk_loose->GetFunction("pol2"); // 60-70%
+    TF1 *fit_v0pt_6070_trk_tight = gr_v0pt_6070_trk_tight->GetFunction("pol2");
+    TF1 *fit_v0pt_6070_cent_positive = gr_v0pt_6070_cent_positive->GetFunction("pol2");
+    TF1 *fit_v0pt_6070_cent_negative = gr_v0pt_6070_cent_negative->GetFunction("pol2");
+    TF1 *fit_v0pt_6070_pvZ_3 = gr_v0pt_6070_pvZ_3->GetFunction("pol2");
+    TF1 *fit_v0pt_6070_pvZ_3_15 = gr_v0pt_6070_pvZ_3_15->GetFunction("pol2");
 
     vector<TF1*> vec_fits_5060_one(nVar-1, nullptr); // One: loose, positive, 3
         vec_fits_5060_one[0] = fit_v0pt_5060_trk_loose;
@@ -910,7 +1046,7 @@ void Evaluate_v0pT(){
         vec_fits_6070_two[1] = fit_v0pt_6070_cent_negative;
         vec_fits_6070_two[2] = fit_v0pt_6070_pvZ_3_15;
 
-     // Getting diff. values of each TGraph
+    // Getting diff. values of each TGraph
     Double_t *v0pt_5060_corr = gr_v0pt_5060_correc->GetY(); // 50-60%
     Double_t *v0pt_5060_trk_loose = gr_v0pt_5060_trk_loose->GetY();
     Double_t *v0pt_5060_trk_tight = gr_v0pt_5060_trk_tight->GetY();
@@ -937,7 +1073,7 @@ void Evaluate_v0pT(){
     TGraphErrors *gr_v0pt_5060 = (TGraphErrors*)f_main->Get("v0pt_ptref_1_5060");
     TGraphErrors *gr_v0pt_6070 = (TGraphErrors*)f_main->Get("v0pt_ptref_1_6070");
 
-    Double_t *x_v0pt = gr_v0pt_5060->GetX();
+    Double_t *x_v0pt = gr_v0pt_6070->GetX(); // CHANGE HERE
     Double_t *y_v0pt_5060 = gr_v0pt_5060->GetY();
     Double_t *y_v0pt_6070 = gr_v0pt_6070->GetY();
 
@@ -963,8 +1099,8 @@ void Evaluate_v0pT(){
         }
     }
 
-    vector<Double_t> vec_ex_left_v0pt(N, 0.0); for (int i=0; i<N; i++) vec_ex_left_v0pt[i] = vec_x_v0pt[i] - (vec_x_v0pt[i] / 1.025);
-    vector<Double_t> vec_ex_right_v0pt(N, 0.0); for (int i=0; i<N; i++) vec_ex_right_v0pt[i] = (vec_x_v0pt[i] * 1.025) - vec_x_v0pt[i];
+    vector<Double_t> vec_ex_left_v0pt(N, 0.0); for (int i=0; i<N; i++) vec_ex_left_v0pt[i] = vec_x_v0pt[i] - (vec_x_v0pt[i] / 1.05);
+    vector<Double_t> vec_ex_right_v0pt(N, 0.0); for (int i=0; i<N; i++) vec_ex_right_v0pt[i] = (vec_x_v0pt[i] * 1.05) - vec_x_v0pt[i];
     vector<Double_t> vec_unc_v0pt_5060_total = VecQuadSum(vec_uncs_v0pt_5060);
     vector<Double_t> vec_unc_v0pt_6070_total = VecQuadSum(vec_uncs_v0pt_6070);
 
@@ -1029,7 +1165,7 @@ void Evaluate_sv0pT(){
         g->SetTitle(title);
         g->SetMarkerStyle(20);
         g->SetMarkerSize(0.8);
-        g->Fit("pol1", "Q");
+        g->Fit("pol2", "Q");
         g->Draw("AP");
     };
 
@@ -1060,18 +1196,18 @@ void Evaluate_sv0pT(){
     delete cs_6070;
 
     // Getting fit parameters
-    TF1 *fit_sv0pt_5060_trk_loose = gr_sv0pt_5060_trk_loose->GetFunction("pol1"); // 50-60%
-    TF1 *fit_sv0pt_5060_trk_tight = gr_sv0pt_5060_trk_tight->GetFunction("pol1");
-    TF1 *fit_sv0pt_5060_cent_positive = gr_sv0pt_5060_cent_positive->GetFunction("pol1");
-    TF1 *fit_sv0pt_5060_cent_negative = gr_sv0pt_5060_cent_negative->GetFunction("pol1");
-    TF1 *fit_sv0pt_5060_pvZ_3 = gr_sv0pt_5060_pvZ_3->GetFunction("pol1");
-    TF1 *fit_sv0pt_5060_pvZ_3_15 = gr_sv0pt_5060_pvZ_3_15->GetFunction("pol1");
-    TF1 *fit_sv0pt_6070_trk_loose = gr_sv0pt_6070_trk_loose->GetFunction("pol1"); // 60-70%
-    TF1 *fit_sv0pt_6070_trk_tight = gr_sv0pt_6070_trk_tight->GetFunction("pol1");
-    TF1 *fit_sv0pt_6070_cent_positive = gr_sv0pt_6070_cent_positive->GetFunction("pol1");
-    TF1 *fit_sv0pt_6070_cent_negative = gr_sv0pt_6070_cent_negative->GetFunction("pol1");
-    TF1 *fit_sv0pt_6070_pvZ_3 = gr_sv0pt_6070_pvZ_3->GetFunction("pol1");
-    TF1 *fit_sv0pt_6070_pvZ_3_15 = gr_sv0pt_6070_pvZ_3_15->GetFunction("pol1");
+    TF1 *fit_sv0pt_5060_trk_loose = gr_sv0pt_5060_trk_loose->GetFunction("pol2"); // 50-60%
+    TF1 *fit_sv0pt_5060_trk_tight = gr_sv0pt_5060_trk_tight->GetFunction("pol2");
+    TF1 *fit_sv0pt_5060_cent_positive = gr_sv0pt_5060_cent_positive->GetFunction("pol2");
+    TF1 *fit_sv0pt_5060_cent_negative = gr_sv0pt_5060_cent_negative->GetFunction("pol2");
+    TF1 *fit_sv0pt_5060_pvZ_3 = gr_sv0pt_5060_pvZ_3->GetFunction("pol2");
+    TF1 *fit_sv0pt_5060_pvZ_3_15 = gr_sv0pt_5060_pvZ_3_15->GetFunction("pol2");
+    TF1 *fit_sv0pt_6070_trk_loose = gr_sv0pt_6070_trk_loose->GetFunction("pol2"); // 60-70%
+    TF1 *fit_sv0pt_6070_trk_tight = gr_sv0pt_6070_trk_tight->GetFunction("pol2");
+    TF1 *fit_sv0pt_6070_cent_positive = gr_sv0pt_6070_cent_positive->GetFunction("pol2");
+    TF1 *fit_sv0pt_6070_cent_negative = gr_sv0pt_6070_cent_negative->GetFunction("pol2");
+    TF1 *fit_sv0pt_6070_pvZ_3 = gr_sv0pt_6070_pvZ_3->GetFunction("pol2");
+    TF1 *fit_sv0pt_6070_pvZ_3_15 = gr_sv0pt_6070_pvZ_3_15->GetFunction("pol2");
 
     vector<TF1*> vec_fits_5060_one(nVar-1, nullptr); // One: loose, positive, 3
         vec_fits_5060_one[0] = fit_sv0pt_5060_trk_loose;
@@ -1143,8 +1279,8 @@ void Evaluate_sv0pT(){
         }
     }
 
-    vector<Double_t> vec_ex_left_sv0pt(N, 0.0); for (int i=0; i<N; i++) vec_ex_left_sv0pt[i] = vec_x_sv0pt[i] - (vec_x_sv0pt[i] / 1.025);
-    vector<Double_t> vec_ex_right_sv0pt(N, 0.0); for (int i=0; i<N; i++) vec_ex_right_sv0pt[i] = (vec_x_sv0pt[i] * 1.025) - vec_x_sv0pt[i];
+    vector<Double_t> vec_ex_left_sv0pt(N, 0.0); for (int i=0; i<N; i++) vec_ex_left_sv0pt[i] = vec_x_sv0pt[i] - (vec_x_sv0pt[i] / 1.05);
+    vector<Double_t> vec_ex_right_sv0pt(N, 0.0); for (int i=0; i<N; i++) vec_ex_right_sv0pt[i] = (vec_x_sv0pt[i] * 1.05) - vec_x_sv0pt[i];
     vector<Double_t> vec_unc_sv0pt_5060_total = VecQuadSum(vec_uncs_sv0pt_5060);
     vector<Double_t> vec_unc_sv0pt_6070_total = VecQuadSum(vec_uncs_sv0pt_6070);
 
@@ -1170,5 +1306,123 @@ void Evaluate_sv0pT(){
     gr_sv0pt_6070_trk->SetName("gr_sv0pt_6070_trk"); gr_sv0pt_6070_trk->Write();
     gr_sv0pt_6070_cent->SetName("gr_sv0pt_6070_cent"); gr_sv0pt_6070_cent->Write();
     gr_sv0pt_6070_pvZ->SetName("gr_sv0pt_6070_pvZ"); gr_sv0pt_6070_pvZ->Write();
+    sf->Close();
+}
+
+void Evaluate_v0pTv0(){ // Only for 50-60% centrality
+
+    // Opening diff. files
+    TFile *f_corr = TFile::Open("./Data/Systematics/CorrectionApplicationUnc.root");
+    TFile *f_trk = TFile::Open("./Data/Systematics/TrackSelectionUnc.root");
+    TFile *f_cent = TFile::Open("./Data/Systematics/CentralityFluctuationUnc.root");
+    TFile *f_pvZ = TFile::Open("./Data/Systematics/ZvertexPositionUnc.root");
+
+    // Loading TGraphs from TFiles, each one has N points
+    TGraph *gr_v0ptv0_5060_correc = (TGraph*)f_corr->Get("gd_v0ptv0_5060_nocorrec"); // 50-60%
+    TGraphErrors *gr_v0ptv0_5060_trk_loose = (TGraphErrors*)f_trk->Get("gd_v0ptv0_5060_loose");
+    TGraphErrors *gr_v0ptv0_5060_trk_tight = (TGraphErrors*)f_trk->Get("gd_v0ptv0_5060_tight");
+    TGraphErrors *gr_v0ptv0_5060_cent_positive = (TGraphErrors*)f_cent->Get("gd_v0ptv0_5060_positive");
+    TGraphErrors *gr_v0ptv0_5060_cent_negative = (TGraphErrors*)f_cent->Get("gd_v0ptv0_5060_negative");
+    TGraphErrors *gr_v0ptv0_5060_pvZ_3 = (TGraphErrors*)f_pvZ->Get("gd_v0ptv0_5060_pvZ_3");
+    TGraphErrors *gr_v0ptv0_5060_pvZ_3_15 = (TGraphErrors*)f_pvZ->Get("gd_v0ptv0_5060_pvZ_3_15");
+
+    int N = gr_v0ptv0_5060_correc->GetN();
+    int nVar = 4;
+
+    gStyle->SetOptFit(1111);
+    
+    auto PlotAndFit = [&](TCanvas* c, int pad, TGraph* g, TString title) {
+        c->cd(pad);
+        gPad->SetBottomMargin(0.12);
+        gPad->SetLeftMargin(0.12);
+        g->SetTitle(title);
+        g->SetMarkerStyle(20);
+        g->SetMarkerSize(0.8);
+        g->Fit("pol2", "Q");
+        g->Draw("AP");
+    };
+
+    TCanvas *c_5060 = new TCanvas("c_5060", "Sistematicos v0pTv0 50-60%", 1200, 800);
+    c_5060->Divide(3, 2);
+
+    PlotAndFit(c_5060, 1, gr_v0ptv0_5060_trk_loose,    "50-60% Trk Loose");
+    PlotAndFit(c_5060, 2, gr_v0ptv0_5060_trk_tight,    "50-60% Trk Tight");
+    PlotAndFit(c_5060, 3, gr_v0ptv0_5060_cent_positive,"50-60% Cent Positive");
+    PlotAndFit(c_5060, 4, gr_v0ptv0_5060_cent_negative,"50-60% Cent Negative");
+    PlotAndFit(c_5060, 5, gr_v0ptv0_5060_pvZ_3,        "50-60% pvZ < 3");
+    PlotAndFit(c_5060, 6, gr_v0ptv0_5060_pvZ_3_15,     "50-60% 3 < pvZ < 15");
+
+    c_5060->SaveAs("./Plots/Systematics/Systematics_Fits_v0pTv0_5060.pdf");
+    delete c_5060;
+
+    // Getting fit parameters
+    TF1 *fit_v0ptv0_5060_trk_loose = gr_v0ptv0_5060_trk_loose->GetFunction("pol2");
+    TF1 *fit_v0ptv0_5060_trk_tight = gr_v0ptv0_5060_trk_tight->GetFunction("pol2");
+    TF1 *fit_v0ptv0_5060_cent_positive = gr_v0ptv0_5060_cent_positive->GetFunction("pol2");
+    TF1 *fit_v0ptv0_5060_cent_negative = gr_v0ptv0_5060_cent_negative->GetFunction("pol2");
+    TF1 *fit_v0ptv0_5060_pvZ_3 = gr_v0ptv0_5060_pvZ_3->GetFunction("pol2");
+    TF1 *fit_v0ptv0_5060_pvZ_3_15 = gr_v0ptv0_5060_pvZ_3_15->GetFunction("pol2");
+   
+    vector<TF1*> vec_fits_5060_one(nVar-1, nullptr); // One: loose, positive, 3
+        vec_fits_5060_one[0] = fit_v0ptv0_5060_trk_loose;
+        vec_fits_5060_one[1] = fit_v0ptv0_5060_cent_positive;
+        vec_fits_5060_one[2] = fit_v0ptv0_5060_pvZ_3;
+    vector<TF1*> vec_fits_5060_two(nVar-1, nullptr); // Two: tight, negative, 3_15
+        vec_fits_5060_two[0] = fit_v0ptv0_5060_trk_tight;
+        vec_fits_5060_two[1] = fit_v0ptv0_5060_cent_negative;
+        vec_fits_5060_two[2] = fit_v0ptv0_5060_pvZ_3_15;
+   
+     // Getting diff. values of each TGraph
+    Double_t *v0ptv0_5060_corr = gr_v0ptv0_5060_correc->GetY();
+    Double_t *v0ptv0_5060_trk_loose = gr_v0ptv0_5060_trk_loose->GetY();
+    Double_t *v0ptv0_5060_trk_tight = gr_v0ptv0_5060_trk_tight->GetY();
+    Double_t *v0ptv0_5060_cent_positive = gr_v0ptv0_5060_cent_positive->GetY();
+    Double_t *v0ptv0_5060_cent_negative = gr_v0ptv0_5060_cent_negative->GetY();
+    Double_t *v0ptv0_5060_pvZ_3 = gr_v0ptv0_5060_pvZ_3->GetY();
+    Double_t *v0ptv0_5060_pvZ_3_15 = gr_v0ptv0_5060_pvZ_3_15->GetY();
+   
+    vector<Double_t> vec_unc_v0ptv0_5060_corr(N, 0.0);
+        vec_unc_v0ptv0_5060_corr.assign(v0ptv0_5060_corr, v0ptv0_5060_corr + N);
+    
+    f_corr->Close(); f_trk->Close(); f_cent->Close(); f_pvZ->Close(); 
+
+    TFile *f_main = TFile::Open("./Data/Figures/main.root");
+    TGraphErrors *gr_v0ptv0_5060 = (TGraphErrors*)f_main->Get("v0ptv0_ptref_1_5060");
+
+    Double_t *x_v0ptv0 = gr_v0ptv0_5060->GetX();
+    Double_t *y_v0ptv0_5060 = gr_v0ptv0_5060->GetY();
+
+    vector<Double_t> vec_x_v0ptv0(N, 0.0); vec_x_v0ptv0.assign(x_v0ptv0, x_v0ptv0 + N);
+    vector<Double_t> vec_y_v0ptv0_5060(N, 0.0); vec_y_v0ptv0_5060.assign(y_v0ptv0_5060, y_v0ptv0_5060 + N);
+
+    vector<vector<Double_t>> vec_uncs_v0ptv0_5060(nVar, vector<Double_t>(N, 0.0));
+
+    for (int i=0; i<nVar; i++){
+        for (int j=0; j<N; j++){
+            if (i==0){
+                vec_uncs_v0ptv0_5060[i][j] = vec_unc_v0ptv0_5060_corr[j];
+            } else{
+                if (vec_fits_5060_one[i-1]->Eval(vec_x_v0ptv0[j]) > vec_fits_5060_two[i-1]->Eval(vec_x_v0ptv0[j])) vec_uncs_v0ptv0_5060[i][j] = vec_fits_5060_one[i-1]->Eval(vec_x_v0ptv0[j]);
+                if (vec_fits_5060_one[i-1]->Eval(vec_x_v0ptv0[j]) < vec_fits_5060_two[i-1]->Eval(vec_x_v0ptv0[j])) vec_uncs_v0ptv0_5060[i][j] = vec_fits_5060_two[i-1]->Eval(vec_x_v0ptv0[j]);
+            }
+        }
+    }
+
+    vector<Double_t> vec_ex_left_v0ptv0(N, 0.0); for (int i=0; i<N; i++) vec_ex_left_v0ptv0[i] = vec_x_v0ptv0[i] - (vec_x_v0ptv0[i] / 1.05);
+    vector<Double_t> vec_ex_right_v0ptv0(N, 0.0); for (int i=0; i<N; i++) vec_ex_right_v0ptv0[i] = (vec_x_v0ptv0[i] * 1.05) - vec_x_v0ptv0[i];
+    vector<Double_t> vec_unc_v0ptv0_5060_total = VecQuadSum(vec_uncs_v0ptv0_5060);
+
+    TGraphAsymmErrors *gr_v0ptv0_5060_total = new TGraphAsymmErrors(N, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060.data(), vec_ex_left_v0ptv0.data(), vec_ex_right_v0ptv0.data(), vec_unc_v0ptv0_5060_total.data(), vec_unc_v0ptv0_5060_total.data()); // 50-60%
+    TGraphAsymmErrors *gr_v0ptv0_5060_corr = new TGraphAsymmErrors(N, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060.data(), vec_ex_left_v0ptv0.data(), vec_ex_right_v0ptv0.data(), vec_uncs_v0ptv0_5060[0].data(), vec_uncs_v0ptv0_5060[0].data());
+    TGraphAsymmErrors *gr_v0ptv0_5060_trk = new TGraphAsymmErrors(N, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060.data(), vec_ex_left_v0ptv0.data(), vec_ex_right_v0ptv0.data(), vec_uncs_v0ptv0_5060[1].data(), vec_uncs_v0ptv0_5060[1].data());
+    TGraphAsymmErrors *gr_v0ptv0_5060_cent = new TGraphAsymmErrors(N, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060.data(), vec_ex_left_v0ptv0.data(), vec_ex_right_v0ptv0.data(), vec_uncs_v0ptv0_5060[2].data(), vec_uncs_v0ptv0_5060[2].data());
+    TGraphAsymmErrors *gr_v0ptv0_5060_pvZ = new TGraphAsymmErrors(N, vec_x_v0ptv0.data(), vec_y_v0ptv0_5060.data(), vec_ex_left_v0ptv0.data(), vec_ex_right_v0ptv0.data(), vec_uncs_v0ptv0_5060[3].data(), vec_uncs_v0ptv0_5060[3].data());
+
+    TFile *sf = new TFile("./Data/Systematics/SystUncs.root", "UPDATE");
+    gr_v0ptv0_5060_total->SetName("gr_v0ptv0_5060_total"); gr_v0ptv0_5060_total->Write(); // 50-60%
+    gr_v0ptv0_5060_corr->SetName("gr_v0ptv0_5060_corr"); gr_v0ptv0_5060_corr->Write();
+    gr_v0ptv0_5060_trk->SetName("gr_v0ptv0_5060_trk"); gr_v0ptv0_5060_trk->Write();
+    gr_v0ptv0_5060_cent->SetName("gr_v0ptv0_5060_cent"); gr_v0ptv0_5060_cent->Write();
+    gr_v0ptv0_5060_pvZ->SetName("gr_v0ptv0_5060_pvZ"); gr_v0ptv0_5060_pvZ->Write();
     sf->Close();
 }
