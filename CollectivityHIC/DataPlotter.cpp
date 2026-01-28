@@ -27,6 +27,8 @@ void customize_TGraph(TGraph *g, const char* title, float xmin, float xmax, floa
     g->SetMarkerColor(color);
     g->SetLineColor(color);
     g->SetMarkerSize(size);
+    g->SetFillColorAlpha(color, 0.3);
+    g->SetFillStyle(1001);
 }
 
 void customize_TGraphAsymmErrors(TGraphAsymmErrors *g, const char* title, float xmin, float xmax, float ymin, float ymax, int style, int color, float size){
@@ -34,6 +36,7 @@ void customize_TGraphAsymmErrors(TGraphAsymmErrors *g, const char* title, float 
     g->GetXaxis()->SetLimits(xmin, xmax); // X axis range
     g->GetXaxis()->CenterTitle(); // Center axis label
     g->GetYaxis()->CenterTitle(); // Center axis label
+    g->GetYaxis()->SetTitleFont(42);
     g->SetMinimum(ymin); // Y axis range
     g->SetMaximum(ymax); // Y axis range
     g->SetMarkerStyle(style);
@@ -49,6 +52,7 @@ void customize_TGraphErrors(TGraphErrors *g, const char* title, float xmin, floa
     g->GetXaxis()->SetLimits(xmin, xmax); // X axis range
     g->GetXaxis()->CenterTitle(); // Center axis label
     g->GetYaxis()->CenterTitle(); // Center axis label
+    g->GetYaxis()->SetTitleFont(42);
     g->SetMinimum(ymin); // Y axis range
     g->SetMaximum(ymax); // Y axis range
     g->SetMarkerStyle(style);
@@ -196,9 +200,9 @@ void DoPlotRefsEta(){
     // pT-ref: [1.0, 5.0]
     TGraphErrors *gr_v0ptv0_ptref_3 = (TGraphErrors*)f_main->Get("v0ptv0_ptref_3_5060");
     // EDITING OUR DATA TGRAPH
-    customize_TGraphErrors(gr_v0ptv0_ptref_1, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 20, 2, 1.0);
-    customize_TGraphErrors(gr_v0ptv0_ptref_2, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 21, 4, 1.0);
-    customize_TGraphErrors(gr_v0ptv0_ptref_3, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 22, 6, 1.0);
+    customize_TGraphErrors(gr_v0ptv0_ptref_1, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 20, 2, 1.0);
+    customize_TGraphErrors(gr_v0ptv0_ptref_2, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 21, 4, 1.0);
+    customize_TGraphErrors(gr_v0ptv0_ptref_3, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 22, 6, 1.0);
 
     // READING TGRAPHS FILE FROM ATLAS DATA
     auto p_v0ptv0_ptref_ATLAS_1 = csvToTGraph("./Data/Figures_ATLAS/v0ptv0_ptref_ATLAS_1.csv");
@@ -211,20 +215,20 @@ void DoPlotRefsEta(){
         TGraphAsymmErrors *gr_v0ptv0_ptref_ATLAS_3 = p_v0ptv0_ptref_ATLAS_3.first;
         TGraphAsymmErrors *gr_v0ptv0_ptref_ATLAS_3_unc = p_v0ptv0_ptref_ATLAS_3.second;
     // EDITING ATLAS DATA TGRAPH
-    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_1, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 24, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_2, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 25, 4, 1.0);
-    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_3, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 26, 6, 1.0);
+    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_1, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 24, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_2, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 25, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_3, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 26, 6, 1.0);
 
-    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_1_unc, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 24, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_2_unc, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 25, 4, 1.0);
-    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_3_unc, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 26, 6, 1.0);
+    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_1_unc, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 24, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_2_unc, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 25, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_v0ptv0_ptref_ATLAS_3_unc, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 26, 6, 1.0);
 
     TGraphErrors *gr_v0ptv0_ptref_1_unc = (TGraphErrors*)f_unc_ptref1->Get("gr_v0ptv0_5060_total");
     TGraphErrors *gr_v0ptv0_ptref_2_unc = (TGraphErrors*)f_unc_ptref2->Get("gr_v0ptv0_5060_total");
     TGraphErrors *gr_v0ptv0_ptref_3_unc = (TGraphErrors*)f_unc_ptref3->Get("gr_v0ptv0_5060_total");
-    customize_TGraphErrors(gr_v0ptv0_ptref_1_unc, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 20, 2, 1.0);
-    customize_TGraphErrors(gr_v0ptv0_ptref_2_unc, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 21, 4, 1.0);
-    customize_TGraphErrors(gr_v0ptv0_ptref_3_unc, " ; p_{T} [GeV]; v_{0}(p_{T})v_{0}x10^{3}", 0.0, 10.0, -2.0, 9.0, 22, 6, 1.0);
+    customize_TGraphErrors(gr_v0ptv0_ptref_1_unc, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 20, 2, 1.0);
+    customize_TGraphErrors(gr_v0ptv0_ptref_2_unc, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 21, 4, 1.0);
+    customize_TGraphErrors(gr_v0ptv0_ptref_3_unc, " ; p_{T} [GeV]; (#LT#deltan(p_{T})#delta[p_{T}]#GT/#LTn(p_{T})#GT#LTp_{T}#GT)x10^{3}", 0.0, 10.0, -2.0, 11.0, 22, 6, 1.0);
 
 
     // CONFIGURING TLEGENDS
@@ -234,7 +238,7 @@ void DoPlotRefsEta(){
     leg_v0ptv0_ptref_title->AddEntry((TObject*)0, "50-60% Centrality", "");
     leg_v0ptv0_ptref_title->SetBorderSize(0);
     leg_v0ptv0_ptref_title->SetFillStyle(0);
-    auto leg_v0ptv0_ptref = new TLegend(0.103, 0.82, 0.5, 0.68);
+    auto leg_v0ptv0_ptref = new TLegend(0.12, 0.82, 0.5, 0.68);
     leg_v0ptv0_ptref->SetTextSize(0.030);
     leg_v0ptv0_ptref->AddEntry(gr_v0ptv0_ptref_1, "CMS OpenData 2.76 TeV: 0.5-2 GeV", "pfl");
     leg_v0ptv0_ptref->AddEntry(gr_v0ptv0_ptref_2, "CMS OpenData 2.76 TeV: 0.5-5 GeV", "pfl");
@@ -242,7 +246,7 @@ void DoPlotRefsEta(){
     leg_v0ptv0_ptref->SetBorderSize(0);
     leg_v0ptv0_ptref->SetFillStyle(0);
 
-    auto leg_v0ptv0_ptref2 = new TLegend(0.4, 0.25, 0.9, 0.12);
+    auto leg_v0ptv0_ptref2 = new TLegend(0.46, 0.25, 0.85, 0.12);
     leg_v0ptv0_ptref2->SetTextSize(0.030);
     leg_v0ptv0_ptref2->AddEntry(gr_v0ptv0_ptref_ATLAS_1, "ATLAS 5.02 TeV: 0.5-2 GeV", "pfl");
     leg_v0ptv0_ptref2->AddEntry(gr_v0ptv0_ptref_ATLAS_2, "ATLAS 5.02 TeV: 0.5-5 GeV", "pfl");
@@ -287,17 +291,17 @@ void DoPlotRefsEta(){
     // pT-ref: [1.0, 5.0]
     TGraphErrors *gr_v0pt_ptref_3 = (TGraphErrors*)f_main->Get("v0pt_ptref_3_5060");
     // EDITING OUR DATA TGRAPH
-    customize_TGraphErrors(gr_v0pt_ptref_1, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 20, 2, 1.0);
-    customize_TGraphErrors(gr_v0pt_ptref_2, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 21, 4, 1.0);
-    customize_TGraphErrors(gr_v0pt_ptref_3, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 22, 6, 1.0);
+    customize_TGraphErrors(gr_v0pt_ptref_1, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 20, 2, 1.0);
+    customize_TGraphErrors(gr_v0pt_ptref_2, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 21, 4, 1.0);
+    customize_TGraphErrors(gr_v0pt_ptref_3, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 22, 6, 1.0);
 
     TGraphErrors *gr_v0pt_ptref_1_unc = (TGraphErrors*)f_unc_ptref1->Get("gr_v0pt_5060_total");
     TGraphErrors *gr_v0pt_ptref_2_unc = (TGraphErrors*)f_unc_ptref2->Get("gr_v0pt_5060_total");
     TGraphErrors *gr_v0pt_ptref_3_unc = (TGraphErrors*)f_unc_ptref3->Get("gr_v0pt_5060_total");
 
-    customize_TGraphErrors(gr_v0pt_ptref_1_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 20, 2, 1.0);
-    customize_TGraphErrors(gr_v0pt_ptref_2_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 21, 4, 1.0);
-    customize_TGraphErrors(gr_v0pt_ptref_3_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 22, 6, 1.0);
+    customize_TGraphErrors(gr_v0pt_ptref_1_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 20, 2, 1.0);
+    customize_TGraphErrors(gr_v0pt_ptref_2_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 21, 4, 1.0);
+    customize_TGraphErrors(gr_v0pt_ptref_3_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 22, 6, 1.0);
 
     // READING TGRAPHS FILE FROM ATLAS DATA
     auto p_v0pt_ptref_ATLAS_1 = csvToTGraph("./Data/Figures_ATLAS/v0pt_ptref_1_ATLAS_5060.csv");
@@ -310,13 +314,13 @@ void DoPlotRefsEta(){
         TGraphAsymmErrors *gr_v0pt_ptref_ATLAS_3 = p_v0pt_ptref_ATLAS_3.first;
         TGraphAsymmErrors *gr_v0pt_ptref_ATLAS_3_unc = p_v0pt_ptref_ATLAS_3.second;
     // EDITING ATLAS DATA TGRAPH
-    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_1, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 24, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_2, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 25, 4, 1.0);
-    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_3, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 26, 6, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_1, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 24, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_2, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 25, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_3, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 26, 6, 1.0);
 
-    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_1_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 24, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_2_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 25, 4, 1.0);
-    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_3_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.5, 26, 6, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_1_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 24, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_2_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 25, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_v0pt_ptref_ATLAS_3_unc, " ; p_{T} [GeV]; v_{0}(p_{T})", 0.0, 10.0, -0.1, 0.6, 26, 6, 1.0);
 
     auto leg_v0pt_ptref_title = new TLegend(0.04, 0.98, 0.5, 0.825);
     leg_v0pt_ptref_title->SetTextSize(0.055);
@@ -325,7 +329,7 @@ void DoPlotRefsEta(){
     leg_v0pt_ptref_title->SetBorderSize(0);
     leg_v0pt_ptref_title->SetFillStyle(0);
 
-    auto leg_v0pt_ptref = new TLegend(0.12, 0.82, 0.5, 0.68);
+    auto leg_v0pt_ptref = new TLegend(0.14, 0.82, 0.485, 0.68);
     leg_v0pt_ptref->SetTextSize(0.030);
     leg_v0pt_ptref->AddEntry(gr_v0pt_ptref_1, "CMS OpenData 2.76 TeV: 0.5-2 GeV", "pfl");
     leg_v0pt_ptref->AddEntry(gr_v0pt_ptref_2, "CMS OpenData 2.76 TeV: 0.5-5 GeV", "pfl");
@@ -333,13 +337,19 @@ void DoPlotRefsEta(){
     leg_v0pt_ptref->SetBorderSize(0);
     leg_v0pt_ptref->SetFillStyle(0);
 
-    auto leg_v0pt_ptref2 = new TLegend(0.4, 0.25, 0.9, 0.12);
+    auto leg_v0pt_ptref2 = new TLegend(0.47, 0.25, 0.84, 0.12);
     leg_v0pt_ptref2->SetTextSize(0.030);
     leg_v0pt_ptref2->AddEntry(gr_v0pt_ptref_ATLAS_1, "ATLAS 5.02 TeV: 0.5-2 GeV", "pfl");
     leg_v0pt_ptref2->AddEntry(gr_v0pt_ptref_ATLAS_2, "ATLAS 5.02 TeV: 0.5-5 GeV", "pfl");
     leg_v0pt_ptref2->AddEntry(gr_v0pt_ptref_ATLAS_3, "ATLAS 5.02 TeV: 1-5 GeV", "pfl");
     leg_v0pt_ptref2->SetBorderSize(0);
     leg_v0pt_ptref2->SetFillStyle(0);
+
+    auto leg_v0pt_ptref_label = new TLegend(0.78, 0.9, 0.93, 0.93);
+    leg_v0pt_ptref_label->SetTextSize(0.055);
+    leg_v0pt_ptref_label->AddEntry((TObject*)0, "(a)", "");
+    leg_v0pt_ptref_label->SetBorderSize(0);
+    leg_v0pt_ptref_label->SetFillStyle(0);
 
     c->cd(3);
     gr_v0pt_ptref_ATLAS_2_unc->Draw("A2");
@@ -357,6 +367,7 @@ void DoPlotRefsEta(){
     leg_v0pt_ptref_title->Draw();
     leg_v0pt_ptref->Draw();
     leg_v0pt_ptref2->Draw();
+    leg_v0pt_ptref_label->Draw();
     gPad->SetLogx();
     gPad->SetLeftMargin(0.12);
     gPad->SetTopMargin(0.02);
@@ -426,7 +437,7 @@ void DoPlotRefsEta(){
     leg_v0pt_eta_title->SetBorderSize(0);
     leg_v0pt_eta_title->SetFillStyle(0);
 
-    auto leg_v0pt_eta = new TLegend(0.12, 0.82, 0.5, 0.64);
+    auto leg_v0pt_eta = new TLegend(0.14, 0.82, 0.49, 0.64);
     leg_v0pt_eta->SetTextSize(0.03);
     leg_v0pt_eta->AddEntry(gr_v0pt_eta0, "CMS Open Data 2.76 TeV    #eta_{gap} = 0", "pfl");
     leg_v0pt_eta->AddEntry(gr_v0pt_eta1, "CMS Open Data 2.76 TeV    #eta_{gap} = 1", "pfl");
@@ -435,7 +446,7 @@ void DoPlotRefsEta(){
     leg_v0pt_eta->SetBorderSize(0);
     leg_v0pt_eta->SetFillStyle(0);
 
-    auto leg_v0pt_eta2 = new TLegend(0.4, 0.29, 0.9, 0.12);
+    auto leg_v0pt_eta2 = new TLegend(0.47, 0.29, 0.86, 0.12);
     leg_v0pt_eta2->SetTextSize(0.03);
     leg_v0pt_eta2->AddEntry(gr_v0pt_ATLAS_eta0, "ATLAS 5.02 TeV    #eta_{gap} = 0", "pfl");
     leg_v0pt_eta2->AddEntry(gr_v0pt_ATLAS_eta1, "ATLAS 5.02 TeV    #eta_{gap} = 1", "pfl");
@@ -443,6 +454,12 @@ void DoPlotRefsEta(){
     leg_v0pt_eta2->AddEntry(gr_v0pt_ATLAS_eta3, "ATLAS 5.02 TeV    #eta_{gap} = 3", "pfl");
     leg_v0pt_eta2->SetBorderSize(0);
     leg_v0pt_eta2->SetFillStyle(0);
+
+    auto leg_v0pt_eta_label = new TLegend(0.78, 0.9, 0.93, 0.93);
+    leg_v0pt_eta_label->SetTextSize(0.055);
+    leg_v0pt_eta_label->AddEntry((TObject*)0, "(b)", "");
+    leg_v0pt_eta_label->SetBorderSize(0);
+    leg_v0pt_eta_label->SetFillStyle(0);
 
     c->cd(4);
     gr_v0pt_ATLAS_eta1_unc->Draw("A2");
@@ -464,6 +481,7 @@ void DoPlotRefsEta(){
     leg_v0pt_eta_title->Draw();
     leg_v0pt_eta->Draw();
     leg_v0pt_eta2->Draw();
+    leg_v0pt_eta_label->Draw();
     gPad->SetLogx();
     gPad->SetLeftMargin(0.12);
     gPad->SetTopMargin(0.02);
@@ -512,7 +530,7 @@ void DoPlotMain(){
     legend_v0pt_text->SetBorderSize(0);
     legend_v0pt_text->SetFillStyle(0);
 
-    auto legend_v0pt_cents = new TLegend(0.103, 0.81, 0.5, 0.61);
+    auto legend_v0pt_cents = new TLegend(0.12, 0.81, 0.47, 0.61);
     legend_v0pt_cents->SetTextSize(0.034);
     legend_v0pt_cents->AddEntry(gr_v0pt_5060, "CMS OpenData 2.76 TeV (50-60%)", "pfl");
     legend_v0pt_cents->AddEntry(gr_v0pt_6070, "CMS OpenData 2.76 TeV (60-70%)", "pfl");
@@ -556,14 +574,14 @@ void DoPlotMain(){
         TGraphAsymmErrors *gr_sv0pt_ATLAS_6070 = p_sv0pt_ATLAS_6070.first;
         TGraphAsymmErrors *gr_sv0pt_ATLAS_6070_unc = p_sv0pt_ATLAS_6070.second;
 
-    customize_TGraph(gr_sv0pt_5060, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 21, 2, 1.0);
-    customize_TGraph(gr_sv0pt_6070, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 20, 4, 1.0);
-    customize_TGraphErrors(gr_sv0pt_5060_unc, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 21, 2, 1.0);
-    customize_TGraphErrors(gr_sv0pt_6070_unc, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 20, 4, 1.0);
-    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_5060, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 25, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_6070, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 24, 4, 1.0);
-    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_5060_unc, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 25, 2, 1.0);
-    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_6070_unc, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 28.0, 24, 4, 1.0);
+    customize_TGraph(gr_sv0pt_5060, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 23.7, 21, 2, 1.0);
+    customize_TGraph(gr_sv0pt_6070, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 23.7, 20, 4, 1.0);
+    customize_TGraphErrors(gr_sv0pt_5060_unc, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 23.7, 21, 2, 1.0);
+    customize_TGraphErrors(gr_sv0pt_6070_unc, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 23.7, 20, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_5060, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 23.7, 25, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_6070, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 23.7, 24, 4, 1.0);
+    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_5060_unc, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 23.7, 25, 2, 1.0);
+    customize_TGraphAsymmErrors(gr_sv0pt_ATLAS_6070_unc, "; p_{T} [GeV]; v_{0}(p_{T})/v_{0}", 0.0, 10.0, -4.0, 23.7, 24, 4, 1.0);
 
     // v0(pT)/v0 legend
     auto legend_sv0pt_text = new TLegend(0.025, 0.98, 0.5, 0.82);
@@ -573,7 +591,7 @@ void DoPlotMain(){
     legend_sv0pt_text->SetBorderSize(0);
     legend_sv0pt_text->SetFillStyle(0);
 
-    auto legend_sv0pt_cents = new TLegend(0.103, 0.81, 0.5, 0.61);
+    auto legend_sv0pt_cents = new TLegend(0.12, 0.81, 0.47, 0.61);
     legend_sv0pt_cents->SetTextSize(0.034);
     legend_sv0pt_cents->AddEntry(gr_sv0pt_5060, "CMS OpenData 2.76 TeV (50-60%)", "pfl");
     legend_sv0pt_cents->AddEntry(gr_sv0pt_6070, "CMS OpenData 2.76 TeV (60-70%)", "pfl");
